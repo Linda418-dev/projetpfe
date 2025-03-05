@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PlacesModule } from './places/places.module';
 import { Place } from './places/Entities/Place.entity';
+import { AssetModule } from './assets/asset.module';
+import { Asset } from './assets/Entities/Asset.entity';
 
 @Module({
   imports: [
@@ -20,11 +22,13 @@ import { Place } from './places/Entities/Place.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Place], 
+        entities: [Place,Asset], 
         synchronize: true, 
       }),
     }),
     PlacesModule,
+    AssetModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],

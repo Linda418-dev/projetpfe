@@ -14,7 +14,7 @@ export class PlacesService {
     async getPlaceById(id: string) {
        const fetchPlace= await this.placeRepository.findOneBy({id : id });
        if (!fetchPlace){
-        throw new BadRequestException('Author with id ${id} not found');
+        throw new BadRequestException('Place with id ${id} not found');
        }
        return fetchPlace;
     }
