@@ -1,18 +1,19 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { PlaceType } from "../enums/Place-type.enum";
 
 
 export class updatePlaceDto{
     @ApiProperty()
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     name: string;
 
     @ApiProperty()
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     description: string;
+
 
     @ApiProperty({ 
         example: PlaceType.OPEN_SPACE, 
@@ -21,11 +22,11 @@ export class updatePlaceDto{
         required: false 
     })
     @IsEnum(PlaceType)
-    @IsNotEmpty()
+    @IsOptional()
     type: PlaceType;
 
     @ApiProperty()
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     imageUrl: string;
 }

@@ -5,9 +5,7 @@ import { updatePlaceDto } from './Types/dto/UpdatePlace.dto';
 
 @Injectable()
 export class PlacesService {
-
     constructor(private readonly placeRepository:PlaceRepository){}
-
     async getAllPlaces() {
         return this.placeRepository.find();
     }
@@ -18,7 +16,6 @@ export class PlacesService {
        }
        return fetchPlace;
     }
-
     async  CreatePlace(createPlaceDto: CreatePlaceDto) {
         return this.placeRepository.save(
             this.placeRepository.create(createPlaceDto)
@@ -37,14 +34,4 @@ export class PlacesService {
         Object.assign(fetchPlace, updatePlaceDto);
         return this.placeRepository.save(fetchPlace);
     }
-  
-   
-   
-
-
-
-
-
-
-
 }
