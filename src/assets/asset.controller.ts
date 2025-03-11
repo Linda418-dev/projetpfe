@@ -40,28 +40,27 @@ import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
       async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
           return this.assetService.updateAsset(id, updateAssetDto);
       }
-      @Post('upload')
+      @Post('upload')  // Vérifie que cette route est correctement définie
       @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
-          destination: './uploads', 
+          destination: './uploads',
           filename: (req, file, callback) => {
             const uniqueName = `${Date.now()}-${file.originalname}`;
             callback(null, uniqueName);
-          }
-        })
+          },
+        }),
       }))
       @ApiConsumes('multipart/form-data')
-      @ApiBody({ description: 'Upload image', type: FileUploadDto }) 
-      uploadFile(@UploadedFile() file: Express.Multer.File) {
+      @ApiBody({ description: 'Upload image', type: FileUploadDto })
+      async uploadFile(@UploadedFile() file: Express.Multer.File) {
         if (!file) {
           throw new BadRequestException('No file uploaded');
         }
-        
+    
         console.log('Fichier reçu:', file);
     
         return { filename: file.filename, url: `uploads/${file.filename}` };
       }
-
 
 
 
