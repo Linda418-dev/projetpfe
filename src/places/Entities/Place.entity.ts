@@ -22,10 +22,7 @@ export class Place implements IPlace{
         default: PlaceType.OTHER, 
       })
     type: PlaceType;
-    
-    @Column()
-    image: string;
-    
+
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  
     

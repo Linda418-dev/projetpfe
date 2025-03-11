@@ -5,39 +5,49 @@ import { updateAssetDto } from './types/dto/UpdateAsset.dto';
 
 @Injectable()
 export class AssetService {
-    constructor(private readonly assetRepository: AssetRepository){}
+    constructor(private readonly assetRepository: AssetRepository) {}
+
+    async getAllAssets() {
+        return this.assetRepository.find();
+    }
+
+    async getAssetById(id: string) {
+        const fetchAsset = await this.assetRepository.findOneBy({ id });
+        if (!fetchAsset) {
+            throw new BadRequestException(`Asset with id ${id} not found`);
+        }
+        return fetchAsset;
+    }
+
+    async createAsset(createAssetDto: CreateAssetDto) {
+        console.log('Données reçues:', createAssetDto); 
     
-        async getAllAssets() {
-            return this.assetRepository.find();
-        }
-        async getAssetById(id: string) {
-           const fetchAsset= await this.assetRepository.findOneBy({id : id });
-           if (!fetchAsset){
-            throw new BadRequestException('Asset with id ${id} not found');
-           }
-           return fetchAsset;
+        if (!createAssetDto.imageUrl) {
+            throw new BadRequestException('Image URL is required');
         }
     
-        async  CreateAsset(createAssetDto: CreateAssetDto) {
-            return this.assetRepository.save(
-                this.assetRepository.create(createAssetDto)
-            )
-        }
+        const asset = this.assetRepository.create({
+            name: createAssetDto.name,
+            imageUrl: createAssetDto.imageUrl, 
+        });
     
-        async deleteAsset(id: string) {
-           const fetchAsset = await this.getAssetById(id);
-           return this.assetRepository.remove(fetchAsset);
-        }
-        async  updateAsset(id: string, updateAssetDto: updateAssetDto) {
-            const fetchAsset = await this.getAssetById(id);
-            if (!fetchAsset) {
-                throw new BadRequestException(`Asset with id ${id} not found`);
-            }
-            Object.assign(fetchAsset, updateAssetDto);
-            return this.assetRepository.save(fetchAsset);
+        return this.assetRepository.save(asset);
+    }
+    
+    
+    async deleteAsset(id: string) {
+        const fetchAsset = await this.getAssetById(id);
+        return this.assetRepository.remove(fetchAsset);
+    }
+    async updateAsset(id: string, updateAssetDto: updateAssetDto) {
+        const fetchAsset = await this.getAssetById(id);
+        if (!fetchAsset) {
+          throw new BadRequestException(`Asset with id ${id} not found`);
         }
       
-       
-       
-    
+        Object.assign(fetchAsset, updateAssetDto);
+      
+        return this.assetRepository.save(fetchAsset);
+      }
+      
 }

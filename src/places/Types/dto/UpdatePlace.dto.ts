@@ -25,8 +25,5 @@ export class updatePlaceDto{
     @IsOptional()
     type: PlaceType;
 
-    @ApiProperty()
-    @IsString()
-    @IsOptional()
-    imageUrl: string;
+    
 }

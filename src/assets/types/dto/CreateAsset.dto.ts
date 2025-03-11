@@ -6,4 +6,9 @@ export class CreateAssetDto {
     @IsString()
     @IsNotEmpty()
     name: string;
+
+    @ApiProperty() 
+    @IsString()
+    @IsNotEmpty()
+    imageUrl: string;
 }

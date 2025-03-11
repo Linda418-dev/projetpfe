@@ -23,9 +23,5 @@ export class CreatePlaceDto {
     @IsNotEmpty()
     type: PlaceType;
 
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    image: string;
 
 }

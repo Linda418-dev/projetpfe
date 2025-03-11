@@ -7,6 +7,9 @@ import { PlacesModule } from './places/places.module';
 import { Place } from './places/Entities/Place.entity';
 import { AssetModule } from './assets/asset.module';
 import { Asset } from './assets/Entities/Asset.entity';
+import { File } from './File/Entities/File.entity';
+import { FileModule } from './File/file.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -21,15 +24,17 @@ import { Asset } from './assets/Entities/Asset.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Place,Asset], 
+        entities: [Place,Asset,File], 
         synchronize: true, 
       }),
     }),
     PlacesModule,
     AssetModule,
+    FileModule,
+    CategoryModule
     
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService ],
 })
 export class AppModule {}
