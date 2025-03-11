@@ -9,3 +9,4 @@ import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
     providers: [FileService , FileRepository , AssetRepository]
 })
 export class FileModule {}
+                                                                                                                 

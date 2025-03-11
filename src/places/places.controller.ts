@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { PlacesService } from './places.service';
-import { CreatePlaceDto } from './Types/dto/CreatePlace.dto';
-import { updatePlaceDto } from './Types/dto/UpdatePlace.dto';
+import { CreatePlaceDto } from './Types/dto/create-place.dto';
+import { updatePlaceDto } from './Types/dto/update-place.dto';
 
 @ApiTags('Places ressource')
 @Controller('places')

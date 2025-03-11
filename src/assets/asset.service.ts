@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AssetRepository } from './Repositories/Asset.repository';
-import { CreateAssetDto } from './types/dto/CreateAsset.dto';
-import { updateAssetDto } from './types/dto/UpdateAsset.dto';
+import { CreateAssetDto } from './types/dto/create-asset.dto';
+import { updateAssetDto } from './types/dto/update-asset.dto';
 
 @Injectable()
 export class AssetService {

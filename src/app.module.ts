@@ -10,6 +10,8 @@ import { Asset } from './assets/Entities/Asset.entity';
 import { File } from './File/Entities/File.entity';
 import { FileModule } from './File/file.module';
 import { CategoryModule } from './category/category.module';
+import { SupplierModule } from './supplier/supplier.module';
+import { Supplier } from './supplier/Entities/Supplier.entity';
 
 @Module({
   imports: [
@@ -24,14 +26,15 @@ import { CategoryModule } from './category/category.module';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Place,Asset,File], 
+        entities: [Place,Asset,File,Supplier], 
         synchronize: true, 
       }),
     }),
     PlacesModule,
     AssetModule,
     FileModule,
-    CategoryModule
+    CategoryModule,
+    SupplierModule
     
   ],
   controllers: [AppController],
