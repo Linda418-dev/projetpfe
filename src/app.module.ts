@@ -11,6 +11,8 @@ import { CategoryModule } from './category/category.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { DataSource } from 'typeorm';
 import { File } from './uploads/entities/file.entity';
+import { Supplier } from './supplier/Entities/Supplier.entity';
+import { SupplierModule } from './supplier/supplier.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -24,14 +26,16 @@ import { File } from './uploads/entities/file.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Place,Asset,File], 
+        entities: [Place,Asset,File,Supplier], 
         synchronize: true, 
       }),
     }),
     PlacesModule,
     AssetModule,
     CategoryModule,
-    UploadsModule
+    UploadsModule,
+    CategoryModule,
+    SupplierModule
     
   ],
   controllers: [AppController],

@@ -2,8 +2,8 @@ import {
     BadRequestException,
     Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UploadedFile, UseInterceptors 
   } from '@nestjs/common';
-  import { CreateAssetDto } from './types/dto/CreateAsset.dto';
-  import { updateAssetDto } from './types/dto/UpdateAsset.dto';
+  import { CreateAssetDto } from './types/dto/create-asset.dto';
+  import { updateAssetDto } from './types/dto/update-asset.dto';
   import { AssetService } from './asset.service';
   import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 

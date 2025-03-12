@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Param, ParseUUIDPipe, Patch } from '@nestjs/common';
 import { PlaceRepository } from './Repositories/Place.repository';
-import { CreatePlaceDto } from './Types/dto/CreatePlace.dto';
-import { updatePlaceDto } from './Types/dto/UpdatePlace.dto';
+import { CreatePlaceDto } from './Types/dto/create-place.dto';
+import { updatePlaceDto } from './Types/dto/update-place.dto';
 
 @Injectable()
 export class PlacesService {
