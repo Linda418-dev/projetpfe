@@ -13,6 +13,11 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],  
     allowedHeaders: ['Content-Type', 'Authorization'],  
   });
+  app.useStaticAssets(join(__dirname, '..', 'uploadsFiles'), {
+    prefix: '/uploadsFiles', 
+  });
+
+ 
 
   const config = new DocumentBuilder()
     .setTitle('Inventory API')
@@ -21,6 +26,7 @@ async function bootstrap() {
     .addTag('Assets')
     .build();
   app.useGlobalPipes(new ValidationPipe());
+  
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
@@ -28,3 +34,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

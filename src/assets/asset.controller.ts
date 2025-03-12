@@ -27,9 +27,9 @@ import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
       }
   
       @Post()
-      async CreateAsset(@Body() createAssetDto: CreateAssetDto) {
+     /* async CreateAsset(@Body() createAssetDto: CreateAssetDto) {
           return this.assetService.createAsset(createAssetDto);
-      }
+      }*/
   
       @Delete(':id')
       async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
@@ -40,7 +40,7 @@ import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
       async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
           return this.assetService.updateAsset(id, updateAssetDto);
       }
-      @Post('upload')  // Vérifie que cette route est correctement définie
+    /*  @Post('upload')  // Vérifie que cette route est correctement définie
       @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
           destination: './uploads',
@@ -60,7 +60,7 @@ import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
         console.log('Fichier reçu:', file);
     
         return { filename: file.filename, url: `uploads/${file.filename}` };
-      }
+      }*/
 
 
 

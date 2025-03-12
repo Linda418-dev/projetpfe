@@ -7,15 +7,15 @@ import { PlacesModule } from './places/places.module';
 import { Place } from './places/Entities/Place.entity';
 import { AssetModule } from './assets/asset.module';
 import { Asset } from './assets/Entities/Asset.entity';
-import { File } from './File/Entities/File.entity';
-import { FileModule } from './File/file.module';
 import { CategoryModule } from './category/category.module';
-
+import { UploadsModule } from './uploads/uploads.module';
+import { DataSource } from 'typeorm';
+import { File } from './uploads/entities/file.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule,UploadsModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -30,11 +30,15 @@ import { CategoryModule } from './category/category.module';
     }),
     PlacesModule,
     AssetModule,
-    FileModule,
-    CategoryModule
+    CategoryModule,
+    UploadsModule
     
   ],
   controllers: [AppController],
   providers: [AppService ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {
+    console.log('📌 Entities loaded:', this.dataSource.entityMetadatas.map(e => e.name));
+  }
+}

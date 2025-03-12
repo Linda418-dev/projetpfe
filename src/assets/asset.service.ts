@@ -19,7 +19,7 @@ export class AssetService {
         return fetchAsset;
     }
 
-    async createAsset(createAssetDto: CreateAssetDto) {
+  /*  async createAsset(createAssetDto: CreateAssetDto) {
         console.log('Données reçues:', createAssetDto); 
     
         if (!createAssetDto.imageUrl) {
@@ -32,7 +32,7 @@ export class AssetService {
         });
     
         return this.assetRepository.save(asset);
-    }
+    }*/
     
     
     async deleteAsset(id: string) {
