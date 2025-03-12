@@ -14,7 +14,6 @@ export class UploadsService {
   ) {}
 
   async saveFileData(file: Express.Multer.File, assetId: string) {
-    // Vérifier si l'asset existe
     const asset = await this.assetRepository.findOne({ where: { id: assetId } });
     if (!asset) {
       throw new Error('Asset non trouvé');
