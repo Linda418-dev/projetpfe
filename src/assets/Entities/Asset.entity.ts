@@ -1,21 +1,22 @@
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { IAsset } from "../types/interface/Asset.interface";
-import { File } from "src/uploads/entities/file.entity";  
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { File } from 'src/uploads/entities/file.entity';  
 
-@Entity()
-export class Asset implements IAsset {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+@Entity('asset')
+export class Asset {
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
 
-  @OneToMany(() => File, (file) => file.asset, { cascade: true })
-  files: File[];
+ 
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
+  @OneToMany(() => File, (file) => file.asset)
+  files: File[];  
 }

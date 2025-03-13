@@ -10,5 +10,5 @@ export class CreateAssetDto {
     @ApiProperty() 
     @IsString()
     @IsNotEmpty()
-    imageUrl: string;
+    imageId: string;
 }

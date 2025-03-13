@@ -1,10 +1,10 @@
-import { Asset } from 'src/assets/Entities/Asset.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Asset } from 'src/assets/Entities/Asset.entity';  
 
-@Entity('file')
+@Entity()
 export class File {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
@@ -15,6 +15,9 @@ export class File {
   @Column()
   typeFile: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.files)
-  asset: Asset;
+  @Column({ nullable: true })
+  assetId: number | null;
+
+  @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true })
+  asset: Asset; 
 }

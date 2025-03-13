@@ -4,7 +4,9 @@ import { AssetService } from './asset.service';
 import { AssetRepository } from './Repositories/Asset.repository';
 
 
+
 @Module({
+      imports:[],
       controllers: [AssetController],
       providers: [AssetService , AssetRepository]
 })

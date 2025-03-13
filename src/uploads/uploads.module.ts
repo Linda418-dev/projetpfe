@@ -4,7 +4,7 @@ import { UploadsController } from './uploads.controller';
 import { MulterModule } from '@nestjs/platform-express';
 import * as path from 'path';
 import { diskStorage } from 'multer';
-import { FileRepository } from './repositories/file-repository';
+import { FileRepository } from './repositories/file.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Asset } from 'src/assets/Entities/Asset.entity';
 import {File} from'./entities/file.entity';
@@ -43,6 +43,7 @@ import {File} from'./entities/file.entity';
   ],
   controllers: [UploadsController],
   providers: [UploadsService, FileRepository],
-  exports: [FileRepository],
+  exports: [FileRepository,UploadsService], 
+
 })
 export class UploadsModule {}

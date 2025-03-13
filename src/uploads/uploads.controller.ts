@@ -1,26 +1,24 @@
 import { Controller, Post, UseInterceptors, UploadedFile, Body } from '@nestjs/common';
-import { UploadsService } from './uploads.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiOperation, ApiConsumes, ApiBody, ApiTags } from '@nestjs/swagger';
-import { UploadFileDto } from './types/dto/upload-file.dto';
+import { ApiConsumes, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { UploadsService } from './uploads.service';
+import { CreateFileDto } from './types/dto/create-file.dto';  // Assurez-vous que le chemin est correct
 
-@ApiTags('uploads')
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
-  @Post('file')
-  @UseInterceptors(FileInterceptor('file')) // Multer est déjà configuré dans le module
-  @ApiOperation({ summary: 'Upload d\'une image et l\'associer à un asset' })
-  @ApiConsumes('multipart/form-data')
+  @Post()
+  @UseInterceptors(FileInterceptor('file'))  // Utilisation de l'intercepteur pour l'upload de fichiers
+  @ApiConsumes('multipart/form-data')  // Consommation de multipart/form-data
   @ApiBody({
-    description: 'Télécharger une image et l\'associer à un asset',
-    type: UploadFileDto,
+    description: 'Upload a file',
+    type: CreateFileDto,  // Utilisation du DTO ici
   })
+  @ApiOperation({ summary: 'Upload a file to be saved in the file table with default assetId as null' })
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('assetId') assetId: string,
   ) {
-    return await this.uploadsService.saveFileData(file, assetId);
+    return this.uploadsService.createFile(file);
   }
 }

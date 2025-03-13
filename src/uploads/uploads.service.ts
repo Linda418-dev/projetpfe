@@ -1,35 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { File } from './entities/file.entity';
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { File } from './entities/file.entity'; // Assurez-vous que le chemin est correct
 
 @Injectable()
 export class UploadsService {
   constructor(
     @InjectRepository(File)
-    private readonly fileRepository: Repository<File>,
-    @InjectRepository(Asset)
-    private readonly assetRepository: Repository<Asset>,
+    private fileRepository: Repository<File>,
   ) {}
 
-  async saveFileData(file: Express.Multer.File, assetId: string) {
-    const asset = await this.assetRepository.findOne({ where: { id: assetId } });
-    if (!asset) {
-      throw new Error('Asset non trouvé');
-    }
+  async createFile(file: Express.Multer.File): Promise<File> {
+    const newFile = this.fileRepository.create({
+      name: file.originalname,
+      urlFile: `/uploads/${file.filename}`,  // URL du fichier
+      typeFile: file.mimetype,  // Type de fichier (mime type)
+      assetId: null,  // L'assetId reste null au début
+    });
 
-    const fileEntity = new File();
-    fileEntity.name = file.originalname; 
-    fileEntity.urlFile = `/uploadsFiles/${file.filename}`; 
-    fileEntity.typeFile = file.mimetype; 
-    fileEntity.asset = asset; 
-
-    try {
-      return await this.fileRepository.save(fileEntity);
-    } catch (error) {
-      console.error('Erreur lors de l\'enregistrement du fichier:', error);
-      throw new Error('Échec de l\'enregistrement du fichier');
-    }
+    return this.fileRepository.save(newFile);
   }
 }

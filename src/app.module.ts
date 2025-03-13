@@ -8,11 +8,10 @@ import { Place } from './places/Entities/Place.entity';
 import { AssetModule } from './assets/asset.module';
 import { Asset } from './assets/Entities/Asset.entity';
 import { CategoryModule } from './category/category.module';
-import { UploadsModule } from './uploads/uploads.module';
-import { DataSource } from 'typeorm';
-import { File } from './uploads/entities/file.entity';
 import { Supplier } from './supplier/Entities/Supplier.entity';
 import { SupplierModule } from './supplier/supplier.module';
+import { UploadsModule } from './uploads/uploads.module';
+import {File} from './uploads/entities/file.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -33,7 +32,6 @@ import { SupplierModule } from './supplier/supplier.module';
     PlacesModule,
     AssetModule,
     CategoryModule,
-    UploadsModule,
     CategoryModule,
     SupplierModule
     
@@ -42,7 +40,5 @@ import { SupplierModule } from './supplier/supplier.module';
   providers: [AppService ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {
-    console.log('📌 Entities loaded:', this.dataSource.entityMetadatas.map(e => e.name));
-  }
+  
 }
