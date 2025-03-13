@@ -1,24 +1,36 @@
-import { Controller, Post, UseInterceptors, UploadedFile, Body } from '@nestjs/common';
+import { Controller, Post, UseInterceptors, UploadedFile, Body, Get } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiConsumes, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UploadsService } from './uploads.service';
-import { CreateFileDto } from './types/dto/create-file.dto';  // Assurez-vous que le chemin est correct
+import { CreateFileDto } from './types/dto/create-file.dto';  
 
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))  // Utilisation de l'intercepteur pour l'upload de fichiers
-  @ApiConsumes('multipart/form-data')  // Consommation de multipart/form-data
+  @UseInterceptors(FileInterceptor('file'))  
+  @ApiConsumes('multipart/form-data')  
   @ApiBody({
     description: 'Upload a file',
-    type: CreateFileDto,  // Utilisation du DTO ici
+    type: CreateFileDto,
   })
-  @ApiOperation({ summary: 'Upload a file to be saved in the file table with default assetId as null' })
+  @ApiOperation({ summary: 'Upload a file ' })
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
   ) {
     return this.uploadsService.createFile(file);
   }
+
+  @Get()
+  @ApiOperation({ summary: 'Get all uploaded files' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of all uploaded files',
+    type: [File],  
+  })
+  async getAllFiles(){
+    return await this.uploadsService.GetAllFiles();
+  }
+
 }
