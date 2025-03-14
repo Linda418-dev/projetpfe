@@ -1,14 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAssetDto {
-    @ApiProperty()
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @ApiProperty({ description: 'Name of the asset' })
+  name: string;
 
-    @ApiProperty() 
-    @IsString()
-    @IsNotEmpty()
-    imageId: string;
+  @ApiProperty({ description: 'ID of the file to associate (optional)', required: false })
+  fileId?: string;  
 }

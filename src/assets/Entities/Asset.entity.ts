@@ -4,7 +4,7 @@ import { File } from 'src/uploads/entities/file.entity';
 @Entity('asset')
 export class Asset {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @Column()
   name: string;

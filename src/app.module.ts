@@ -11,12 +11,15 @@ import { CategoryModule } from './category/category.module';
 import { Supplier } from './supplier/Entities/Supplier.entity';
 import { SupplierModule } from './supplier/supplier.module';
 import { UploadsModule } from './uploads/uploads.module';
-import {File} from './uploads/entities/file.entity';
+import { File } from './uploads/entities/file.entity';
+
 @Module({
   imports: [
+    AssetModule,
+
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule,UploadsModule],
+      imports: [ConfigModule],  // N'incluez pas UploadsModule ici
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -25,20 +28,16 @@ import {File} from './uploads/entities/file.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Place,Asset,File,Supplier], 
-        synchronize: true, 
+        entities: [Place, Asset, File, Supplier],  
+        synchronize: true,
       }),
     }),
     PlacesModule,
-    AssetModule,
     CategoryModule,
-    CategoryModule,
-    SupplierModule
-    
+    SupplierModule,
+    UploadsModule,  
   ],
   controllers: [AppController],
-  providers: [AppService ],
+  providers: [AppService],
 })
-export class AppModule {
-  
-}
+export class AppModule {}

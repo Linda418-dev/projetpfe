@@ -2,22 +2,40 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { AssetRepository } from './Repositories/Asset.repository';
 import { CreateAssetDto } from './types/dto/create-asset.dto';
 import { updateAssetDto } from './types/dto/update-asset.dto';
+import { FileRepository } from 'src/uploads/repositories/file.repository';
 
 @Injectable()
-export class AssetService {
-    constructor(private readonly assetRepository: AssetRepository) {}
+export class AssetsService {
+    constructor(private readonly assetRepository: AssetRepository,
+        private fileRepository:FileRepository,
+    ) {}
 
-    async  CreateAsset(createAssetDto: CreateAssetDto) {
-            return this.assetRepository.save(
-                this.assetRepository.create(createAssetDto)
-            )
+    async createAsset(createAssetDto: CreateAssetDto) {
+        const { name, fileId } = createAssetDto;
+    
+        const asset = this.assetRepository.create({ name });
+        await this.assetRepository.save(asset);
+    
+        if (fileId) {
+          const file = await this.fileRepository.findOne({ where: { id: fileId } });
+          if (!file) {
+            throw new Error(`File with ID ${fileId} not found`);
+          }
+          
+          file.asset = asset;  
+    
+          await this.fileRepository.save(file); 
         }
-
+    
+        return asset;
+    }
+    
+    
     async getAllAssets() {
         return this.assetRepository.find();
     }
 
-    async getAssetById(id: number) {
+    async getAssetById(id: string) {
         const fetchAsset = await this.assetRepository.findOneBy({ id });
         if (!fetchAsset) {
             throw new BadRequestException(`Asset with id ${id} not found`);
@@ -25,11 +43,11 @@ export class AssetService {
         return fetchAsset;
     }
 
-    async deleteAsset(id: number) {
+    async deleteAsset(id: string) {
         const fetchAsset = await this.getAssetById(id);
         return this.assetRepository.remove(fetchAsset);
     }
-    async updateAsset(id: number, updateAssetDto: updateAssetDto) {
+    async updateAsset(id: string, updateAssetDto: updateAssetDto) {
         const fetchAsset = await this.getAssetById(id);
         if (!fetchAsset) {
           throw new BadRequestException(`Asset with id ${id} not found`);
