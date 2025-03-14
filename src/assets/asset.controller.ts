@@ -31,6 +31,7 @@ import { CreateAssetDto } from './types/dto/create-asset.dto';
           return this.assetService.deleteAsset(id);
       }
 
+      
       @Patch(':id')
       async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
           return this.assetService.updateAsset(id, updateAssetDto);

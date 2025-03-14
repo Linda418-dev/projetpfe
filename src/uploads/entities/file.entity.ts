@@ -15,7 +15,11 @@ export class File {
   @Column()
   typeFile: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true, eager: true })
+  @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true, eager: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'assetId' })
   asset: Asset;
+
+  @Column({ nullable: true })  // Ajoute cette colonne si elle n'existe pas
+  assetId: string;  // Cette colonne est nécessaire pour stocker l'ID de l'asset
 }
+
