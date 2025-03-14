@@ -12,21 +12,24 @@ export class AssetsService {
 
     async createAsset(createAssetDto: CreateAssetDto) {
         const { name, fileId } = createAssetDto;
-    
+      
         const asset = this.assetRepository.create({ name });
         await this.assetRepository.save(asset);
-    
+      
         if (fileId) {
           const file = await this.fileRepository.findOne({ where: { id: fileId } });
           if (!file) {
             throw new Error(`File with ID ${fileId} not found`);
           }
           
+          asset.imageUrl = file.urlFile; 
+    
           file.asset = asset;  
-    
-          await this.fileRepository.save(file); 
+        
+          await this.assetRepository.save(asset); 
+          await this.fileRepository.save(file);   
         }
-    
+      
         return asset;
     }
     
@@ -58,4 +61,12 @@ export class AssetsService {
         return this.assetRepository.save(fetchAsset);
       }
       
+      async getFilesWithNames() {
+        const files = await this.fileRepository.find(); 
+    
+        return files.map(file => ({
+          id: file.id,     
+          name: file.name,  
+        }));
+      }
 }

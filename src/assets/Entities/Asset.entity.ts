@@ -3,13 +3,14 @@ import { File } from 'src/uploads/entities/file.entity';
 
 @Entity('asset')
 export class Asset {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   name: string;
 
- 
+  @Column({ nullable: true })
+  imageUrl:string
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

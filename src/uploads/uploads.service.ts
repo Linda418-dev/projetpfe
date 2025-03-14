@@ -16,7 +16,6 @@ export class UploadsService {
       name: file.originalname,
       urlFile: `/uploads/${file.filename}`,
       typeFile: file.mimetype,
-      // Laisse simplement asset undefined ici (null est accepté par la relation nullable)
     });
 
     return this.fileRepository.save(newFile);
@@ -27,7 +26,6 @@ export class UploadsService {
   }
 
   async createAssetAndAssignToFile(assetName: string, fileId: string) {
-    
     const asset = this.assetRepository.create({
       name: assetName,
     });
@@ -42,10 +40,13 @@ export class UploadsService {
       throw new Error('File not found');
     }
 
-    file.asset = asset;  
+    file.asset = asset;
+    asset.imageUrl = file.urlFile;  
 
+    await this.assetRepository.save(asset);
     await this.fileRepository.save(file);
 
     return asset; 
-  }
+}
+
 }

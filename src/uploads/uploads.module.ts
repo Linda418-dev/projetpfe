@@ -31,7 +31,7 @@ import { File } from './entities/file.entity';
         }
       },
       storage: diskStorage({
-        destination: './uploadsFiles',
+        destination: './uploads',
         filename: (req, file, callback) => {
           const name = path.parse(file.originalname).name;
           const ext = path.extname(file.originalname);

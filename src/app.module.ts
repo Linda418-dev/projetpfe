@@ -19,7 +19,7 @@ import { File } from './uploads/entities/file.entity';
 
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],  // N'incluez pas UploadsModule ici
+      imports: [ConfigModule],  
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',

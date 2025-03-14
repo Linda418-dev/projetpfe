@@ -13,8 +13,8 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],  
     allowedHeaders: ['Content-Type', 'Authorization'],  
   });
-  app.useStaticAssets(join(__dirname, '..', 'uploadsFiles'), {
-    prefix: '/uploadsFiles', 
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads', 
   });
 
  

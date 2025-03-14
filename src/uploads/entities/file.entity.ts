@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Asset } from 'src/assets/Entities/Asset.entity';
 
-@Entity()
+@Entity('file')
 export class File {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -16,6 +16,6 @@ export class File {
   typeFile: string;
 
   @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true, eager: true })
-  @JoinColumn({ name: 'assetId' })  
-  asset: Asset | null;
+  @JoinColumn({ name: 'assetId' })
+  asset: Asset;
 }
