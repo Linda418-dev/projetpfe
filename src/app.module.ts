@@ -8,16 +8,15 @@ import { Place } from './places/Entities/Place.entity';
 import { AssetModule } from './assets/asset.module';
 import { Asset } from './assets/Entities/Asset.entity';
 import { CategoryModule } from './category/category.module';
-import { UploadsModule } from './uploads/uploads.module';
 import { DataSource } from 'typeorm';
-import { File } from './uploads/entities/file.entity';
 import { Supplier } from './supplier/Entities/Supplier.entity';
 import { SupplierModule } from './supplier/supplier.module';
+import { Category } from './category/Entities/category.entity';
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule,UploadsModule],
+      imports: [ConfigModule,],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -26,14 +25,13 @@ import { SupplierModule } from './supplier/supplier.module';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Place,Asset,File,Supplier], 
+        entities: [Place,Asset,File,Supplier,Category], 
         synchronize: true, 
       }),
     }),
     PlacesModule,
     AssetModule,
     CategoryModule,
-    UploadsModule,
     CategoryModule,
     SupplierModule
     
@@ -42,7 +40,5 @@ import { SupplierModule } from './supplier/supplier.module';
   providers: [AppService ],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {
-    console.log('📌 Entities loaded:', this.dataSource.entityMetadatas.map(e => e.name));
-  }
+ 
 }

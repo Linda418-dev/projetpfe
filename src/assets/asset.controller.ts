@@ -1,16 +1,8 @@
-import { 
-    BadRequestException,
-    Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, UploadedFile, UseInterceptors 
-  } from '@nestjs/common';
-  import { CreateAssetDto } from './types/dto/create-asset.dto';
-  import { updateAssetDto } from './types/dto/update-asset.dto';
-  import { AssetService } from './asset.service';
-  import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-
-  import { FileInterceptor } from '@nestjs/platform-express';
-  import { diskStorage } from 'multer'; 
-import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
-  
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { updateAssetDto } from './types/dto/update-asset.dto';
+import { AssetService } from './asset.service';
+import { ApiTags } from '@nestjs/swagger';
+import { CreateAssetDto } from './types/dto/create-asset.dto';
   @ApiTags('Asset ressource')
   @Controller('asset')
   export class AssetController {
@@ -27,9 +19,10 @@ import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
       }
   
       @Post()
-     /* async CreateAsset(@Body() createAssetDto: CreateAssetDto) {
-          return this.assetService.createAsset(createAssetDto);
-      }*/
+     async CreateAsset(@Body() createAssetDto: CreateAssetDto) {
+        const newAsset = await this.assetService.createAsset(createAssetDto);
+        return this.assetService.getAssetById(newAsset.id); 
+      }
   
       @Delete(':id')
       async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
@@ -40,29 +33,7 @@ import { FileUploadDto } from 'src/assets/types/dto/FileUpload.dto';
       async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
           return this.assetService.updateAsset(id, updateAssetDto);
       }
-    /*  @Post('upload')  // Vérifie que cette route est correctement définie
-      @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-          destination: './uploads',
-          filename: (req, file, callback) => {
-            const uniqueName = `${Date.now()}-${file.originalname}`;
-            callback(null, uniqueName);
-          },
-        }),
-      }))
-      @ApiConsumes('multipart/form-data')
-      @ApiBody({ description: 'Upload image', type: FileUploadDto })
-      async uploadFile(@UploadedFile() file: Express.Multer.File) {
-        if (!file) {
-          throw new BadRequestException('No file uploaded');
-        }
     
-        console.log('Fichier reçu:', file);
-    
-        return { filename: file.filename, url: `uploads/${file.filename}` };
-      }*/
-
-
 
 
   }

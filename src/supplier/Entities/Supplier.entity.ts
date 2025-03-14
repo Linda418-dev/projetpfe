@@ -1,5 +1,6 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ISupplier } from "../types/interfaces/Supplier.interface";
+import { Asset } from "src/assets/Entities/Asset.entity";
 
 @Entity()
 export class Supplier  implements ISupplier{   
@@ -14,6 +15,9 @@ export class Supplier  implements ISupplier{
 
     @Column()
     phone : string;
+
+    @OneToMany(() => Asset, (asset) => asset.supplier)
+    assets: Asset[];
     
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  
