@@ -23,7 +23,7 @@ export class UploadsService {
 
   async GetAllFiles() {
     const files = await this.fileRepository.find();
-    return  files.map(file => file.name);
+    return files.map(file => ({ id: file.id, name: file.name }));
   }
   async createAssetAndAssignToFile(assetName: string, fileId: string) {
     const asset = this.assetRepository.create({

@@ -32,7 +32,7 @@ export class UploadsController {
   async getAllFiles() {
     return await this.uploadsService.GetAllFiles();
   }
-
+ 
   @Post('create-asset-and-assign-file')
   @ApiBody({
     description: 'Assign an asset to a file',
