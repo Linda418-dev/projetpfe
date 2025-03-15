@@ -12,7 +12,7 @@ export class Asset implements IAsset {
   @Column()
   name: string;
   
-  @ManyToOne(() => Category, (category) => category.assets, { nullable: false, eager: true })  
+  @ManyToOne(() => Category, (category) => category.assets, { nullable: false, eager: true ,onDelete: "CASCADE" })  
   @JoinColumn({ name: 'categoryId' })  
   category: Category;
  
@@ -22,18 +22,13 @@ export class Asset implements IAsset {
   @Column({ nullable: true })
   imageUrl:string;
 
- 
-
-  
-  @CreateDateColumn({ type: 'timestamp' })
+ @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
   
-
-   
-  /*@ManyToOne(() => Supplier, (supplier) => supplier.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
+ /*@ManyToOne(() => Supplier, (supplier) => supplier.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
   supplier: Supplier | null;
 
    @ManyToOne(() => Place, (place) => place.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
