@@ -4,7 +4,6 @@ import { DataSource } from 'typeorm';
 import { Category } from '../Entities/category.entity';
 
 
-
 @Injectable()
 export class CategoryRepository extends Repository<Category> {
   constructor(private readonly dataSource: DataSource) {

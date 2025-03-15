@@ -1,25 +1,16 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsNotEmpty, IsUUID } from "class-validator";
 
 export class CreateAssetDto {
-    @ApiProperty()
-    @IsString()
+    @ApiProperty({ description: 'Name of the asset' })
     @IsNotEmpty()
     name: string;
 
-    @ApiProperty()
+    @ApiProperty({ description: 'ID of the category' })
+    @IsNotEmpty()
     @IsUUID()
-    categoryId: string;
+    categoryId: string;  // Il est important que ce champ soit correctement défini ici
 
-    @ApiProperty()
-    @IsOptional()
-    @IsUUID()
-    supplierId?: string;
-    
-    @ApiProperty()
-    @IsOptional()
-    @IsUUID()
-    placeId?: string;
-    
-  
+    @ApiProperty({ description: 'ID of the file to associate (optional)', required: false })
+    fileId?: string; 
 }

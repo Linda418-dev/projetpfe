@@ -1,18 +1,24 @@
 import { Module } from '@nestjs/common';
 import { AssetController } from './asset.controller';
-import { AssetService } from './asset.service';
 import { AssetRepository } from './Repositories/Asset.repository';
-import { CategoryService } from 'src/category/category.service';
+import { AssetsService } from './asset.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UploadsModule } from 'src/uploads/uploads.module';
+import { Asset } from './Entities/Asset';
+import { FileRepository } from 'src/uploads/repositories/file.repository';
+import { UploadsService } from 'src/uploads/uploads.service';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
-import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
-import { SupplierService } from 'src/supplier/supplier.service';
-import { PlaceRepository } from 'src/places/Repositories/Place.repository';
-import { PlacesService } from 'src/places/places.service';
+import { CategoryService } from 'src/category/category.service';
 
 
 @Module({
-      controllers: [AssetController],
-      providers: [AssetService , AssetRepository , CategoryService , CategoryRepository , SupplierRepository, SupplierService,PlaceRepository, PlacesService]
+  imports: [
+    TypeOrmModule.forFeature([Asset]),  
+    UploadsModule
+    
+  ],
+  controllers: [AssetController],
+  providers: [AssetsService, AssetRepository , FileRepository , CategoryRepository, CategoryService],
+  exports: [AssetsService, AssetRepository], 
 })
-
 export class AssetModule {}

@@ -1,10 +1,10 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { File } from 'src/uploads/entities/file.entity';  
 import { IAsset } from "../types/interface/Asset.interface";
-import { Category } from "src/category/Entities/category.entity";
-import { Supplier } from "src/supplier/Entities/Supplier.entity";
-import { Place } from "src/places/Entities/Place.entity";
+import { Category } from 'src/category/Entities/category.entity';
 
-@Entity()
+
+@Entity('asset')
 export class Asset implements IAsset {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -12,27 +12,32 @@ export class Asset implements IAsset {
   @Column()
   name: string;
   
-  @ManyToOne(() => Category, (category) => category.assets, { eager: true, onDelete: 'SET NULL' }) 
-  category: Category | null;
-  
-  @ManyToOne(() => Supplier, (supplier) => supplier.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
-  supplier: Supplier | null;
-
-  // Optionnel : pour simplifier l'affichage côté front, on peut stocker le nom de la catégorie
+  @ManyToOne(() => Category, (category) => category.assets, { nullable: false, eager: true })  
+  @JoinColumn({ name: 'categoryId' })  
+  category: Category;
+ 
+   @OneToMany(() => File, (file) => file.asset)
+   files: File[];
+   
   @Column({ nullable: true })
-  categoryName?: string;
+  imageUrl:string;
 
-  // Relation avec Place, chargée en mode eager pour obtenir directement l'objet
-  @ManyToOne(() => Place, (place) => place.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
-  place: Place | null;
+ 
 
-  // Colonne pour stocker le nom du lieu (s'il n'est pas récupéré via la relation)
-  @Column({ type: 'varchar', nullable: true, default: '' })
-  placeName?: string;
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+  
+
+   
+  /*@ManyToOne(() => Supplier, (supplier) => supplier.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
+  supplier: Supplier | null;
+
+   @ManyToOne(() => Place, (place) => place.assets, { eager: true, nullable: true, onDelete: 'SET NULL' })
+   place: Place | null;*/
+
+ 
 }
