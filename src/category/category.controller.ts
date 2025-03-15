@@ -9,7 +9,13 @@ export class CategoryController {
       
      @Get()
      getAllCategories() {
-         return this.categoryService.getAllCategories();
+        
+        return this.categoryService.getAllCategories();
+     }
+
+     @Get('names')
+     async getAllCategoryNames() {
+       return this.categoryService.getAllCategoryNames();
      }
  
      @Get(':id')

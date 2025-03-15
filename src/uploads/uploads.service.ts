@@ -3,6 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Asset } from 'src/assets/Entities/Asset';
 import { Repository } from "typeorm";
 import { File } from './entities/file.entity';
+import { CategoryRepository } from "src/category/Repositories/category.repository";
+import { Category } from "src/category/Entities/category.entity";
 
 @Injectable()
 export class UploadsService {
@@ -25,7 +27,7 @@ export class UploadsService {
     const files = await this.fileRepository.find();
     return files.map(file => ({ id: file.id, name: file.name }));
   }
-  async createAssetAndAssignToFile(assetName: string, fileId: string) {
+  async createAssetAndAssignToFile(assetName: string, fileId: string ) {
     const asset = this.assetRepository.create({
       name: assetName,
     });
@@ -44,8 +46,7 @@ export class UploadsService {
   
     file.assetId = asset.id; 
     
-    asset.imageUrl = file.urlFile;
-  
+    asset.imageUrl = file.urlFile;  
     await this.fileRepository.save(file);
   
     await this.assetRepository.save(asset);

@@ -13,7 +13,6 @@ export class Asset implements IAsset {
   name: string;
   
   @ManyToOne(() => Category, (category) => category.assets, { nullable: false, eager: true ,onDelete: "CASCADE" })  
-  @JoinColumn({ name: 'categoryId' })  
   category: Category;
  
    @OneToMany(() => File, (file) => file.asset)

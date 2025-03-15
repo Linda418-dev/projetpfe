@@ -17,12 +17,15 @@ export class CategoryService {
     async getCategoryById(id: string) {
         const category = await this.categoryRepository.findOne({
             where: { id },
-            relations: ['assets'], // Charger les assets associés
+            relations: ['assets'], 
         });
         if (!category) throw new NotFoundException('Catégorie non trouvée');
         return category;
     }
-    
+    async getAllCategoryNames() {
+        const categories = await this.categoryRepository.find({ select: ['name'] });
+        return categories.map(category => category.name);
+      }
 
     async createCategory(createCategoryDto: CreateCategoryDto) {
         const category = this.categoryRepository.create(createCategoryDto);
