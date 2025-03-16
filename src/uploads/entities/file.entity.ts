@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Asset } from 'src/assets/Entities/Asset';
+import { Asset } from 'src/assets/Entities/Asset.entity';
 
 
 @Entity('file')

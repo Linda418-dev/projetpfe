@@ -6,13 +6,15 @@ import * as path from 'path';
 import { diskStorage } from 'multer';
 
 import { TypeOrmModule } from '@nestjs/typeorm'; 
-import { Asset } from 'src/assets/Entities/Asset';
+import { Asset } from 'src/assets/Entities/Asset.entity';
 import { File } from './entities/file.entity';
 import { FileRepository } from './repositories/file.repository';
+import { Category } from 'src/category/Entities/category.entity';
+import { CategoryRepository } from 'src/category/Repositories/category.repository';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([File, Asset]), // Assurez-vous d'ajouter Asset et File ici
+    TypeOrmModule.forFeature([File, Asset,Category]), 
     MulterModule.register({
       fileFilter: (req, file, callback) => {
         const allowedMimeTypes = [
@@ -43,7 +45,7 @@ import { FileRepository } from './repositories/file.repository';
     }),
   ],
   controllers: [UploadsController],
-  providers: [UploadsService, FileRepository], 
+  providers: [UploadsService, FileRepository,CategoryRepository], 
   exports: [FileRepository, UploadsService], 
 })
 export class UploadsModule {}

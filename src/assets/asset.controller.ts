@@ -9,21 +9,17 @@ import { AssetsService } from "./asset.service";
 export class AssetController {
     constructor(private readonly assetService: AssetsService) {}
 
-    @Post()
-create(@Body() createAssetDto: CreateAssetDto) {
-  console.log('🛠 Données reçues:', createAssetDto);
-  return this.assetService.createAsset(createAssetDto);
-}
-
+   
   
     @Get()
-async getAllAssets() {
-  return this.assetService.getAllAssets();
-}
-@Get(':id')
-async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
+    async getAllAssets() {
+    return this.assetService.getAllAssets();
+    }
+
+    @Get(':id')
+    async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getAssetById(id);
-}
+    }
 
     @Delete(':id')
     async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {

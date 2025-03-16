@@ -6,7 +6,7 @@ import { AppService } from './app.service';
 import { PlacesModule } from './places/places.module';
 import { Place } from './places/Entities/Place.entity';
 import { AssetModule } from './assets/asset.module';
-import { Asset } from './assets/Entities/Asset';
+import { Asset } from './assets/Entities/Asset.entity';
 import { CategoryModule } from './category/category.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { UploadsModule } from './uploads/uploads.module';

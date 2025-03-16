@@ -32,22 +32,33 @@ export class UploadsController {
   async getAllFiles() {
     return await this.uploadsService.GetAllFiles();
   }
+  
+  @Get("filesName")
+  @ApiOperation({ summary: 'Récupérer tous les noms de fichiers' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des noms des fichiers',
+    type: Object, 
+  })
+  async getAllFilesName() {
+    return await this.uploadsService.GetAllNameFiles();
+  }
  
   @Post('create-asset-and-assign-file')
-  @ApiBody({
-    description: 'Assign an asset to a file',
-    type: AssignFileToAssetDto, 
-  })
-  @ApiOperation({ summary: 'Create an asset and assign it to a file' })
-  async createAssetAndAssignToFile(
-    @Body() assignFileToAssetDto: AssignFileToAssetDto,  
-  ) {
-    const { assetName, fileId } = assignFileToAssetDto;
-    const asset = await this.uploadsService.createAssetAndAssignToFile(assetName, fileId);
+@ApiBody({
+  description: 'Assign an asset to a file and a category',
+  type: AssignFileToAssetDto, 
+})
+@ApiOperation({ summary: 'Create an asset, assign it to a category and a file' })
+async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
+  const { assetName, categoryName, fileId } = assignFileToAssetDto;
 
-    return {
-      message: 'Asset successfully created and assigned to file',
-      asset,
-    };
-  }
+  const asset = await this.uploadsService.createAssetAndAssignToFile(assetName, categoryName, fileId);
+
+  return {
+    message: 'Asset successfully created and assigned to file and category',
+    asset,
+  };
+}
+
 }

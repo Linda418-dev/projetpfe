@@ -6,10 +6,6 @@ export class CreateAssetDto {
     @IsNotEmpty()
     name: string;
 
-    @ApiProperty({ description: 'ID of the category' })
-    @IsNotEmpty()
-    @IsUUID()
-    categoryId: string;  // Il est important que ce champ soit correctement défini ici
 
     @ApiProperty({ description: 'ID of the file to associate (optional)', required: false })
     fileId?: string; 

@@ -4,7 +4,7 @@ import { AssetRepository } from './Repositories/Asset.repository';
 import { AssetsService } from './asset.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UploadsModule } from 'src/uploads/uploads.module';
-import { Asset } from './Entities/Asset';
+import { Asset } from './Entities/Asset.entity';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { UploadsService } from 'src/uploads/uploads.service';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';

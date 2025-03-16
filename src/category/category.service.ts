@@ -9,11 +9,9 @@ export class CategoryService {
    
     async getAllCategories() {
         return this.categoryRepository.find({
-            relations: ['assets'], // Charger les assets associés
+            relations: ['assets'], 
         });
     }
-    
-
     async getCategoryById(id: string) {
         const category = await this.categoryRepository.findOne({
             where: { id },

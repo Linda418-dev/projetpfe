@@ -12,37 +12,7 @@ export class AssetsService {
         private readonly categoryRepository : CategoryRepository
     ) {}
     
-    async createAsset(createAssetDto: CreateAssetDto) {
-        const { name, fileId, categoryId } = createAssetDto;
-    
-        if (!isUUID(fileId) || !isUUID(categoryId)) {
-            throw new BadRequestException('Invalid UUID for file or category');
-        }
-    
-        const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
-        if (!category) {
-            throw new NotFoundException('Category not found');
-        }
-    
-        const asset = this.assetRepository.create({
-            name,
-            category,  
-        });
-    
-        const file = await this.fileRepository.findOne({ where: { id: fileId } });
-        if (!file) {
-            throw new NotFoundException('File not found');
-        }
-    
-        asset.imageUrl = file.urlFile;
-        file.asset = asset;
-    
-        await this.assetRepository.save(asset);
-        await this.fileRepository.save(file);
-    
-        return asset;
-    }
-    
+   
       
     async getAllAssets() {
         const assets = await this.assetRepository.find({ relations: ['category'] });  
