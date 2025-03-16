@@ -1,29 +1,30 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ISupplier } from "../types/interfaces/Supplier.interface";
-//import { Asset } from "src/assets/Entities/Asset.entity";
+import { Asset } from "src/assets/Entities/Asset.entity";
 
 @Entity()
-export class Supplier  implements ISupplier{   
-    @PrimaryGeneratedColumn('uuid')
-    id: string;  
-   
-    @Column()
-    name: string;
+export class Supplier implements ISupplier {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;  
 
-    @Column()
-    email: string;
+  @Column()
+  name: string;
 
-    @Column()
-    phone : string;
+  @Column()
+  email: string;
 
-    /*@OneToMany(() => Asset, (asset) => asset.supplier)
-    assets: Asset[];*/
-    
-    @CreateDateColumn({ type: 'timestamp' })
-    createdAt: Date;  
-    
-    @UpdateDateColumn({ type: 'timestamp' })
-    updatedAt: Date;
-  
-    
+  @Column()
+  phone: string;
+
+  @OneToMany(() => Asset, (asset) => asset.supplier)
+  assets: Asset[];
+
+  @Column({ nullable: true })
+  assetsNames: string;  
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }

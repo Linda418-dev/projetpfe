@@ -8,7 +8,12 @@ export class AssignFileToAssetDto {
 
   @ApiProperty({ description: 'name category ' })
   @IsString()
-  categoryName: string;  
+  categoryName: string;
+  
+  @ApiProperty({ description: 'name supplier ' })
+  @IsString()
+  supplierName: string;
+
 
   @ApiProperty({ description: 'Id file' })
   @IsUUID()

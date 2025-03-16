@@ -45,20 +45,21 @@ export class UploadsController {
   }
  
   @Post('create-asset-and-assign-file')
-@ApiBody({
-  description: 'Assign an asset to a file and a category',
-  type: AssignFileToAssetDto, 
-})
-@ApiOperation({ summary: 'Create an asset, assign it to a category and a file' })
-async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
-  const { assetName, categoryName, fileId } = assignFileToAssetDto;
-
-  const asset = await this.uploadsService.createAssetAndAssignToFile(assetName, categoryName, fileId);
-
-  return {
-    message: 'Asset successfully created and assigned to file and category',
-    asset,
-  };
-}
+  @ApiBody({
+    description: 'Assign an asset to a file and a category',
+    type: AssignFileToAssetDto,
+  })
+  @ApiOperation({ summary: 'Create an asset, assign it to a category and a file' })
+  async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
+    const { assetName, categoryName, supplierName, fileId } = assignFileToAssetDto;  
+  
+    const asset = await this.uploadsService.createAssetAndAssignToFile(assetName, categoryName, supplierName, fileId);
+  
+    return {
+      message: 'Asset successfully created and assigned to file and category',
+      asset,
+    };
+  }
+  
 
 }

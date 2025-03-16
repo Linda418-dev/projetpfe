@@ -12,7 +12,10 @@ export class SupplierController {
         async getAllSuppliers(){
             return this .supplierService.getAllSuppliers();
         }
-    
+        @Get('names')
+        async getAllSuppliersNames(): Promise<string[]> {
+          return this.supplierService.getAllSuppliersNames();
+        }
         @Get(':id')
         async getSupplierById(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.supplierService.getSupplierById(id); 
@@ -32,10 +35,7 @@ export class SupplierController {
         return this.supplierService.updateSupplier(id, updateSuplierDto);
         }
 
-        @Get("names") 
-        async getAllSuppliersName() {
-          return await this.supplierService.getAllSuppliersNames();
-        }
+    
     
     
 }
