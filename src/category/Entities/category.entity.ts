@@ -11,10 +11,10 @@ export class Category implements ICategory {
   name: string;
 
   @OneToMany(() => Asset, (asset) => asset.category)
-  assets: Asset[];
+assets: Asset[];
 
-  @Column({ type: 'text', nullable: true })  
-  assetsNames: string;  
+  @Column("simple-array", { nullable: true })
+  assetsNames: string[];  
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

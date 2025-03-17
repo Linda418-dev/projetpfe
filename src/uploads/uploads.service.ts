@@ -37,31 +37,27 @@ export class UploadsService {
   }
   
   async createAssetAndAssignToFile(assetName: string, categoryName: string, supplierName: string, fileId: string) {
-    // Chercher la catégorie et charger la relation assets
     let category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
 
-    if (!category || !category.id) {
-        throw new Error('Category not found or invalid category ID');
+    if (!category) {
+        throw new Error('Category not found');
     }
 
-    // Chercher le fournisseur et charger la relation assets
     let supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
-    if (!supplier || !supplier.id) {
-        throw new Error('Supplier not found or invalid supplier ID');
+
+    if (!supplier) {
+        throw new Error('Supplier not found');
     }
 
-    // Créer l'asset
     const asset = new Asset();
     asset.name = assetName;
-    asset.category = category;  // Assurez-vous que category est bien l'objet complet
+    asset.category = category;  
     asset.categoryName = category.name;
     asset.supplier = supplier;
     asset.supplierName = supplier.name;
 
-    // Sauvegarder l'asset
     await this.assetRepository.save(asset);
 
-    // Chercher le fichier à associer
     const file = await this.fileRepository.findOne({ where: { id: fileId } });
     if (!file) {
         throw new Error('File not found');
@@ -74,18 +70,30 @@ export class UploadsService {
     await this.fileRepository.save(file);
     await this.assetRepository.save(asset);
 
-    const categoryAssetNames = category.assets.map(a => a.name); 
-    categoryAssetNames.push(asset.name); 
-    category.assetsNames = categoryAssetNames.join(', '); 
-    await this.categoryRepository.save(category); 
+    // 🔄 Mettre à jour `assetsNames` dans Category en tableau
+    category = await this.categoryRepository.findOne({ where: { id: category.id }, relations: ['assets'] });
 
-    const supplierAssetNames = supplier.assets.map(a => a.name); 
-    supplierAssetNames.push(asset.name); 
-    supplier.assetsNames = supplierAssetNames.join(', '); 
-    await this.supplierRepository.save(supplier); 
+    if (!category) {
+        throw new Error('Category not found after reloading');
+    }
+    
+    category.assetsNames = Array.from(new Set(category.assets.map(a => a.name))); // Évite les doublons
+    await this.categoryRepository.save(category);
+
+    // 🔄 Mettre à jour `assetsNames` dans Supplier en tableau
+    supplier = await this.supplierRepository.findOne({ where: { id: supplier.id }, relations: ['assets'] });
+
+    if (!supplier) {
+        throw new Error('Supplier not found after reloading');
+    }
+    
+    supplier.assetsNames = Array.from(new Set(supplier.assets.map(a => a.name))); // Évite les doublons
+    await this.supplierRepository.save(supplier);
+    
 
     return asset;
 }
+
 
 
 
