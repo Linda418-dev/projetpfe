@@ -13,6 +13,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { Supplier } from './supplier/Entities/Supplier.entity';
 import { Category } from './category/Entities/category.entity';
 import { File } from './uploads/entities/file.entity';
+import { HistoriqueLocationAssetModule } from './historique-location-asset/historique-location-asset.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { File } from './uploads/entities/file.entity';
     PlacesModule,
     CategoryModule,
     SupplierModule,
-    UploadsModule
+    UploadsModule,
+    HistoriqueLocationAssetModule
   ],
   controllers: [AppController],
   providers: [AppService],

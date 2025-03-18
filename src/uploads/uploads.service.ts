@@ -5,6 +5,9 @@ import { Repository } from "typeorm";
 import { File } from './entities/file.entity';
 import { Category } from "src/category/Entities/category.entity";
 import { Supplier } from "src/supplier/Entities/Supplier.entity";
+import { Place } from "src/places/Entities/Place.entity";
+import { HistoriqueLocationAssetService } from "src/historique-location-asset/historique-location-asset.service";
+import { AssignFileToAssetDto } from "./types/dto/assign-file.dto";
 
 @Injectable()
 export class UploadsService {
@@ -12,7 +15,10 @@ export class UploadsService {
     @InjectRepository(File) private fileRepository: Repository<File>,
     @InjectRepository(Asset) private assetRepository: Repository<Asset>,
     @InjectRepository(Category) private categoryRepository: Repository<Category>,
-    @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>
+    @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
+    @InjectRepository(Place) private placeRepository: Repository<Place>,
+    private readonly historiqueLocationAssetService: HistoriqueLocationAssetService,
+
 
 
   ) {}
@@ -36,32 +42,31 @@ export class UploadsService {
     return files.map(file => ({ name: file.name }));
   }
   
-  async createAssetAndAssignToFile(assetName: string, categoryName: string, supplierName: string, fileId: string) {
-    let category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
+  async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
+    const { assetName, categoryName, supplierName, fileId, locationName } = dto;
 
-    if (!category) {
-        throw new Error('Category not found');
-    }
+    const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
+    if (!category) throw new Error('Category not found');
 
-    let supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
+    const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
+    if (!supplier) throw new Error('Supplier not found');
 
-    if (!supplier) {
-        throw new Error('Supplier not found');
-    }
+    let place = await this.placeRepository.findOne({ where: { name: locationName }, relations: ['assets'] });
+    if (!place) throw new Error('Place not found');
 
     const asset = new Asset();
     asset.name = assetName;
-    asset.category = category;  
+    asset.category = category;
     asset.categoryName = category.name;
     asset.supplier = supplier;
     asset.supplierName = supplier.name;
+    asset.place = place;
+    asset.locationName = place.name; 
 
     await this.assetRepository.save(asset);
 
     const file = await this.fileRepository.findOne({ where: { id: fileId } });
-    if (!file) {
-        throw new Error('File not found');
-    }
+    if (!file) throw new Error('File not found');
 
     file.asset = asset;
     file.assetId = asset.id;
@@ -70,32 +75,11 @@ export class UploadsService {
     await this.fileRepository.save(file);
     await this.assetRepository.save(asset);
 
-    // 🔄 Mettre à jour `assetsNames` dans Category en tableau
-    category = await this.categoryRepository.findOne({ where: { id: category.id }, relations: ['assets'] });
-
-    if (!category) {
-        throw new Error('Category not found after reloading');
-    }
-    
-    category.assetsNames = Array.from(new Set(category.assets.map(a => a.name))); // Évite les doublons
-    await this.categoryRepository.save(category);
-
-    // 🔄 Mettre à jour `assetsNames` dans Supplier en tableau
-    supplier = await this.supplierRepository.findOne({ where: { id: supplier.id }, relations: ['assets'] });
-
-    if (!supplier) {
-        throw new Error('Supplier not found after reloading');
-    }
-    
-    supplier.assetsNames = Array.from(new Set(supplier.assets.map(a => a.name))); // Évite les doublons
-    await this.supplierRepository.save(supplier);
-    
+    place.assetsNames = [...(place.assetsNames || []), asset.name];
+    await this.placeRepository.save(place);
 
     return asset;
 }
-
-
-
 
 
 }

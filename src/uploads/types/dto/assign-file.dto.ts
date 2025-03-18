@@ -2,20 +2,23 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsUUID } from 'class-validator';
 
 export class AssignFileToAssetDto {
-  @ApiProperty({ description: 'name asset ' })
+  @ApiProperty({ description: 'Name of the asset' })
   @IsString()
   assetName: string;
 
-  @ApiProperty({ description: 'name category ' })
+  @ApiProperty({ description: 'Name of the category' })
   @IsString()
   categoryName: string;
   
-  @ApiProperty({ description: 'name supplier ' })
+  @ApiProperty({ description: 'Name of the supplier' })
   @IsString()
   supplierName: string;
 
+  @ApiProperty({ description: 'Name of the location' }) // ✅ Correction
+  @IsString()
+  locationName: string;
 
-  @ApiProperty({ description: 'Id file' })
+  @ApiProperty({ description: 'ID of the file' })
   @IsUUID()
   fileId: string;
 }

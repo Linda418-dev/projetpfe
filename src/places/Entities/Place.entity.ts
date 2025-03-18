@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IPlace } from "../Types/interfaces/Place.interface";
 import { PlaceType } from "../Types/enums/Place-type.enum";
-// import { Asset } from "src/assets/Entities/Asset.entity";
+import { Asset } from "src/assets/Entities/Asset.entity";
 
 @Entity()
 export class Place implements IPlace{
@@ -24,8 +24,11 @@ export class Place implements IPlace{
       })
     type: PlaceType;
 
-    /*@OneToMany(() => Asset, (asset) => asset.place)  
-    assets: Asset[];*/
+    @OneToMany(() => Asset, (asset) => asset.place)
+    assets: Asset[];
+
+    @Column("simple-array", { nullable: true, default: [] }) 
+    assetsNames: string[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  
