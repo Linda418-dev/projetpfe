@@ -4,8 +4,8 @@ import { HistoriqueLocationAssetService } from './historique-location-asset.serv
 import { AssetsService } from 'src/assets/asset.service';
 
 
-@ApiTags('Historique ressource')
-@Controller('historique-location-asset')
+@ApiTags('History Resource')
+@Controller('historiques')
 export class HistoriqueLocationAssetController {
 
 

@@ -4,8 +4,8 @@ import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 
-@ApiTags('Asset ressource')
-@Controller('asset')
+@ApiTags('Asset Resource')
+@Controller('assets')
 export class AssetController {
     constructor(private readonly assetService: AssetsService) {}
 

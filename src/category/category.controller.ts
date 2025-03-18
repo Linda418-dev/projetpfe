@@ -2,8 +2,10 @@ import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './types/dto/create-category.dto';
 import { UpdateCategoryDto } from './types/dto/update-category.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('category')
+@ApiTags('Category Resource')
+@Controller('categories')
 export class CategoryController {
      constructor(private readonly categoryService: CategoryService) {}
       

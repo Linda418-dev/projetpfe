@@ -4,7 +4,7 @@ import { PlacesService } from './places.service';
 import { CreatePlaceDto } from './Types/dto/create-place.dto';
 import { updatePlaceDto } from './Types/dto/update-place.dto';
 
-@ApiTags('Places ressource')
+@ApiTags('Place Resource')
 @Controller('places')
 export class PlacesController {
 
