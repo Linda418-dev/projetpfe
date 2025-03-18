@@ -13,6 +13,10 @@ export class PlacesController {
     async getAllPlaces(){
         return this .placeService.getAllPlaces();
     }
+    @Get('names')
+    async getAllPlaceNames() {
+      return this.placeService.getAllPlacesNames();
+    }
 
     @Get(':id')
     async getPlaceById(@Param('id', new ParseUUIDPipe()) id: string) {
