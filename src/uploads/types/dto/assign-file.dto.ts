@@ -14,7 +14,7 @@ export class AssignFileToAssetDto {
   @IsString()
   supplierName: string;
 
-  @ApiProperty({ description: 'Name of the location' }) // ✅ Correction
+  @ApiProperty({ description: 'Name of the location' })
   @IsString()
   locationName: string;
 

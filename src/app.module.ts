@@ -14,6 +14,7 @@ import { Supplier } from './supplier/Entities/Supplier.entity';
 import { Category } from './category/Entities/category.entity';
 import { File } from './uploads/entities/file.entity';
 import { HistoriqueLocationAssetModule } from './historique-location-asset/historique-location-asset.module';
+import { HistoriqueLocationAsset } from './historique-location-asset/entities/historique-location-asset.entity';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { HistoriqueLocationAssetModule } from './historique-location-asset/histo
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category], 
+        entities: [Place,Asset,File,Supplier,Category,HistoriqueLocationAsset], 
         synchronize: true, 
       }),
     }),

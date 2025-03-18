@@ -6,8 +6,8 @@ import { File } from './entities/file.entity';
 import { Category } from "src/category/Entities/category.entity";
 import { Supplier } from "src/supplier/Entities/Supplier.entity";
 import { Place } from "src/places/Entities/Place.entity";
-import { HistoriqueLocationAssetService } from "src/historique-location-asset/historique-location-asset.service";
 import { AssignFileToAssetDto } from "./types/dto/assign-file.dto";
+import { HistoriqueLocationAsset } from "src/historique-location-asset/entities/historique-location-asset.entity";
 
 @Injectable()
 export class UploadsService {
@@ -17,7 +17,8 @@ export class UploadsService {
     @InjectRepository(Category) private categoryRepository: Repository<Category>,
     @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
     @InjectRepository(Place) private placeRepository: Repository<Place>,
-    private readonly historiqueLocationAssetService: HistoriqueLocationAssetService,
+    @InjectRepository(HistoriqueLocationAsset) private historiqueLocationAssetRepository: Repository<HistoriqueLocationAsset>,
+
 
 
 
@@ -61,7 +62,7 @@ export class UploadsService {
     asset.supplier = supplier;
     asset.supplierName = supplier.name;
     asset.place = place;
-    asset.locationName = place.name; 
+    asset.locationName = place.name;
 
     await this.assetRepository.save(asset);
 
@@ -78,8 +79,19 @@ export class UploadsService {
     place.assetsNames = [...(place.assetsNames || []), asset.name];
     await this.placeRepository.save(place);
 
+    const historique = new HistoriqueLocationAsset();
+    historique.asset = asset;
+    historique.assetId = asset.id;
+    historique.assetName = asset.name;
+    historique.place = place;
+    historique.locationId = place.id;
+    historique.locationName = place.name;
+    
+    await this.historiqueLocationAssetRepository.save(historique);
+
     return asset;
 }
+
 
 
 }
