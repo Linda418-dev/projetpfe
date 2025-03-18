@@ -61,7 +61,6 @@ export class UploadsService {
     asset.categoryName = category.name;
     asset.supplier = supplier;
     asset.supplierName = supplier.name;
-    asset.place = place;
     asset.locationName = place.name;
 
     await this.assetRepository.save(asset);

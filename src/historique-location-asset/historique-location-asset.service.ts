@@ -20,4 +20,9 @@ export class HistoriqueLocationAssetService {
     
     return await this.historiqueLocationAssetRepository.save(historique);
   }
+  async getHistorique() {
+    const historiques = await this.historiqueLocationAssetRepository.find();  
+    console.log(' historique :', historiques);
+    return historiques;}
+
 }
