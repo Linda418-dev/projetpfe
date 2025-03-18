@@ -82,7 +82,7 @@ export class UploadsService {
     historique.asset = asset;
     historique.assetId = asset.id;
     historique.assetName = asset.name;
-    historique.place = place;
+   // historique.place = place;
     historique.locationId = place.id;
     historique.locationName = place.name;
     

@@ -4,7 +4,6 @@ import { CreateAssetDto } from './types/dto/create-asset.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { updateAssetDto } from './types/dto/update-asset.dto';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
-import { validate as isUUID } from 'uuid';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,

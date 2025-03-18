@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HistoriqueLocationAsset } from './entities/historique-location-asset.entity';
@@ -20,9 +20,17 @@ export class HistoriqueLocationAssetService {
     
     return await this.historiqueLocationAssetRepository.save(historique);
   }
-  async getHistorique() {
+  async getAllHistory() {
     const historiques = await this.historiqueLocationAssetRepository.find();  
     console.log(' historique :', historiques);
-    return historiques;}
-
+    return historiques;
+  }
+  
+  async getHistoriqueByAssetId(assetId: string): Promise<HistoriqueLocationAsset[]> {
+    return await this.historiqueLocationAssetRepository.find({
+      where: { assetId },
+      relations: ['asset', 'place'], 
+      order: { createdAt: 'DESC' },  
+    });
+  }
 }

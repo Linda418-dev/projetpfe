@@ -1,18 +1,31 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { HistoriqueLocationAssetService } from './historique-location-asset.service';
+import { AssetsService } from 'src/assets/asset.service';
+
+
 @ApiTags('Historique ressource')
 @Controller('historique-location-asset')
 export class HistoriqueLocationAssetController {
 
 
     
-    constructor(private readonly historiqueService: HistoriqueLocationAssetService) {}
+    constructor(private readonly historiqueLocationAssetService: HistoriqueLocationAssetService, 
+    ) {}
 
 
   @Get()
     async getHistorique() {
-    return this.historiqueService.getHistorique();
+    return this.historiqueLocationAssetService.getAllHistory();
     }
+    @Get('asset/:assetId')
+    async getHistoriqueByAssetId(
+      @Param('assetId') assetId: string,
+    ){
+      return this.historiqueLocationAssetService.getHistoriqueByAssetId(assetId);
+    }
+  
+    
+    
 }
    
