@@ -12,6 +12,9 @@ import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { Place } from 'src/places/Entities/Place.entity';
 import { HistoriqueLocationAsset } from 'src/historique-location-asset/entities/historique-location-asset.entity';
+import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
+import { PlaceRepository } from 'src/places/Repositories/Place.repository';
+import { HistoriqueLocationAssetRepository } from 'src/historique-location-asset/repositories/histprique-location-asset.repository';
 
 
 @Module({
@@ -20,7 +23,7 @@ import { HistoriqueLocationAsset } from 'src/historique-location-asset/entities/
     UploadsModule
   ],
   controllers: [AssetController],
-  providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService],
+  providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , SupplierRepository,PlaceRepository,HistoriqueLocationAssetRepository],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

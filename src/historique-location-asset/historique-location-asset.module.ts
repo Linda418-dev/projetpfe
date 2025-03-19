@@ -12,6 +12,7 @@ import { SupplierModule } from 'src/supplier/supplier.module';
 import { Category } from 'src/category/Entities/category.entity';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { HistoriqueLocationAsset } from './entities/historique-location-asset.entity';
+import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { HistoriqueLocationAsset } from './entities/historique-location-asset.en
     FileRepository,
     CategoryRepository,
     SupplierRepository,  
+    PlaceRepository
   ],
   controllers: [HistoriqueLocationAssetController],
   exports: [HistoriqueLocationAssetService],

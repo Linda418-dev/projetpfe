@@ -31,7 +31,7 @@ export class UploadsController {
   }
   
 
- @Post('create-asset-and-assign-file')
+ /*@Post('create-asset-and-assign-file')
   @ApiOperation({ summary: 'Create an asset, assign it to a category and a file' })
   async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
   const { assetName, categoryName, supplierName, fileId, locationName } = assignFileToAssetDto;
@@ -40,7 +40,7 @@ export class UploadsController {
     message: 'Asset successfully created and assigned to file, category, and location',
     asset,
   };
-}
+}*/
 
   
 

@@ -38,7 +38,7 @@ export class UploadsService {
     const files = await this.fileRepository.find();
     return files.map(file => ({ id: file.id, name: file.name }));
   }
- async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
+ /*async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     const { assetName, categoryName, supplierName, fileId, locationName } = dto;
 
     const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
@@ -83,7 +83,7 @@ export class UploadsService {
     await this.historiqueLocationAssetRepository.save(historique);
 
     return asset;
-}
+}*/
 
 
 
