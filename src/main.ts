@@ -21,7 +21,6 @@ async function bootstrap() {
     .setTitle('Inventory API')
     .setDescription('Fixed Assets Management API')
     .setVersion('1.0')
-    .addTag('Assets')
     .build();
   
   app.useGlobalPipes(new ValidationPipe());

@@ -19,38 +19,40 @@ export class AssetController {
     }
   
     @Get()
+    @ApiOperation({ summary: 'get all assets' })
     async getAllAssets() {
     return this.assetService.getAllAssets();
     }
 
-    
+    @Post('create-asset')
+    @ApiOperation({ summary: 'Create  asset' })
+    async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
+    const { assetName, categoryName, supplierName, fileId, locationName } = assignFileToAssetDto;
+    const asset = await this.assetService.createAssetAndAssignToFile(assignFileToAssetDto);
+   return {
+     message: 'Asset successfully created and assigned to file, category, and location',
+     asset,
+   };
+  }
 
-    @Get(':id')
+  @Get(':id')
+    @ApiOperation({ summary: 'get asset by id' })
     async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getAssetById(id);
     }
 
-    @Delete(':id')
-    async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
-        return this.assetService.deleteAsset(id);
-    }
-
-    
-    @Patch(':id')
+   @Patch(':id')
+    @ApiOperation({ summary: 'edit asset' })
     async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
         return this.assetService.updateAsset(id, updateAssetDto);
     }
-   //declarere here
-   @Post('create-asset-and-assign-file')
-  @ApiOperation({ summary: 'Create an asset, assign it to a category and a file' })
-  async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
-  const { assetName, categoryName, supplierName, fileId, locationName } = assignFileToAssetDto;
-  const asset = await this.assetService.createAssetAndAssignToFile(assignFileToAssetDto);
-  return {
-    message: 'Asset successfully created and assigned to file, category, and location',
-    asset,
-  };
-}
+
+    @Delete(':id')
+    @ApiOperation({ summary: 'delete asset' })
+    async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
+        return this.assetService.deleteAsset(id);
+    }
+  
     
      
   }

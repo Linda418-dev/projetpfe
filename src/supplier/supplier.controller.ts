@@ -8,28 +8,37 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 @Controller('suppliers')
 export class SupplierController {
     constructor(private readonly supplierService:SupplierService){}
+
         @Get()
+        @ApiOperation({ summary: 'get all suppliers' })
         async getAllSuppliers(){
             return this .supplierService.getAllSuppliers();
         }
-        @Get(':id')
-        async getSupplierById(@Param('id', new ParseUUIDPipe()) id: string) {
-        return this.supplierService.getSupplierById(id); 
-        }
-    
+
         @Post()
+        @ApiOperation({ summary: 'create supplier' })
         async CreateSupplier(@Body() createSupplierDto : CreateSupplierDto ){
             return this.supplierService.CreateSupplier(createSupplierDto);
         }
     
-        @Delete(':id')
-        async deleteSupplier(@Param('id',new ParseUUIDPipe()) id : string){
-            return this.supplierService.deleteSupplier(id);
+        @Get(':id')
+        @ApiOperation({ summary: 'get supplier by id ' })
+        async getSupplierById(@Param('id', new ParseUUIDPipe()) id: string) {
+        return this.supplierService.getSupplierById(id); 
         }
-        @Patch(':id')
+    
+       @Patch(':id')
+        @ApiOperation({ summary: 'edit supplier' })
         async updateSupplier(@Param('id', new ParseUUIDPipe()) id: string,@Body() updateSuplierDto: UpdateSupplierDto) {
         return this.supplierService.updateSupplier(id, updateSuplierDto);
         }
+
+        @Delete(':id')
+        @ApiOperation({ summary: 'delete  supplier' })
+        async deleteSupplier(@Param('id',new ParseUUIDPipe()) id : string){
+            return this.supplierService.deleteSupplier(id);
+        }
+
 
     
     
