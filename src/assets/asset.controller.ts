@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
@@ -9,7 +9,10 @@ import { AssetsService } from "./asset.service";
 export class AssetController {
     constructor(private readonly assetService: AssetsService) {}
 
-   
+    @Get('search')
+    async searchAssets(@Query('keyword') keyword: string) {
+        return this.assetService.searchAssets(keyword);
+    }
   
     @Get()
     async getAllAssets() {
@@ -33,7 +36,8 @@ export class AssetController {
     async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
         return this.assetService.updateAsset(id, updateAssetDto);
     }
-
+   
+    
      
   }
   

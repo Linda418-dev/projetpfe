@@ -4,6 +4,7 @@ import { CreateAssetDto } from './types/dto/create-asset.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { updateAssetDto } from './types/dto/update-asset.dto';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
+import { ILike } from 'typeorm';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -51,6 +52,26 @@ export class AssetsService {
           name: file.name,  
         }));
       }
+   
+
+async searchAssets(keyword: string) {
+    if (!keyword) {
+        throw new BadRequestException('Keyword is required for search.');
+    }
+
+    const assets = await this.assetRepository.find({
+        where: [
+            { name: ILike(`%${keyword}%`) },
+            { category: { name: ILike(`%${keyword}%`) } },
+            { supplier: { name: ILike(`%${keyword}%`) } },
+            { locationName: ILike(`%${keyword}%`) }
+        ],
+        relations: ['category', 'supplier'], 
+    });
+
+    return assets;
+}
+
 }
 
     
