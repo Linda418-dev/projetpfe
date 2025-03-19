@@ -35,7 +35,7 @@ import { HistoriqueLocationAssetModule } from 'src/historique-location-asset/his
         if (allowedMimeTypes.includes(file.mimetype)) {
           callback(null, true); 
         } else {
-          callback(new Error('Seules les images sont autorisées'), false);
+          callback(new Error('files autorisées'), false);
         }
       },
       storage: diskStorage({

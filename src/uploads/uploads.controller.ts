@@ -30,13 +30,8 @@ export class UploadsController {
     return await this.uploadsService.GetAllFiles();
   }
   
-  @Get("filesName")
-  @ApiOperation({ summary: 'Récupérer tous les noms de fichiers' })
-  async getAllFilesName() {
-    return await this.uploadsService.GetAllNameFiles();
-  }
- 
-  @Post('create-asset-and-assign-file')
+
+ @Post('create-asset-and-assign-file')
   @ApiOperation({ summary: 'Create an asset, assign it to a category and a file' })
   async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
   const { assetName, categoryName, supplierName, fileId, locationName } = assignFileToAssetDto;

@@ -38,12 +38,7 @@ export class UploadsService {
     const files = await this.fileRepository.find();
     return files.map(file => ({ id: file.id, name: file.name }));
   }
-  async GetAllNameFiles() {
-    const files = await this.fileRepository.find();
-    return files.map(file => ({ name: file.name }));
-  }
-  
-  async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
+ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     const { assetName, categoryName, supplierName, fileId, locationName } = dto;
 
     const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
@@ -82,7 +77,6 @@ export class UploadsService {
     historique.asset = asset;
     historique.assetId = asset.id;
     historique.assetName = asset.name;
-   // historique.place = place;
     historique.locationId = place.id;
     historique.locationName = place.name;
     

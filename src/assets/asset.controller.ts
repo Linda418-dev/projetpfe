@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from "@nestjs/common";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
@@ -15,6 +15,8 @@ export class AssetController {
     async getAllAssets() {
     return this.assetService.getAllAssets();
     }
+
+    
 
     @Get(':id')
     async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {

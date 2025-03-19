@@ -35,8 +35,4 @@ export class SupplierService {
             return this.supplierRepository.save(fetchSupplier);
         }
        
-        async getAllSuppliersNames(){
-            const suppliers = await this.supplierRepository.find({ select: ['name'] });
-            return suppliers.map(supplier => supplier.name);
-          }
 }

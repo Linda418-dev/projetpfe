@@ -12,10 +12,6 @@ export class SupplierController {
         async getAllSuppliers(){
             return this .supplierService.getAllSuppliers();
         }
-        @Get('names')
-        async getAllSuppliersNames(): Promise<string[]> {
-          return this.supplierService.getAllSuppliersNames();
-        }
         @Get(':id')
         async getSupplierById(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.supplierService.getSupplierById(id); 
