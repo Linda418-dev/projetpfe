@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 import { IPlace } from "../Types/interfaces/Place.interface";
 import { PlaceType } from "../Types/enums/Place-type.enum";
 import { Asset } from "src/assets/Entities/Asset.entity";
+import { Department } from "src/department/entities/department.entity";
 
 @Entity()
 export class Place implements IPlace{
@@ -29,6 +30,9 @@ export class Place implements IPlace{
 
     @Column("simple-array", { nullable: true, default: [] }) 
     assetsNames: string[];
+
+    @OneToMany(() => Department, (department) => department.place)
+    departments: Department[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  
