@@ -18,6 +18,8 @@ import { HistoriqueLocationAsset } from './historique-location-asset/entities/hi
 import { PaginationModule } from './pagination/pagination.module';
 import { Department } from './department/entities/department.entity';
 import { DepartmentModule } from './department/department.module';
+import { ServiceModule } from './service/service.module';
+import { Service } from './service/entities/service.entity';
 
 @Module({
   imports: [
@@ -33,7 +35,7 @@ import { DepartmentModule } from './department/department.module';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category,HistoriqueLocationAsset ,Department], 
+        entities: [Place,Asset,File,Supplier,Category,HistoriqueLocationAsset ,Department,Service], 
         synchronize: true, 
       }),
     }),
@@ -44,7 +46,8 @@ import { DepartmentModule } from './department/department.module';
     UploadsModule,
     HistoriqueLocationAssetModule,
     PaginationModule,
-    DepartmentModule
+    DepartmentModule,
+    ServiceModule
   ],
   controllers: [AppController],
   providers: [AppService],

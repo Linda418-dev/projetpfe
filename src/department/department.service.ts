@@ -12,7 +12,7 @@ export class DepartmentService {
        
       async getAllDepartments() {
         return this.departmentRepository.find({
-            relations: ['place']
+            relations: ['place', 'services'] 
         });
     }
     
