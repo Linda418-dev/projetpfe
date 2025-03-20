@@ -34,6 +34,7 @@ export class UploadsService {
     return this.fileRepository.save(newFile);
   }
 
+
   async GetAllFiles() {
     const files = await this.fileRepository.find();
     return files.map(file => ({ id: file.id, name: file.name }));

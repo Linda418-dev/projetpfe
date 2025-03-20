@@ -13,8 +13,12 @@ export class UploadsController {
 
   @Post()
   @UseInterceptors(FileInterceptor('file'))  
-  @ApiConsumes('multipart/form-data')  
-  @ApiOperation({ summary: 'Upload a file' })
+  @ApiConsumes('multipart/form-data') 
+  @ApiBody({
+    description: 'Upload a file',
+    type: CreateFileDto,
+  })
+    @ApiOperation({ summary: 'Upload a file' })
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.uploadsService.createFile(file);
   }
