@@ -15,6 +15,7 @@ import { Category } from './category/Entities/category.entity';
 import { File } from './uploads/entities/file.entity';
 import { HistoriqueLocationAssetModule } from './historique-location-asset/historique-location-asset.module';
 import { HistoriqueLocationAsset } from './historique-location-asset/entities/historique-location-asset.entity';
+import { PaginationModule } from './pagination/pagination.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { HistoriqueLocationAsset } from './historique-location-asset/entities/hi
     CategoryModule,
     SupplierModule,
     UploadsModule,
-    HistoriqueLocationAssetModule
+    HistoriqueLocationAssetModule,
+    PaginationModule
   ],
   controllers: [AppController],
   providers: [AppService],

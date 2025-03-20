@@ -11,6 +11,7 @@ import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { Asset } from './Entities/Asset.entity';
 import { HistoriqueLocationAsset } from 'src/historique-location-asset/entities/historique-location-asset.entity';
 import { HistoriqueLocationAssetRepository } from 'src/historique-location-asset/repositories/histprique-location-asset.repository';
+import { PaginationService } from 'src/pagination/pagination.service';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -18,15 +19,14 @@ export class AssetsService {
         private readonly categoryRepository : CategoryRepository,
         private readonly supplierRepository:SupplierRepository,
         private readonly placeRepository:PlaceRepository,
-        private readonly historiqueLocationAssetRepository : HistoriqueLocationAssetRepository
+        private readonly historiqueLocationAssetRepository : HistoriqueLocationAssetRepository,
+        private readonly paginationService:PaginationService,
     ) {}
-    
-   
-      
-    async getAllAssets() {
-        const assets = await this.assetRepository.find({ relations: ['category'] });  
-        console.log(' Assets récupérés:', assets);
-        return assets;
+         
+ 
+
+    async getAllAssets(page:number=1,limit:number=4) {
+        return this.paginationService.paginate(this.assetRepository,page,limit);
     }
     
 
@@ -86,7 +86,7 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
 
     const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
     if (!category) throw new Error('Category not found');
-
+    
     const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
     if (!supplier) throw new Error('Supplier not found');
 

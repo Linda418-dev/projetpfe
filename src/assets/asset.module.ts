@@ -15,12 +15,14 @@ import { HistoriqueLocationAsset } from 'src/historique-location-asset/entities/
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { HistoriqueLocationAssetRepository } from 'src/historique-location-asset/repositories/histprique-location-asset.repository';
+import { PaginationModule } from 'src/pagination/pagination.module';
+import { HistoriqueLocationAssetModule } from 'src/historique-location-asset/historique-location-asset.module';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Asset, Category, Supplier, Place, HistoriqueLocationAsset]),  
-    UploadsModule
+    UploadsModule,PaginationModule,HistoriqueLocationAssetModule
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , SupplierRepository,PlaceRepository,HistoriqueLocationAssetRepository],

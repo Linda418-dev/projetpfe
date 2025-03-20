@@ -13,12 +13,14 @@ import { Category } from 'src/category/Entities/category.entity';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { HistoriqueLocationAsset } from './entities/historique-location-asset.entity';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
+import { PaginationModule } from 'src/pagination/pagination.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([HistoriqueLocationAsset, Category]), 
     SupplierModule,  
-    CategoryModule,  
+    CategoryModule, 
+    PaginationModule 
   ],
   providers: [
     HistoriqueLocationAssetService,
