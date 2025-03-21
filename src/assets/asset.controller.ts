@@ -3,13 +3,12 @@ import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
-import { AssignFileToAssetDto } from "src/uploads/types/dto/assign-file.dto";
-import { UploadsService } from "src/uploads/uploads.service";
 
 @ApiTags('Asset Resource')
 @Controller('assets')
 export class AssetController {
     constructor(private readonly assetService: AssetsService,
+        
        
    
     ) {}
@@ -33,9 +32,9 @@ export class AssetController {
 
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
-    async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, serviceId } = assignFileToAssetDto;
-    const asset = await this.assetService.createAssetAndAssignToFile(assignFileToAssetDto);
+    async createAssetAndAssignToFile(@Body() createAssetDto: CreateAssetDto) {
+    const { assetName, categoryName, supplierName, fileId, serviceId ,status } = createAssetDto;
+    const asset = await this.assetService.createAssetAndAssignToFile(createAssetDto);
 
 
    return {

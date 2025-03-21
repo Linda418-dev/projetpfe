@@ -2,7 +2,6 @@ import { Controller, Post, Body, Get, UploadedFile, UseInterceptors } from '@nes
 import { ApiConsumes, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UploadsService } from './uploads.service';
 import { CreateFileDto } from './types/dto/create-file.dto';  
-import { AssignFileToAssetDto } from './types/dto/assign-file.dto';
 import { File } from './entities/file.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 

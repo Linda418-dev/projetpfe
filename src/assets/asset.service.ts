@@ -5,7 +5,6 @@ import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { updateAssetDto } from './types/dto/update-asset.dto';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { ILike } from 'typeorm';
-import { AssignFileToAssetDto } from 'src/uploads/types/dto/assign-file.dto';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { Asset } from './Entities/Asset.entity';
@@ -13,6 +12,7 @@ import { PaginationService } from 'src/pagination/pagination.service';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
+import { AssetStatus } from './types/enums/asset-status.enum';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -85,8 +85,8 @@ async searchAssets(keyword: string) {
     return assets;
 }
 //declarer here
-async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, serviceId  } = dto;
+async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
+    const { assetName, categoryName, supplierName, fileId, serviceId ,status } = createAssetdto;
 
     const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
     if (!category) throw new Error('Category not found');
@@ -94,7 +94,7 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
     if (!supplier) throw new Error('Supplier not found');
 
-    let service = await this.serviceRepository.findOne({ where: { id: dto.serviceId }, relations: ['assets'] });
+    let service = await this.serviceRepository.findOne({ where: { id: createAssetdto.serviceId }, relations: ['assets'] });
     if (!service) throw new Error('Service not found');
 
     
@@ -108,6 +108,7 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     asset.supplierName = supplier.name;
     asset.service = service;  // Associer l'Asset au Service
     asset.serviceId = service.id;
+    asset.status = status || AssetStatus.GOOD_CONDITION;
 
     await this.assetRepository.save(asset);
 
@@ -129,7 +130,7 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
 
     return asset;
 
-    return asset;
+    
 }
 
 }

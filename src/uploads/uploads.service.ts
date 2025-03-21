@@ -6,7 +6,6 @@ import { File } from './entities/file.entity';
 import { Category } from "src/category/Entities/category.entity";
 import { Supplier } from "src/supplier/Entities/Supplier.entity";
 import { Place } from "src/places/Entities/Place.entity";
-import { AssignFileToAssetDto } from "./types/dto/assign-file.dto";
 
 @Injectable()
 export class UploadsService {
