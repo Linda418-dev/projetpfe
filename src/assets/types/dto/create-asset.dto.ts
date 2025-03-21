@@ -21,4 +21,6 @@ export class CreateAssetDto {
     @ApiProperty({ description: 'ID of the file' })
     @IsUUID()
     fileId: string;
+
+    
 }

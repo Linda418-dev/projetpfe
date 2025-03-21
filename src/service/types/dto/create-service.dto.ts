@@ -8,6 +8,11 @@ export class CreateServiceDto {
     name: string;
 
     @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    serviceLocation: string;
+
+    @ApiProperty()
     @IsUUID()
     @IsNotEmpty()
     departmentId: string;

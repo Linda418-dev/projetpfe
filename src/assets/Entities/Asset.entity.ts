@@ -4,6 +4,7 @@ import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { Place } from 'src/places/Entities/Place.entity';
+import { Service } from 'src/service/entities/service.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -31,11 +32,17 @@ export class Asset implements IAsset {
   @Column({ nullable: true })
   imageUrl: string;
   
-  @Column({ nullable: true })
-  locationName: string; 
+  
 
-  @ManyToOne(() => Place, (place) => place.assets, { nullable: true, eager: true, onDelete: "CASCADE" })
-  place: Place;
+  /*@ManyToOne(() => Place, (place) => place.assets, { nullable: true, eager: true, onDelete: "CASCADE" })
+  place: Place;*/
+  
+  @ManyToOne(() => Service, (service) => service.assets, { nullable: false, onDelete: "CASCADE" })
+  service: Service;
+
+  @Column()
+  serviceId: string;
+
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

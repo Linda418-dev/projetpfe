@@ -13,8 +13,6 @@ import { UploadsModule } from './uploads/uploads.module';
 import { Supplier } from './supplier/Entities/Supplier.entity';
 import { Category } from './category/Entities/category.entity';
 import { File } from './uploads/entities/file.entity';
-import { HistoriqueLocationAssetModule } from './historique-location-asset/historique-location-asset.module';
-import { HistoriqueLocationAsset } from './historique-location-asset/entities/historique-location-asset.entity';
 import { PaginationModule } from './pagination/pagination.module';
 import { Department } from './department/entities/department.entity';
 import { DepartmentModule } from './department/department.module';
@@ -35,7 +33,7 @@ import { Service } from './service/entities/service.entity';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category,HistoriqueLocationAsset ,Department,Service], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service], 
         synchronize: true, 
       }),
     }),
@@ -44,7 +42,6 @@ import { Service } from './service/entities/service.entity';
     CategoryModule,
     SupplierModule,
     UploadsModule,
-    HistoriqueLocationAssetModule,
     PaginationModule,
     DepartmentModule,
     ServiceModule

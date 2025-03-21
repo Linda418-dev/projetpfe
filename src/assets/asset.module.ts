@@ -11,21 +11,20 @@ import { CategoryService } from 'src/category/category.service';
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { Place } from 'src/places/Entities/Place.entity';
-import { HistoriqueLocationAsset } from 'src/historique-location-asset/entities/historique-location-asset.entity';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
-import { HistoriqueLocationAssetRepository } from 'src/historique-location-asset/repositories/histprique-location-asset.repository';
 import { PaginationModule } from 'src/pagination/pagination.module';
-import { HistoriqueLocationAssetModule } from 'src/historique-location-asset/historique-location-asset.module';
+import { ServiceRepository } from 'src/service/repositories/service.repository';
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Asset, Category, Supplier, Place, HistoriqueLocationAsset]),  
-    UploadsModule,PaginationModule,HistoriqueLocationAssetModule
+    TypeOrmModule.forFeature([Asset, Category, Supplier, Place]),  
+    UploadsModule,PaginationModule
   ],
   controllers: [AssetController],
-  providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , SupplierRepository,PlaceRepository,HistoriqueLocationAssetRepository],
+  providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , 
+    SupplierRepository,PlaceRepository,ServiceRepository],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

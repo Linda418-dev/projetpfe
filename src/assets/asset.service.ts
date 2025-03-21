@@ -9,9 +9,8 @@ import { AssignFileToAssetDto } from 'src/uploads/types/dto/assign-file.dto';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { Asset } from './Entities/Asset.entity';
-import { HistoriqueLocationAsset } from 'src/historique-location-asset/entities/historique-location-asset.entity';
-import { HistoriqueLocationAssetRepository } from 'src/historique-location-asset/repositories/histprique-location-asset.repository';
 import { PaginationService } from 'src/pagination/pagination.service';
+import { ServiceRepository } from 'src/service/repositories/service.repository';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -19,8 +18,8 @@ export class AssetsService {
         private readonly categoryRepository : CategoryRepository,
         private readonly supplierRepository:SupplierRepository,
         private readonly placeRepository:PlaceRepository,
-        private readonly historiqueLocationAssetRepository : HistoriqueLocationAssetRepository,
         private readonly paginationService:PaginationService,
+        private readonly serviceRepository: ServiceRepository
     ) {}
          
  
@@ -73,7 +72,8 @@ async searchAssets(keyword: string) {
             { name: ILike(`%${keyword}%`) },
             { category: { name: ILike(`%${keyword}%`) } },
             { supplier: { name: ILike(`%${keyword}%`) } },
-            { locationName: ILike(`%${keyword}%`) }
+             /*{ serviceName: ILike(`%${keyword}%`) }*/
+            /*{ locationName: ILike(`%${keyword}%`) }*/
         ],
         relations: ['category', 'supplier'], 
     });
@@ -82,7 +82,7 @@ async searchAssets(keyword: string) {
 }
 //declarer here
 async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, locationName } = dto;
+    const { assetName, categoryName, supplierName, fileId, serviceId  } = dto;
 
     const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
     if (!category) throw new Error('Category not found');
@@ -90,8 +90,11 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
     if (!supplier) throw new Error('Supplier not found');
 
-    let place = await this.placeRepository.findOne({ where: { name: locationName }, relations: ['assets'] });
-    if (!place) throw new Error('Place not found');
+    let service = await this.serviceRepository.findOne({ where: { id: dto.serviceId }, relations: ['assets'] });
+    if (!service) throw new Error('Service not found');
+
+    
+   
 
     const asset = new Asset();
     asset.name = assetName;
@@ -99,7 +102,8 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     asset.categoryName = category.name;
     asset.supplier = supplier;
     asset.supplierName = supplier.name;
-    asset.locationName = place.name;
+    asset.service = service;  // Associer l'Asset au Service
+    asset.serviceId = service.id;
 
     await this.assetRepository.save(asset);
 
@@ -113,17 +117,17 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     await this.fileRepository.save(file);
     await this.assetRepository.save(asset);
 
-    place.assetsNames = [...(place.assetsNames || []), asset.name];
+    /*place.assetsNames = [...(place.assetsNames || []), asset.name];
     await this.placeRepository.save(place);
 
     const historique = new HistoriqueLocationAsset();
     historique.asset = asset;
     historique.assetId = asset.id;
     historique.assetName = asset.name;
-    historique.locationId = place.id;
+   historique.locationId = place.id;
     historique.locationName = place.name;
     
-    await this.historiqueLocationAssetRepository.save(historique);
+    await this.historiqueLocationAssetRepository.save(historique);*/
 
     return asset;
 }

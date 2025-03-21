@@ -7,7 +7,6 @@ import { Category } from "src/category/Entities/category.entity";
 import { Supplier } from "src/supplier/Entities/Supplier.entity";
 import { Place } from "src/places/Entities/Place.entity";
 import { AssignFileToAssetDto } from "./types/dto/assign-file.dto";
-import { HistoriqueLocationAsset } from "src/historique-location-asset/entities/historique-location-asset.entity";
 
 @Injectable()
 export class UploadsService {
@@ -17,7 +16,6 @@ export class UploadsService {
     @InjectRepository(Category) private categoryRepository: Repository<Category>,
     @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
     @InjectRepository(Place) private placeRepository: Repository<Place>,
-    @InjectRepository(HistoriqueLocationAsset) private historiqueLocationAssetRepository: Repository<HistoriqueLocationAsset>,
 
 
 

@@ -25,8 +25,8 @@ export class Place implements IPlace{
       })
     type: PlaceType;
 
-    @OneToMany(() => Asset, (asset) => asset.place)
-    assets: Asset[];
+    /*@OneToMany(() => Asset, (asset) => asset.place)
+    assets: Asset[];*/
 
     @Column("simple-array", { nullable: true, default: [] }) 
     assetsNames: string[];

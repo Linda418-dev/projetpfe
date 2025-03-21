@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
@@ -10,6 +10,7 @@ import { UploadsService } from "src/uploads/uploads.service";
 @Controller('assets')
 export class AssetController {
     constructor(private readonly assetService: AssetsService,
+       
    
     ) {}
 
@@ -33,10 +34,12 @@ export class AssetController {
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
     async createAssetAndAssignToFile(@Body() assignFileToAssetDto: AssignFileToAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, locationName } = assignFileToAssetDto;
+    const { assetName, categoryName, supplierName, fileId, serviceId } = assignFileToAssetDto;
     const asset = await this.assetService.createAssetAndAssignToFile(assignFileToAssetDto);
+
+
    return {
-     message: 'Asset successfully created and assigned to file, category, and location',
+     message: 'Asset successfully created and assigned to file, category, and service',
      asset,
    };
   }

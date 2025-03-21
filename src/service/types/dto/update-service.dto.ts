@@ -7,4 +7,9 @@ export class UpdateServiceDto {
     @IsNotEmpty()
     name: string;
 
+    @ApiProperty()
+    @IsString()
+    @IsNotEmpty()
+    serviceLocation: string;
+
 }
