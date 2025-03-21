@@ -10,10 +10,11 @@ import { CategoryRepository } from 'src/category/Repositories/category.repositor
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { PaginationService } from 'src/pagination/pagination.service';
+import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 
 @Module({
   providers: [ServiceService,ServiceRepository, DepartmentRepository, AssetRepository,AssetsService,FileRepository,CategoryRepository,SupplierRepository
-    ,PlaceRepository,PaginationService,
+    ,PlaceRepository,PaginationService,HistoryAssetRepository
   ],
   controllers: [ServiceController]
 })

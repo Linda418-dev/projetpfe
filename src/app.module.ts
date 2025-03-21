@@ -18,6 +18,8 @@ import { Department } from './department/entities/department.entity';
 import { DepartmentModule } from './department/department.module';
 import { ServiceModule } from './service/service.module';
 import { Service } from './service/entities/service.entity';
+import { HistoryAssetModule } from './history-asset/history-asset.module';
+import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
 
 @Module({
   imports: [
@@ -33,7 +35,7 @@ import { Service } from './service/entities/service.entity';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset], 
         synchronize: true, 
       }),
     }),
@@ -44,7 +46,8 @@ import { Service } from './service/entities/service.entity';
     UploadsModule,
     PaginationModule,
     DepartmentModule,
-    ServiceModule
+    ServiceModule,
+    HistoryAssetModule
   ],
   controllers: [AppController],
   providers: [AppService],

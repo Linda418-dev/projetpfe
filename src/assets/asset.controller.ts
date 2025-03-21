@@ -19,16 +19,16 @@ export class AssetController {
         return this.assetService.searchAssets(keyword);
     }
   
-
-   /* @Get()
+    @Get('all-assets')
     @ApiOperation({ summary: 'get all assets' })
     async getAllAssets() {
-    return this.assetService.getAllAssets();
-    }*/
+        return this.assetService.getAllAssets();
+    }
+    
     @Get()
     @ApiOperation({ summary: 'get all assets' })
-    async getAllAssets(@Query('page') page: number=1,@Query('limit') limit:number=4) {
-    return this.assetService.getAllAssets(Number(page),Number(limit));
+    async getAllAssetsWithPagination(@Query('page') page: number=1,@Query('limit') limit:number=4) {
+    return this.assetService.getAllAssetsWithPagination(Number(page),Number(limit));
     }
 
     @Post('create-asset')

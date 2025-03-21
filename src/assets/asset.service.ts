@@ -11,6 +11,8 @@ import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { Asset } from './Entities/Asset.entity';
 import { PaginationService } from 'src/pagination/pagination.service';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
+import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
+import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -19,15 +21,17 @@ export class AssetsService {
         private readonly supplierRepository:SupplierRepository,
         private readonly placeRepository:PlaceRepository,
         private readonly paginationService:PaginationService,
-        private readonly serviceRepository: ServiceRepository
+        private readonly serviceRepository: ServiceRepository,
+        private readonly historyAssetRepository :HistoryAssetRepository
     ) {}
-         
- 
-
-    async getAllAssets(page:number=1,limit:number=4) {
+        
+    async getAllAssetsWithPagination(page:number=1,limit:number=4) {
         return this.paginationService.paginate(this.assetRepository,page,limit);
     }
-    
+
+    async getAllAssets() {
+      return this.assetRepository.find();
+  }
 
     async getAssetById(id: string) {
         const fetchAsset = await this.assetRepository.findOneBy({ id });
@@ -117,17 +121,13 @@ async createAssetAndAssignToFile(dto: AssignFileToAssetDto) {
     await this.fileRepository.save(file);
     await this.assetRepository.save(asset);
 
-    /*place.assetsNames = [...(place.assetsNames || []), asset.name];
-    await this.placeRepository.save(place);
-
-    const historique = new HistoriqueLocationAsset();
-    historique.asset = asset;
-    historique.assetId = asset.id;
-    historique.assetName = asset.name;
-   historique.locationId = place.id;
-    historique.locationName = place.name;
+    const historyAsset = new HistoryAsset();
+    historyAsset.asset = asset;
+    historyAsset.service = service;
     
-    await this.historiqueLocationAssetRepository.save(historique);*/
+    await this.historyAssetRepository.save(historyAsset);
+
+    return asset;
 
     return asset;
 }
