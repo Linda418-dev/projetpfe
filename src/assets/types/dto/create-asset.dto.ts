@@ -24,7 +24,7 @@ export class CreateAssetDto {
     @IsUUID()
     serviceId: string; 
 
-    @ApiProperty()
+    
     @IsOptional()
     @IsEnum(AssetStatus)
     status?: AssetStatus;
