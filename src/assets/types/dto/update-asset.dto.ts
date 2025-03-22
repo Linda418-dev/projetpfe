@@ -19,7 +19,9 @@ export class updateAssetDto{
     @IsUUID()
     placeId: string;
 
+    @ApiProperty()
     @IsOptional()
     @IsEnum(AssetStatus)
     status?: AssetStatus;
+
 }

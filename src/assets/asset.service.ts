@@ -53,6 +53,22 @@ export class AssetsService {
         if (!fetchAsset) {
           throw new BadRequestException(`Asset with id ${id} not found`);
         }
+
+        if (updateAssetDto.status && updateAssetDto.status !== fetchAsset.status) {
+            /* 🔹 Enregistrer l'ancien statut avant la mise à jour
+            const oldHistoryStatus = new HistoryStatusAsset();
+            oldHistoryStatus.asset = fetchAsset;
+            oldHistoryStatus.assetId = fetchAsset.id;
+            oldHistoryStatus.status = fetchAsset.status; // Ancien statut
+            await this.historyStatusAssetRepository.save(oldHistoryStatus);*/
+    
+            // 🔹 Enregistrer le nouveau statut après la mise à jour
+            const newHistoryStatus = new HistoryStatusAsset();
+            newHistoryStatus.asset = fetchAsset;
+            newHistoryStatus.assetId = fetchAsset.id;
+            newHistoryStatus.status = updateAssetDto.status; // Nouveau statut
+            await this.historyStatusAssetRepository.save(newHistoryStatus);
+        }
       
         Object.assign(fetchAsset, updateAssetDto);
       
