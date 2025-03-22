@@ -8,10 +8,10 @@ export class HistoryAsset implements IHistoryAsset {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Asset, (asset) => asset.id, { onDelete: 'CASCADE' , eager: true  })
   asset: Asset;
 
-  @ManyToOne(() => Service, (service) => service.id, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Service, (service) => service.id, { onDelete: 'CASCADE' , eager: true  })
   service: Service;
 
   @CreateDateColumn({ type: 'timestamp' })

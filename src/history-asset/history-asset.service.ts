@@ -7,7 +7,18 @@ export class HistoryAssetService {
             private readonly historyAssetRepository: HistoryAssetRepository,
           ) {}
         
-          async getAllHistoryAssets(){
-            return this.historyAssetRepository.find();
-          }
+          async getAllHistoryAssets() {
+            const histories = await this.historyAssetRepository.find({
+                relations: ['asset', 'service'],
+            });
+        
+            return histories.map(history => ({
+                id: history.id,
+                assetId: history.asset?.id,  
+                serviceId: history.service?.id, 
+                createdAt: history.createdAt,
+                updatedAt: history.updatedAt,
+            }));
+        }
+        
 }
