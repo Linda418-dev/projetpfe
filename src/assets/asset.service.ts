@@ -77,24 +77,24 @@ export class AssetsService {
       }
    
 
-async searchAssets(keyword: string) {
-    if (!keyword) {
-        throw new BadRequestException('Keyword is required for search.');
+      async searchAssets(keyword: string) {
+        if (!keyword) {
+            throw new BadRequestException('Keyword is required for search.');
+        }
+    
+        const assets = await this.assetRepository.find({
+            where: [
+                { name: ILike(`%${keyword}%`) },
+                { category: { name: ILike(`%${keyword}%`) } },
+                { supplier: { name: ILike(`%${keyword}%`) } },
+                { service: { name: ILike(`%${keyword}%`) } }, // 🔹 Ajout de la recherche par service
+            ],
+            relations: ['category', 'supplier', 'service'], // 🔹 Ajout de la relation 'service'
+        });
+    
+        return assets;
     }
-
-    const assets = await this.assetRepository.find({
-        where: [
-            { name: ILike(`%${keyword}%`) },
-            { category: { name: ILike(`%${keyword}%`) } },
-            { supplier: { name: ILike(`%${keyword}%`) } },
-             /*{ serviceName: ILike(`%${keyword}%`) }*/
-            /*{ locationName: ILike(`%${keyword}%`) }*/
-        ],
-        relations: ['category', 'supplier'], 
-    });
-
-    return assets;
-}
+    
 
 async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
     const { assetName, categoryName, supplierName, fileId, serviceId ,status } = createAssetdto;
