@@ -26,18 +26,18 @@ export class ServiceService {
     async createService(createServiceDto: CreateServiceDto) {
         const { name,serviceLocation, departmentId } = createServiceDto;
 
-        // Vérifier si le Department existe
+        
         const department = await this.departmentRepository.findOne({ where: { id: departmentId } });
         if (!department) {
             throw new NotFoundException(`Department with id ${departmentId} not found`);
         }
 
-        // Créer le service avec le bon Department
+       
         const service = this.serviceRepository.create({
             name,
             serviceLocation,
-            department, // Associe l'entité complète
-            departmentId // Stocke aussi l'ID
+            department, 
+            departmentId 
         });
 
         return this.serviceRepository.save(service);

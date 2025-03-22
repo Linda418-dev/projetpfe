@@ -16,7 +16,7 @@ export class Supplier implements ISupplier {
   @Column()
   phone: string;
 
-  @OneToMany(() => Asset, (asset) => asset.supplier)
+  @OneToMany(() => Asset, (asset) => asset.supplier,{ cascade: true })
   assets: Asset[];
 
   @Column("simple-array", { nullable: true })
