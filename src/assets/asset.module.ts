@@ -16,6 +16,7 @@ import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { PaginationModule } from 'src/pagination/pagination.module';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
+import { HistoryStatusAssetRepository } from 'src/history-status-asset/repositories/history-asset.repository';
 
 
 @Module({
@@ -25,7 +26,7 @@ import { HistoryAssetRepository } from 'src/history-asset/repositories/history-a
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , 
-    SupplierRepository,PlaceRepository,ServiceRepository,HistoryAssetRepository],
+    SupplierRepository,PlaceRepository,ServiceRepository,HistoryAssetRepository,HistoryStatusAssetRepository],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

@@ -13,6 +13,8 @@ import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
 import { AssetStatus } from './types/enums/asset-status.enum';
+import { HistoryStatusAsset } from 'src/history-status-asset/entities/history-status-Asset.entity';
+import { HistoryStatusAssetRepository } from 'src/history-status-asset/repositories/history-asset.repository';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -22,7 +24,8 @@ export class AssetsService {
         private readonly placeRepository:PlaceRepository,
         private readonly paginationService:PaginationService,
         private readonly serviceRepository: ServiceRepository,
-        private readonly historyAssetRepository :HistoryAssetRepository
+        private readonly historyAssetRepository :HistoryAssetRepository,
+        private readonly historyStatusAssetRepository :HistoryStatusAssetRepository
     ) {}
         
     async getAllAssetsWithPagination(page:number=1,limit:number=4) {
@@ -127,6 +130,14 @@ async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
     historyAsset.service = service;
     
     await this.historyAssetRepository.save(historyAsset);
+
+
+    const historyStatus = new HistoryStatusAsset();
+    historyStatus.asset = asset;
+    historyStatus.assetId = asset.id;
+    historyStatus.status = asset.status;
+
+    await this.historyStatusAssetRepository.save(historyStatus);
 
     return asset;
 

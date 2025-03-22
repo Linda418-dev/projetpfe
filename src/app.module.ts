@@ -18,8 +18,10 @@ import { Department } from './department/entities/department.entity';
 import { DepartmentModule } from './department/department.module';
 import { ServiceModule } from './service/service.module';
 import { Service } from './service/entities/service.entity';
-import { HistoryAssetModule } from './history-asset/history-asset.module';
 import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
+import { HistoryStatusAssetModule } from './history-status-asset/history-status-asset.module';
+import { HistoryStatusAsset } from './history-status-asset/entities/history-status-Asset.entity';
+import { HistoryAssetModule } from './history-asset/history-asset.module';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset], 
         synchronize: true, 
       }),
     }),
@@ -47,7 +49,10 @@ import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
     PaginationModule,
     DepartmentModule,
     ServiceModule,
+    HistoryStatusAssetModule,
     HistoryAssetModule
+    
+    
   ],
   controllers: [AppController],
   providers: [AppService],
