@@ -1,20 +1,16 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { IUser } from "../types/interface/user.interface";
+import { IUserRole } from "../interface/user-role.interface";
 
 
 @Entity()
-export class User implements IUser {
+export class UserRole implements IUserRole {
   
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ type: 'enum', enum: UserRole, unique: true })
+  role: UserRole;
 
-  @Column()
-  password: string;
-
-  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   

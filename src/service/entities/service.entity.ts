@@ -13,7 +13,7 @@ export class Service implements IService{
     @Column()
     name: string;
 
-    @Column({ unique: true })
+    @Column()
     serviceLocation: string;
     
     @ManyToOne(() => Department, (department) => department.services, { nullable: false, onDelete: 'CASCADE' })

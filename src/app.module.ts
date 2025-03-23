@@ -22,6 +22,7 @@ import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
 import { HistoryStatusAssetModule } from './history-status-asset/history-status-asset.module';
 import { HistoryStatusAsset } from './history-status-asset/entities/history-status-Asset.entity';
 import { HistoryAssetModule } from './history-asset/history-asset.module';
+import { UserRoleModule } from './user-role/user-role.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { HistoryAssetModule } from './history-asset/history-asset.module';
     DepartmentModule,
     ServiceModule,
     HistoryStatusAssetModule,
-    HistoryAssetModule
+    HistoryAssetModule,
+    UserRoleModule
     
     
   ],
