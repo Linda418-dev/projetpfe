@@ -23,6 +23,12 @@ import { HistoryStatusAssetModule } from './history-status-asset/history-status-
 import { HistoryStatusAsset } from './history-status-asset/entities/history-status-Asset.entity';
 import { HistoryAssetModule } from './history-asset/history-asset.module';
 import { UserRoleModule } from './user-role/user-role.module';
+import { AuthModule } from './auth/auth.module';
+import { User } from './user/entities/user.entity';
+import { UserModule } from './user/user.module';
+import { UserRoleEntity } from './user-role/entities/user-role.entity';
+import { BcryptService } from './common/bcrypt.service';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -38,7 +44,7 @@ import { UserRoleModule } from './user-role/user-role.module';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRoleEntity], 
         synchronize: true, 
       }),
     }),
@@ -52,12 +58,16 @@ import { UserRoleModule } from './user-role/user-role.module';
     ServiceModule,
     HistoryStatusAssetModule,
     HistoryAssetModule,
-    UserRoleModule
+    UserRoleModule,
+    AuthModule,
+    UserModule,
+    UserRoleModule,
+    CommonModule
     
     
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, BcryptService],
 })
 export class AppModule {
  
