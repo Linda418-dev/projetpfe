@@ -5,7 +5,7 @@ import { UserRoleEnum } from "../enums/user-role.enum";
 
 
 @Entity()
-export class UserRoleEntity  implements IUserRole {
+export class UserRole  implements IUserRole {
   
   @PrimaryGeneratedColumn('uuid')
   id: string;

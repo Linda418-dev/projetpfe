@@ -26,9 +26,10 @@ import { UserRoleModule } from './user-role/user-role.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { UserRoleEntity } from './user-role/entities/user-role.entity';
 import { BcryptService } from './common/bcrypt.service';
 import { CommonModule } from './common/common.module';
+import { JwtAuthModule } from './jwt-auth/jwt-auth.module';
+import { UserRole } from './user-role/entities/user-role.entity';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { CommonModule } from './common/common.module';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRoleEntity], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole], 
         synchronize: true, 
       }),
     }),
@@ -62,7 +63,8 @@ import { CommonModule } from './common/common.module';
     AuthModule,
     UserModule,
     UserRoleModule,
-    CommonModule
+    CommonModule,
+    JwtAuthModule
     
     
   ],

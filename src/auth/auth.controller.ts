@@ -6,7 +6,7 @@ import { LoginUserDto } from 'src/user/types/dto/login-user.dto';
 
 
 
-@ApiTags('Auth Resource')
+@ApiTags('Accounts Resource')
 @Controller('Auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}

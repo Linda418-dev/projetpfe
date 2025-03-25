@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IUser } from "../types/interface/user.interface";
-import {  UserRoleEntity } from "src/user-role/entities/user-role.entity";
+import { UserRole } from "src/user-role/entities/user-role.entity";
 
 
 @Entity()
@@ -15,8 +15,8 @@ export class User implements IUser {
   @Column()
   password: string;
 
-  @ManyToOne(() => UserRoleEntity, (role) => role.users, { eager: true })
-  role: UserRoleEntity;
+  @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
+  role: UserRole;
    
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

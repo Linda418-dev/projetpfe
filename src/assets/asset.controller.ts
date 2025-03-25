@@ -1,9 +1,13 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
+import { Roles } from "src/jwt-auth/roles.decorator";
+import { JwtAuthGuard } from "src/jwt-auth/jwt-auth.guard";
+import { RolesGuard } from "src/jwt-auth/roles.guard";
 
+@ApiBearerAuth()
 @ApiTags('Asset Resource')
 @Controller('assets')
 export class AssetController {
@@ -32,6 +36,8 @@ export class AssetController {
 
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
+    @UseGuards(JwtAuthGuard, RolesGuard)  
+    @Roles('admin') 
     async createAssetAndAssignToFile(@Body() createAssetDto: CreateAssetDto) {
     const { assetName, categoryName, supplierName, fileId, serviceId ,status } = createAssetDto;
     const asset = await this.assetService.createAssetAndAssignToFile(createAssetDto);

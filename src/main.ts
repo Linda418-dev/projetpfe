@@ -5,8 +5,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { join } from 'path';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
+
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  
+
 
   app.enableCors({
     origin: ['http://localhost:4200'],  
@@ -18,15 +22,28 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'), { prefix: '/uploads/' });
 
   const config = new DocumentBuilder()
-    .setTitle('Inventory API')
-    .setDescription('Fixed Assets Management API')
-    .setVersion('1.0')
-    .build();
+  .setTitle('Inventory API')
+  .setDescription('Fixed Assets Management API')
+  .setVersion('1.0')
+  .addBearerAuth({
+    type: 'http',
+    scheme: 'bearer',
+    bearerFormat: 'JWT',
+    in: 'header',
+  })
+  .build();
+  
+
   
   app.useGlobalPipes(new ValidationPipe());
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,  // 🔥 Garde le token actif
+    },
+  });
+  
 
   await app.listen(process.env.PORT ?? 3000);
 }
