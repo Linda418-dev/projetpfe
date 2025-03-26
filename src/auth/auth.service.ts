@@ -46,30 +46,22 @@ export class AuthService {
    
     return { user: newUser };
   }
-
-  // 🔹 Méthode de connexion (Signin)
   async signin(loginUserDto: LoginUserDto) {
     const { email, password } = loginUserDto;
-
-    // Vérifier si l'utilisateur existe
     const user = await this.userRepository.findOne({ where: { email }, relations: ['role'] });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
-    // Vérifier si le mot de passe est correct
     const isPasswordValid = await this.bcryptService.comparePassword(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Générer un token JWT
     const token = this.generateJwt(user);
 
     return { user, token };
   }
-
-  // 🔹 Génération du Token JWT
   private generateJwt(user: User): string {
     const payload = { email: user.email, id: user.id, role: user.role.role };
     return this.jwtService.sign(payload);

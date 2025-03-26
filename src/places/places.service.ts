@@ -7,19 +7,26 @@ import { updatePlaceDto } from './Types/dto/update-place.dto';
 export class PlacesService {
     constructor(private readonly placeRepository:PlaceRepository){}
     async getAllPlaces() {
-        return this.placeRepository.find();
+        return this.placeRepository.find({ relations: ['departments'] });
     }
+    
     async getAllPlacesNames() {
         const places = await this.placeRepository.find({ select: ['name'] });
         return places.map(place => place.name);
       }
-    async getPlaceById(id: string) {
-       const fetchPlace= await this.placeRepository.findOneBy({id : id });
-       if (!fetchPlace){
-        throw new BadRequestException('Place with id ${id} not found');
-       }
-       return fetchPlace;
+      async getPlaceById(id: string) {
+        const fetchPlace = await this.placeRepository.findOne({
+            where: { id },
+            relations: ['departments'],
+        });
+    
+        if (!fetchPlace) {
+            throw new BadRequestException(`Place with id ${id} not found`);
+        }
+        
+        return fetchPlace;
     }
+    
     async  CreatePlace(createPlaceDto: CreatePlaceDto) {
         return this.placeRepository.save(
             this.placeRepository.create(createPlaceDto)

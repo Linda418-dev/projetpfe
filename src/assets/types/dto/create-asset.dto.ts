@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
-import { AssetStatus } from "../enums/asset-status.enum";
 
 export class CreateAssetDto {
    @ApiProperty({ description: 'Name of the asset' })
@@ -25,9 +24,7 @@ export class CreateAssetDto {
     serviceId: string; 
 
     
-    @IsOptional()
-    @IsEnum(AssetStatus)
-    status?: AssetStatus;
+    
 
 
     

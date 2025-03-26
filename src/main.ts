@@ -8,10 +8,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-
-  
-
-
   app.enableCors({
     origin: ['http://localhost:4200'],  
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],  
@@ -40,7 +36,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
     swaggerOptions: {
-      persistAuthorization: true,  // 🔥 Garde le token actif
+      persistAuthorization: true,  
     },
   });
   

@@ -12,8 +12,6 @@ import { PaginationService } from 'src/pagination/pagination.service';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
-import { AssetStatus } from './types/enums/asset-status.enum';
-import { HistoryStatusAsset } from 'src/history-status-asset/entities/history-status-Asset.entity';
 import { HistoryStatusAssetRepository } from 'src/history-status-asset/repositories/history-asset.repository';
 @Injectable()
 export class AssetsService {
@@ -25,7 +23,7 @@ export class AssetsService {
         private readonly paginationService:PaginationService,
         private readonly serviceRepository: ServiceRepository,
         private readonly historyAssetRepository :HistoryAssetRepository,
-        private readonly historyStatusAssetRepository :HistoryStatusAssetRepository
+       
     ) {}
         
     async getAllAssetsWithPagination(page:number=1,limit:number=4) {
@@ -52,14 +50,6 @@ export class AssetsService {
         const fetchAsset = await this.getAssetById(id);
         if (!fetchAsset) {
           throw new BadRequestException(`Asset with id ${id} not found`);
-        }
-
-        if (updateAssetDto.status && updateAssetDto.status !== fetchAsset.status) {
-            const newHistoryStatus = new HistoryStatusAsset();
-            newHistoryStatus.asset = fetchAsset;
-            newHistoryStatus.assetId = fetchAsset.id;
-            newHistoryStatus.status = updateAssetDto.status;
-            await this.historyStatusAssetRepository.save(newHistoryStatus);
         }
       
         Object.assign(fetchAsset, updateAssetDto);
@@ -97,7 +87,7 @@ export class AssetsService {
     
 
 async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, serviceId ,status } = createAssetdto;
+    const { assetName, categoryName, supplierName, fileId, serviceId  } = createAssetdto;
 
     const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
     if (!category) throw new Error('Category not found');
@@ -119,7 +109,6 @@ async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
     asset.supplierName = supplier.name;
     asset.service = service;  // Associer l'Asset au Service
     asset.serviceId = service.id;
-    asset.status = status || AssetStatus.GOOD_CONDITION;
 
     await this.assetRepository.save(asset);
 
@@ -140,12 +129,12 @@ async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
     await this.historyAssetRepository.save(historyAsset);
 
 
-    const historyStatus = new HistoryStatusAsset();
+    /*const historyStatus = new HistoryStatusAsset();
     historyStatus.asset = asset;
     historyStatus.assetId = asset.id;
     historyStatus.status = asset.status;
 
-    await this.historyStatusAssetRepository.save(historyStatus);
+    await this.historyStatusAssetRepository.save(historyStatus);*/
 
     return asset;
 

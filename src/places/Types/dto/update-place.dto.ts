@@ -1,6 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { PlaceType } from "../enums/Place-type.enum";
 
 
 export class updatePlaceDto{
@@ -15,15 +14,6 @@ export class updatePlaceDto{
     description: string;
 
 
-    @ApiProperty({ 
-        example: PlaceType.OPEN_SPACE, 
-        description: "Type of the place",
-        enum: PlaceType,
-        required: false 
-    })
-    @IsEnum(PlaceType)
-    @IsOptional()
-    type: PlaceType;
 
     
 }
