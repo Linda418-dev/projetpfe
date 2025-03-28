@@ -13,16 +13,17 @@ import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
 import { HistoryStatusAssetRepository } from 'src/history-status-asset/repositories/history-asset.repository';
+import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
         private fileRepository:FileRepository,
         private readonly categoryRepository : CategoryRepository,
         private readonly supplierRepository:SupplierRepository,
-        private readonly placeRepository:PlaceRepository,
         private readonly paginationService:PaginationService,
         private readonly serviceRepository: ServiceRepository,
         private readonly historyAssetRepository :HistoryAssetRepository,
+    
        
     ) {}
         
@@ -30,6 +31,10 @@ export class AssetsService {
         return this.paginationService.paginate(this.assetRepository,page,limit);
     }
 
+    async getAssets(params:PaginateSearchDto){
+        return this.assetRepository.getAllAssetWithPaginate(params);
+
+    }
     async getAllAssets() {
       return this.assetRepository.find();
   }

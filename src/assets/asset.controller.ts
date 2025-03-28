@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
@@ -6,6 +6,7 @@ import { AssetsService } from "./asset.service";
 import { Roles } from "src/jwt-auth/roles.decorator";
 import { JwtAuthGuard } from "src/jwt-auth/jwt-auth.guard";
 import { RolesGuard } from "src/jwt-auth/roles.guard";
+import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
 
 @ApiBearerAuth()
 @ApiTags('Asset Resource')
@@ -19,17 +20,24 @@ export class AssetController {
         return this.assetService.searchAssets(keyword);
     }
   
-    @Get('all-assets')
+    /*@Get('all-assets')
     @ApiOperation({ summary: 'get all assets' })
     async getAllAssets() {
         return this.assetService.getAllAssets();
-    }
-    
-    @Get()
+    }*/
+     @Get()
+     @ApiOperation({ summary: 'get all  assets with paginate keyword' })
+
+  async getAssets(
+    @Query() query: PaginateSearchDto,
+  ) {
+    return this.assetService.getAssets(query);
+  }  
+    /*@Get()
     @ApiOperation({ summary: 'get all assets' })
     async getAllAssetsWithPagination(@Query('page') page: number=1,@Query('limit') limit:number=4) {
     return this.assetService.getAllAssetsWithPagination(Number(page),Number(limit));
-    }
+    }*/
 
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
