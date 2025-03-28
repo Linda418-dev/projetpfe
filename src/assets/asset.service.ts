@@ -6,13 +6,11 @@ import { updateAssetDto } from './types/dto/update-asset.dto';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { ILike } from 'typeorm';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
-import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { Asset } from './Entities/Asset.entity';
 import { PaginationService } from 'src/pagination/pagination.service';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
-import { HistoryStatusAssetRepository } from 'src/history-status-asset/repositories/history-asset.repository';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 @Injectable()
 export class AssetsService {
@@ -54,13 +52,31 @@ export class AssetsService {
     async updateAsset(id: string, updateAssetDto: updateAssetDto) {
         const fetchAsset = await this.getAssetById(id);
         if (!fetchAsset) {
-          throw new BadRequestException(`Asset with id ${id} not found`);
+            throw new BadRequestException(`Asset with id ${id} not found`);
         }
-      
+    
+        // Vérifier si le serviceId est mis à jour
+        if (updateAssetDto.serviceId && updateAssetDto.serviceId !== fetchAsset.serviceId) {
+            const newService = await this.serviceRepository.findOne({ where: { id: updateAssetDto.serviceId } });
+            if (!newService) {
+                throw new BadRequestException(`Service with id ${updateAssetDto.serviceId} not found`);
+            }
+    
+            // Créer un nouvel historique
+            const historyAsset = new HistoryAsset();
+            historyAsset.asset = fetchAsset;
+            historyAsset.service = newService;
+            await this.historyAssetRepository.save(historyAsset);
+    
+            // Mettre à jour l'Asset avec le nouveau serviceId
+            fetchAsset.service = newService;
+            fetchAsset.serviceId = newService.id;
+        }
+    
         Object.assign(fetchAsset, updateAssetDto);
-      
         return this.assetRepository.save(fetchAsset);
-      }
+    }
+    
       
       async getFilesWithNames() {
         const files = await this.fileRepository.find(); 
@@ -132,14 +148,6 @@ async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
     historyAsset.service = service;
     
     await this.historyAssetRepository.save(historyAsset);
-
-
-    /*const historyStatus = new HistoryStatusAsset();
-    historyStatus.asset = asset;
-    historyStatus.assetId = asset.id;
-    historyStatus.status = asset.status;
-
-    await this.historyStatusAssetRepository.save(historyStatus);*/
 
     return asset;
 

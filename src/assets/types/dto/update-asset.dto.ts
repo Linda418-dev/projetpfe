@@ -18,6 +18,10 @@ export class updateAssetDto{
     @IsUUID()
     placeId: string;
 
+    @ApiProperty({ description: 'ID of the service' })
+    @IsUUID()
+    serviceId: string; 
+
    
 
 }
