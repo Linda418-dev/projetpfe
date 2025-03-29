@@ -8,8 +8,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class JwtAuthController {
 
     @Get()
-    @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard) 
     getProtectedData(@Request() req) {
-      return { message: 'Access granted', user: req.user };
+    return { message: 'Access granted', user: req.user };
     }
 }

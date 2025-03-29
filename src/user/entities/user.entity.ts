@@ -2,15 +2,16 @@ import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, Up
 import { IUser } from "../types/interface/user.interface";
 import { UserRole } from "src/user-role/entities/user-role.entity";
 
-
 @Entity()
 export class User implements IUser {
-  
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ unique: true, nullable: true }) // Permet d'accepter NULL
+  username?: string;
+
+  @Column({ unique: true, nullable: true }) // Permet d'accepter NULL
+  email?: string;
 
   @Column()
   password: string;

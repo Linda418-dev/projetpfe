@@ -3,10 +3,10 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
-import { Roles } from "src/jwt-auth/roles.decorator";
-import { JwtAuthGuard } from "src/jwt-auth/jwt-auth.guard";
-import { RolesGuard } from "src/jwt-auth/roles.guard";
+import { Roles } from "src/auth/guards/roles.decorator";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { RolesGuard } from "src/auth/guards/roles.guard";
 
 @ApiBearerAuth()
 @ApiTags('Asset Resource')

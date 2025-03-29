@@ -21,7 +21,4 @@ export class updateAssetDto{
     @ApiProperty({ description: 'ID of the service' })
     @IsUUID()
     serviceId: string; 
-
-   
-
 }

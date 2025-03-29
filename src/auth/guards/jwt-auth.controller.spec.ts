@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JwtAuthController } from './jwt-auth.controller';
+import { JwtAuthController } from '../auth/guards/jwt-auth.controller';
 
 describe('JwtAuthController', () => {
   let controller: JwtAuthController;

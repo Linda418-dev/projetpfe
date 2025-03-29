@@ -26,9 +26,7 @@ import { UserRoleModule } from './user-role/user-role.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { BcryptService } from './common/bcrypt.service';
-import { CommonModule } from './common/common.module';
-import { JwtAuthModule } from './jwt-auth/jwt-auth.module';
+import { BcryptService } from './auth/common/bcrypt.service';
 import { UserRole } from './user-role/entities/user-role.entity';
 
 @Module({
@@ -63,8 +61,8 @@ import { UserRole } from './user-role/entities/user-role.entity';
     AuthModule,
     UserModule,
     UserRoleModule,
-    CommonModule,
-    JwtAuthModule
+    
+    
     
     
   ],
