@@ -28,6 +28,11 @@ import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { BcryptService } from './auth/common/bcrypt.service';
 import { UserRole } from './user-role/entities/user-role.entity';
+import { InventoryModule } from './inventory/inventory.module';
+import { InventoryStatusHistoryModule } from './inventory-status-history/inventory-status-history.module';
+import { StatusModule } from './status/status.module';
+import { InventoryDetailsModule } from './inventory-details/inventory-details.module';
+import { InventoryLocationModule } from './inventory-location/inventory-location.module';
 
 @Module({
   imports: [
@@ -61,6 +66,11 @@ import { UserRole } from './user-role/entities/user-role.entity';
     AuthModule,
     UserModule,
     UserRoleModule,
+    InventoryModule,
+    InventoryStatusHistoryModule,
+    StatusModule,
+    InventoryDetailsModule,
+    InventoryLocationModule,
     
     
     
