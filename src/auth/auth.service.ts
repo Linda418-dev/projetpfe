@@ -19,51 +19,38 @@ export class AuthService {
   async signup(createUserDto: CreateUserDto) {
     const { email, username, password, role } = createUserDto;
 
-    // Vérifier qu'on ne reçoit pas les deux en même temps
-    if (!email && !username) {
-      throw new ConflictException('You must provide either a username or an email');
-    }
-    if (email && username) {
-      throw new ConflictException('You cannot provide both username and email');
-    }
-
-    // Vérifier si l'utilisateur existe déjà (par email ou par username)
-    const userExists = await this.userRepository.findOne({
-      where: [
-        { email: email || undefined },
-        { username: username || undefined },
-      ],
+      const userExists = await this.userRepository.findOne({
+      where: [{ email }, { username }],
     });
+  
     if (userExists) {
       throw new ConflictException('User with this email or username already exists');
     }
-
-    // Vérifier si le rôle existe
+  
     const userRole = await this.roleRepository.findOne({ where: { role } });
-
+  
     if (!userRole) {
       throw new ConflictException('Invalid role');
     }
-
-    // Hasher le mot de passe
+  
     const hashedPassword = await this.bcryptService.hashPassword(password);
-
-    // Créer et sauvegarder l'utilisateur
+  
     const newUser = this.userRepository.create({
       email,
       username,
       password: hashedPassword,
       role: userRole,
     });
+  
     await this.userRepository.save(newUser);
-
+  
     return { user: newUser };
   }
+  
 
   async signin(loginUserDto: LoginUserDto) {
     const { email, username, password } = loginUserDto;
 
-    // Chercher l'utilisateur soit par email, soit par username
     const user = await this.userRepository.findOne({
       where: [
         { email: email || undefined },

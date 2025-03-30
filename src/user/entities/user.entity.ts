@@ -7,10 +7,10 @@ export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true, nullable: true }) // Permet d'accepter NULL
+  @Column({ unique: true, nullable: true }) 
   username?: string;
 
-  @Column({ unique: true, nullable: true }) // Permet d'accepter NULL
+  @Column({ unique: true, nullable: true }) 
   email?: string;
 
   @Column()
