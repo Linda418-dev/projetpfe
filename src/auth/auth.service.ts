@@ -49,30 +49,29 @@ export class AuthService {
   
 
   async signin(loginUserDto: LoginUserDto) {
-    const { email, username, password } = loginUserDto;
-
+    const { identifier, password } = loginUserDto;
+  
+    // Vérifier si l'identifiant est un email ou un username
+    const isEmail = identifier.includes('@');
     const user = await this.userRepository.findOne({
-      where: [
-        { email: email || undefined },
-        { username: username || undefined },
-      ],
+      where: isEmail ? { email: identifier } : { username: identifier },
       relations: ['role'],
     });
-
+  
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-
+  
     const isPasswordValid = await this.bcryptService.comparePassword(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
+  
     const token = this.generateJwt(user);
-
+  
     return { user, token };
   }
-
+  
   private generateJwt(user: User): string {
     const payload = { email: user.email, id: user.id, username: user.username, role: user.role.role };
     return this.jwtService.sign(payload);

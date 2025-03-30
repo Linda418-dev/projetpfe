@@ -4,24 +4,24 @@ import { UserRoleEnum } from 'src/user-role/enums/user-role.enum';
 
 export class CreateUserDto {
   @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
+  @IsNotEmpty({ message: 'Username is required' })
+  @IsString({ message: 'Username must be a string' })
   username: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEmail({}, { message: 'Format de l’email invalide' })
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsEmail({}, { message: 'Invalid email format' })
   email: string;
 
   @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(6, { message: 'Le mot de passe doit contenir au moins 6 caractères' })
+  @IsString({ message: 'Password must be a string' })
+  @IsNotEmpty({ message: 'Password is required' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
   @ApiProperty()
   @IsEnum(UserRoleEnum, { message: 'Invalid role' })
-  @IsNotEmpty({ message: 'Le rôle est obligatoire' })
+  @IsNotEmpty({ message: 'Role is required' })
   role: UserRoleEnum;
 }
 
