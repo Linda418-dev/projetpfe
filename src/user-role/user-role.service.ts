@@ -1,6 +1,6 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { userRoleRepository } from './repositories/user-role.repository';
-import { UserRoleEnum } from './enums/user-role.enum';
+import { UserRoleEnum } from './types/enums/user-role.enum';
 
 @Injectable()
 export class UserRoleService implements OnModuleInit {

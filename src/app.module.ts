@@ -33,6 +33,7 @@ import { InventoryStatusHistoryModule } from './inventory-status-history/invento
 import { StatusModule } from './status/status.module';
 import { InventoryDetailsModule } from './inventory-details/inventory-details.module';
 import { InventoryLocationModule } from './inventory-location/inventory-location.module';
+import { Inventory } from './inventory/entities/inventory.entity';
 
 @Module({
   imports: [
@@ -48,7 +49,7 @@ import { InventoryLocationModule } from './inventory-location/inventory-location
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole,Inventory], 
         synchronize: true, 
       }),
     }),

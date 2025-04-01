@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { IUserRole } from "../interface/user-role.interface";
+import { IUserRole } from "../types/interface/user-role.interface";
 import { User } from "src/user/entities/user.entity";
-import { UserRoleEnum } from "../enums/user-role.enum";
+import { UserRoleEnum } from "../types/enums/user-role.enum";
 
 
 @Entity()
