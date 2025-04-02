@@ -10,15 +10,15 @@ export class InventoryGateway implements OnGatewayInit, OnGatewayConnection, OnG
   }
 
   handleConnection(client: Socket) {
-    console.log(`🔌 Client connecté : ${client.id}`);
+    console.log(` Client connected : ${client.id}`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(` Client déconnecté : ${client.id}`);
+    console.log(` Client disconnected : ${client.id}`);
   }
 
   notifyInventoryLaunch() {
-    console.log(' Envoi de la notification de lancement d\'inventaire');
-    this.server.emit('inventory-launched', { message: 'Un nouvel inventaire a été lancé !' });
+    console.log(' Sending inventory launch notification');
+    this.server.emit('inventory-launched', { message: 'A new inventory has been launched !' });
   }
 }

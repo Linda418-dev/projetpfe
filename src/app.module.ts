@@ -35,6 +35,12 @@ import { InventoryDetailsModule } from './inventory-details/inventory-details.mo
 import { InventoryLocationModule } from './inventory-location/inventory-location.module';
 import { Inventory } from './inventory/entities/inventory.entity';
 import { Status } from './status/entities/status.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { InventoryLockGuard } from './inventory/guards/inventory-lock.guard';
+import { InventoryService } from './inventory/inventory.service';
+import { InventoryRepository } from './inventory/repositories/inventory.repository';
+import { StatusRepository } from './status/repositories/status.repository';
+import { InventoryGateway } from './inventory/inventory.gateway';
 
 @Module({
   imports: [
@@ -79,7 +85,18 @@ import { Status } from './status/entities/status.entity';
     
   ],
   controllers: [AppController],
-  providers: [AppService, BcryptService],
+  providers: [
+    AppService, 
+    BcryptService,
+    InventoryService,
+    InventoryRepository,
+    StatusRepository,
+    InventoryGateway,
+    {
+      provide: APP_GUARD, // ✅ Ajout du guard globalement
+      useClass: InventoryLockGuard,
+    },
+  ],
 })
 export class AppModule {
  

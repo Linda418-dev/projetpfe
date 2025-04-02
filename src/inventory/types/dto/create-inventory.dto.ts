@@ -1,10 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString } from 'class-validator';
+import { IsDateString, IsString } from 'class-validator';
 
 export class CreateInventoryDto {
   @ApiProperty()
-  @IsDateString()
-  launchDate: string;  
+  @IsString()
+  name: string;
 }
 
 

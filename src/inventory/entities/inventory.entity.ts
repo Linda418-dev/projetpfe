@@ -8,6 +8,9 @@ export class Inventory implements Iinventory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column()
+  name: string;
+
   @Column({ type: 'date' })
   launchDate: Date;
 

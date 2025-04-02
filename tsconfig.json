@@ -17,5 +17,9 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/express.d.ts"  // Ajoute cette ligne pour inclure le fichier de déclaration
+  ]
 }

@@ -14,7 +14,7 @@ export class InventoryService {
         private readonly inventoryGateway: InventoryGateway,
     ) {}
 
-    async launchInventory(): Promise<Inventory> {
+    async launchInventory(name: string): Promise<Inventory> {  
         const activeInventory = await this.inventoryRepository.findOne({
             where: { closingDate: IsNull() },
         });
@@ -27,6 +27,7 @@ export class InventoryService {
             throw new Error('Status "In Progress" not found');
         }
         const inventory = new Inventory();
+        inventory.name = name;  
         inventory.launchDate = new Date();
         inventory.closingDate = null;
         inventory.status = statusInProgress;
@@ -37,6 +38,7 @@ export class InventoryService {
     
         return newInventory;
     }
+    
     
 
     async closeInventory() {
@@ -58,4 +60,12 @@ export class InventoryService {
         
         return this.inventoryRepository.save(inventory);
     }
+
+
+    async getActiveInventory() {
+        return this.inventoryRepository.findOne({
+            where: { closingDate: IsNull() },
+        });
+    }
+    
 }
