@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe } from '@nestjs/common';
 import { HistoryAssetService } from './history-asset.service';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -10,5 +10,9 @@ export class HistoryAssetController {
         @Get()
         async getAllHistoryAssets() {
           return this.historyAssetService.getAllHistoryAssets();
+        }
+        @Get(':id') 
+        async getHistoryByAssetId(@Param('id',new ParseUUIDPipe()) assetId: string) {
+            return this.historyAssetService.getHistoryByAssetId(assetId);
         }
 }

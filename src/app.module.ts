@@ -26,10 +26,21 @@ import { UserRoleModule } from './user-role/user-role.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { BcryptService } from './common/bcrypt.service';
-import { CommonModule } from './common/common.module';
-import { JwtAuthModule } from './jwt-auth/jwt-auth.module';
+import { BcryptService } from './auth/common/bcrypt.service';
 import { UserRole } from './user-role/entities/user-role.entity';
+import { InventoryModule } from './inventory/inventory.module';
+import { InventoryStatusHistoryModule } from './inventory-status-history/inventory-status-history.module';
+import { StatusModule } from './status/status.module';
+import { InventoryDetailsModule } from './inventory-details/inventory-details.module';
+import { InventoryLocationModule } from './inventory-location/inventory-location.module';
+import { Inventory } from './inventory/entities/inventory.entity';
+import { Status } from './status/entities/status.entity';
+import { APP_GUARD } from '@nestjs/core';
+import { InventoryLockGuard } from './inventory/guards/inventory-lock.guard';
+import { InventoryService } from './inventory/inventory.service';
+import { InventoryRepository } from './inventory/repositories/inventory.repository';
+import { StatusRepository } from './status/repositories/status.repository';
+import { InventoryGateway } from './inventory/inventory.gateway';
 
 @Module({
   imports: [
@@ -45,7 +56,7 @@ import { UserRole } from './user-role/entities/user-role.entity';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole,Inventory,Status], 
         synchronize: true, 
       }),
     }),
@@ -63,13 +74,29 @@ import { UserRole } from './user-role/entities/user-role.entity';
     AuthModule,
     UserModule,
     UserRoleModule,
-    CommonModule,
-    JwtAuthModule
+    InventoryModule,
+    InventoryStatusHistoryModule,
+    StatusModule,
+    InventoryDetailsModule,
+    InventoryLocationModule,
+    
+    
     
     
   ],
   controllers: [AppController],
-  providers: [AppService, BcryptService],
+  providers: [
+    AppService, 
+    BcryptService,
+    InventoryService,
+    InventoryRepository,
+    StatusRepository,
+    InventoryGateway,
+    {
+      provide: APP_GUARD, // ✅ Ajout du guard globalement
+      useClass: InventoryLockGuard,
+    },
+  ],
 })
 export class AppModule {
  

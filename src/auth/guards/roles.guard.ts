@@ -19,6 +19,10 @@ export class RolesGuard implements CanActivate {
     }
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    return requiredRoles.includes(user.role); // Vérifie l'autorisation  de  rôle utilisateur 
+
+    console.log('Role reçu:', user.role); // Debugging
+    console.log('Rôle trouvé en BDD:', user.role?.role); // Debugging
+
+    return requiredRoles.includes(user.role?.role); // 🔥 Correction ici !
   }
 }
