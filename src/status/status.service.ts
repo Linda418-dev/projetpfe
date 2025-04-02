@@ -7,9 +7,9 @@ export class StatusService implements OnModuleInit {
     constructor(private readonly statusRepository: StatusRepository) {}
 
     async onModuleInit() {
-        console.log('⚡ Seeding statuses...');
+        console.log(' Seeding statuses...');
         await this.seedStatuses();
-        console.log('✅ Statuses seeded successfully!');
+        console.log('Statuses seeded successfully!');
     }
 
     async seedStatuses() {
@@ -21,7 +21,7 @@ export class StatusService implements OnModuleInit {
             if (!existingStatus) {
                 const status = this.statusRepository.create({ name: statusName });
                 await this.statusRepository.save(status);
-                console.log(`✅ Status "${statusName}" created!`);
+                console.log(`Status "${statusName}" created!`);
             }
         }
     }

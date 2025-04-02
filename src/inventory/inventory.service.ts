@@ -15,22 +15,29 @@ export class InventoryService {
     ) {}
 
     async launchInventory(): Promise<Inventory> {
+        const activeInventory = await this.inventoryRepository.findOne({
+            where: { closingDate: IsNull() },
+        });
+    
+        if (activeInventory) {
+            throw new Error(' Un inventaire est déjà en cours !');
+        }
         const statusInProgress = await this.statusRepository.findOne({ where: { name: StatusEnum.IN_PROGRESS } });
         if (!statusInProgress) {
             throw new Error('Status "In Progress" not found');
         }
-
         const inventory = new Inventory();
         inventory.launchDate = new Date();
         inventory.closingDate = null;
-        inventory.status = statusInProgress; // ✅ Assignation du statut "In Progress"
-        
+        inventory.status = statusInProgress;
+    
         const newInventory = await this.inventoryRepository.save(inventory);
     
-        this.inventoryGateway.notifyInventoryLaunch(); // 🔥 Notifier les opérateurs
+        this.inventoryGateway.notifyInventoryLaunch(); 
     
         return newInventory;
     }
+    
 
     async closeInventory() {
         const inventory = await this.inventoryRepository.findOne({
@@ -47,7 +54,7 @@ export class InventoryService {
         }
 
         inventory.closingDate = new Date();
-        inventory.status = statusCompleted; // ✅ Assignation du statut "Completed"
+        inventory.status = statusCompleted;
         
         return this.inventoryRepository.save(inventory);
     }
