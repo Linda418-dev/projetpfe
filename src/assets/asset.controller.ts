@@ -27,17 +27,14 @@ export class AssetController {
     }*/
      @Get()
      @ApiOperation({ summary: 'get all  assets with paginate keyword' })
+      async getAssets(
+      @Query() query: PaginateSearchDto,
+      ) {
+        return this.assetService.getAssets(query);
+      }  
 
-  async getAssets(
-    @Query() query: PaginateSearchDto,
-  ) {
-    return this.assetService.getAssets(query);
-  }  
-    /*@Get()
-    @ApiOperation({ summary: 'get all assets' })
-    async getAllAssetsWithPagination(@Query('page') page: number=1,@Query('limit') limit:number=4) {
-    return this.assetService.getAllAssetsWithPagination(Number(page),Number(limit));
-    }*/
+
+ 
 
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
