@@ -95,7 +95,7 @@ import { userRepository } from './user/repositories/user.repository';
     InventoryGateway,
     userRepository,
     {
-      provide: APP_GUARD, // ✅ Ajout du guard globalement
+      provide: APP_GUARD,
       useClass: InventoryLockGuard,
     },
   ],
