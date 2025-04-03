@@ -42,6 +42,8 @@ import { InventoryRepository } from './inventory/repositories/inventory.reposito
 import { StatusRepository } from './status/repositories/status.repository';
 import { InventoryGateway } from './inventory/inventory.gateway';
 import { userRepository } from './user/repositories/user.repository';
+import { InventoryStatusHistory } from './inventory-status-history/entities/inventory-status-history.entity';
+import { InventoryStatusHistoryRepository } from './inventory-status-history/repositories/inventory-status-history.repository';
 
 @Module({
   imports: [
@@ -57,7 +59,7 @@ import { userRepository } from './user/repositories/user.repository';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole,Inventory,Status], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole,Inventory,Status,InventoryStatusHistory], 
         synchronize: true, 
       }),
     }),
@@ -94,6 +96,7 @@ import { userRepository } from './user/repositories/user.repository';
     StatusRepository,
     InventoryGateway,
     userRepository,
+    InventoryStatusHistoryRepository,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,

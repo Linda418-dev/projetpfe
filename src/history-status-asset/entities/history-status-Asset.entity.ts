@@ -14,8 +14,6 @@ export class HistoryStatusAsset implements IHistoryStatusAsset {
   @Column()
   assetId: string;
 
- 
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  
       
