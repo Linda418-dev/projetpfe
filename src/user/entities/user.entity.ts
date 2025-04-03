@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IUser } from "../types/interface/user.interface";
 import { UserRole } from "src/user-role/entities/user-role.entity";
+import { Inventory } from "src/inventory/entities/inventory.entity";
 
 @Entity()
 export class User implements IUser {
@@ -19,6 +20,11 @@ export class User implements IUser {
   @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
   role: UserRole;
    
+
+  @ManyToMany(() => Inventory, (inventory) => inventory.users)
+  inventories: Inventory[];
+  
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   

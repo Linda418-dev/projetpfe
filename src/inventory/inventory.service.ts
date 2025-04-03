@@ -5,6 +5,7 @@ import { IsNull } from 'typeorm';
 import { InventoryGateway } from './inventory.gateway';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { StatusEnum } from 'src/status/types/enums/status.enum';
+import { userRepository } from 'src/user/repositories/user.repository';
 
 @Injectable()
 export class InventoryService {
@@ -12,9 +13,31 @@ export class InventoryService {
         private readonly inventoryRepository: InventoryRepository,
         private readonly statusRepository: StatusRepository,
         private readonly inventoryGateway: InventoryGateway,
+        private readonly userRepository : userRepository
     ) {}
 
-    async launchInventory(name: string): Promise<Inventory> {  
+    async getInventories(user: any) {
+        console.log(`🔍 Récupération des inventaires pour : ${user.role.role}`); 
+    
+        if (user.role.role === 'admin') {  
+            //  L'admin récupère TOUS les inventaires
+            const inventories = await this.inventoryRepository.find({
+                relations: ['users', 'status'],
+            });
+            console.log(" Inventaires récupérés (Admin) :", JSON.stringify(inventories, null, 2));
+            return inventories;
+        } 
+    
+        //  Un opérateur récupère seulement SES inventaires
+        const userInventories = await this.inventoryRepository.find({
+            relations: ['users', 'status'],
+            where: { users: { id: user.id } },
+        });
+    
+        console.log(" Inventaires récupérés (Opérateur) :", JSON.stringify(userInventories, null, 2));
+        return userInventories;
+    }
+    async launchInventory(name: string, operatorIds?: string[]): Promise<Inventory> {  
         const activeInventory = await this.inventoryRepository.findOne({
             where: { closingDate: IsNull() },
         });
@@ -31,7 +54,12 @@ export class InventoryService {
         inventory.launchDate = new Date();
         inventory.closingDate = null;
         inventory.status = statusInProgress;
-    
+
+        if (operatorIds && operatorIds.length > 0) {
+            inventory.users = await this.userRepository.findByIds(operatorIds);
+            console.log(" Utilisateurs ajoutés à l'inventaire :", inventory.users);
+        }
+        
         const newInventory = await this.inventoryRepository.save(inventory);
     
         this.inventoryGateway.notifyInventoryLaunch(); 
@@ -67,5 +95,7 @@ export class InventoryService {
             where: { closingDate: IsNull() },
         });
     }
+    
+    
     
 }

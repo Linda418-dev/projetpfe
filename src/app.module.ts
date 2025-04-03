@@ -41,6 +41,7 @@ import { InventoryService } from './inventory/inventory.service';
 import { InventoryRepository } from './inventory/repositories/inventory.repository';
 import { StatusRepository } from './status/repositories/status.repository';
 import { InventoryGateway } from './inventory/inventory.gateway';
+import { userRepository } from './user/repositories/user.repository';
 
 @Module({
   imports: [
@@ -92,6 +93,7 @@ import { InventoryGateway } from './inventory/inventory.gateway';
     InventoryRepository,
     StatusRepository,
     InventoryGateway,
+    userRepository,
     {
       provide: APP_GUARD, // ✅ Ajout du guard globalement
       useClass: InventoryLockGuard,
