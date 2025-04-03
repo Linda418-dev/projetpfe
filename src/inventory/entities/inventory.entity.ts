@@ -26,7 +26,6 @@ export class Inventory implements Iinventory {
   @JoinTable()
   users: User[];
   
-  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  
       
