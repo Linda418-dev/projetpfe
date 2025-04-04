@@ -21,34 +21,32 @@ export class InventoryService {
     ) {}
 
     async getInventories(user: any) {
-        console.log(`🔍 Récupération des inventaires pour : ${user.role.role}`);
+        console.log(` Retrieving inventories for : ${user.role.role}`);
 
         if (user.role.role === 'admin') {
-            //  L'admin récupère TOUS les inventaires
+            //  admin récupère tous les inventaires
             const inventories = await this.inventoryRepository.find({
                 relations: ['users', 'status'],
             });
-            console.log("Inventaires récupérés (Admin) :", JSON.stringify(inventories, null, 2));
+            //console.log("Inventories retrieved (Admin) :", JSON.stringify(inventories, null, 2));
             return inventories;
         }
 
-        //  Un opérateur récupère seulement SES inventaires
+        // opérateur récupère ses inventaires
         const userInventories = await this.inventoryRepository.find({
             relations: ['users', 'status'],
             where: { users: { id: user.id } },
         });
-
-        console.log("Inventaires récupérés (Opérateur) :", JSON.stringify(userInventories, null, 2));
         return userInventories;
     }
-
-    async launchInventory(name: string, operatorIds?: string[]): Promise<Inventory> {
+    // lancer inventory 
+    async launchInventory(name: string, operatorIds?: string[]) {
         const activeInventory = await this.inventoryRepository.findOne({
             where: { closingDate: IsNull() },
         });
 
         if (activeInventory) {
-            throw new Error('Un inventaire est déjà en cours !');
+            throw new Error('An inventory is already in progress !');
         }
         
         const statusInProgress = await this.statusRepository.findOne({ where: { name: StatusEnum.IN_PROGRESS } });
@@ -64,7 +62,7 @@ export class InventoryService {
 
         if (operatorIds && operatorIds.length > 0) {
             inventory.users = await this.userRepository.findByIds(operatorIds);
-            console.log("Utilisateurs ajoutés à l'inventaire :", inventory.users);
+            console.log("Users added to the inventory :", inventory.users);
         }
 
         const newInventory = await this.inventoryRepository.save(inventory);

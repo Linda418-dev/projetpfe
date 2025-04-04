@@ -16,7 +16,7 @@ export class AuthService {
     private bcryptService: BcryptService,
   ) {}
 
-  async signup(createUserDto: CreateUserDto) {
+  /*async signup(createUserDto: CreateUserDto) {
     const { email, username, password, role } = createUserDto;
 
       const userExists = await this.userRepository.findOne({
@@ -45,7 +45,7 @@ export class AuthService {
     await this.userRepository.save(newUser);
   
     return { user: newUser };
-  }
+  }*/
   
 
   async signin(loginUserDto: LoginUserDto) {

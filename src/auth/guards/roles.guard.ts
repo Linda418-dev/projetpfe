@@ -20,9 +20,9 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    console.log('Role reçu:', user.role); // Debugging
-    console.log('Rôle trouvé en BDD:', user.role?.role); // Debugging
+    console.log('Role reçu:', user.role); 
+    console.log('Rôle trouvé en BDD:', user.role?.role); 
 
-    return requiredRoles.includes(user.role?.role); // 🔥 Correction ici !
+    return requiredRoles.includes(user.role?.role); 
   }
 }

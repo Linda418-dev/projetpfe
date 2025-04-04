@@ -4,7 +4,7 @@ import { InventoryStatusHistoryRepository } from './repositories/inventory-statu
 @Injectable()
 export class InventoryStatusHistoryService {
     constructor(private readonly inventoryStatusHistoryRepository : InventoryStatusHistoryRepository){}
-
+    // get les historiques du status d'un inventaires By Id
     async getInventoryStatusHistory(inventoryId: string) {
         return await this.inventoryStatusHistoryRepository.find({
             where: { inventory: { id: inventoryId } },
@@ -12,6 +12,7 @@ export class InventoryStatusHistoryService {
     
         });
     }
+    // get all historiques pour tous les inventaires 
     async getAllInventoryStatusHistories() {
         return await this.inventoryStatusHistoryRepository.find({
             relations: ['inventory', 'status'],

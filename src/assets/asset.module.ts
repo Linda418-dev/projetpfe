@@ -16,7 +16,6 @@ import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { PaginationModule } from 'src/pagination/pagination.module';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
-import { HistoryStatusAssetRepository } from 'src/history-status-asset/repositories/history-asset.repository';
 import { JwtService } from '@nestjs/jwt';
 
 
@@ -27,7 +26,7 @@ import { JwtService } from '@nestjs/jwt';
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , 
-    SupplierRepository,PlaceRepository,ServiceRepository,HistoryAssetRepository,HistoryStatusAssetRepository,JwtService],
+    SupplierRepository,PlaceRepository,ServiceRepository,HistoryAssetRepository,JwtService],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

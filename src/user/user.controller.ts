@@ -1,14 +1,45 @@
-import { Controller, Get } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Roles } from 'src/auth/guards/roles.decorator';
+import { CreateUserDto } from './types/dto/create-user.dto';
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { UpdateUserDto } from './types/dto/update-user.dto';
+import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 
+@ApiBearerAuth()
 @ApiTags('user Resource')
 @Controller('users')
 export class UserController {
     constructor(private readonly userService : UserService){}
 
-    @Get()
+  @Get()
   async getAllUsers() {
     return this.userService.getAllUsers(); 
+  }
+
+  @BypassInventoryLock()
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard) 
+  @Roles('admin') 
+  async createUser(@Body() createUserDto: CreateUserDto) {
+    return this.userService.createUser(createUserDto);
+  }
+
+  @BypassInventoryLock()
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin') 
+  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.updateUser(id, updateUserDto);
+  }
+
+  @BypassInventoryLock()
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin') 
+  async deleteUser(@Param('id') id: string) {
+    return this.userService.deleteUser(id);
   }
 }

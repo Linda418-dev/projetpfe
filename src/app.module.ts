@@ -19,8 +19,6 @@ import { DepartmentModule } from './department/department.module';
 import { ServiceModule } from './service/service.module';
 import { Service } from './service/entities/service.entity';
 import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
-import { HistoryStatusAssetModule } from './history-status-asset/history-status-asset.module';
-import { HistoryStatusAsset } from './history-status-asset/entities/history-status-Asset.entity';
 import { HistoryAssetModule } from './history-asset/history-asset.module';
 import { UserRoleModule } from './user-role/user-role.module';
 import { AuthModule } from './auth/auth.module';
@@ -59,7 +57,7 @@ import { InventoryStatusHistoryRepository } from './inventory-status-history/rep
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,HistoryStatusAsset,User,UserRole,Inventory,Status,InventoryStatusHistory], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory], 
         synchronize: true, 
       }),
     }),
@@ -71,7 +69,6 @@ import { InventoryStatusHistoryRepository } from './inventory-status-history/rep
     PaginationModule,
     DepartmentModule,
     ServiceModule,
-    HistoryStatusAssetModule,
     HistoryAssetModule,
     UserRoleModule,
     AuthModule,

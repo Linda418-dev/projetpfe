@@ -2,7 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@
 import { Reflector } from '@nestjs/core';
 import { InventoryService } from 'src/inventory/inventory.service';
 import { Request } from 'express'; 
-
+// guard pour controler l'accés  aux routes  HTTP quand un  inventaire  est en cours 
 @Injectable()
 export class InventoryLockGuard implements CanActivate {
   constructor(
@@ -14,12 +14,12 @@ export class InventoryLockGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<Request>();
     const user: any = request.user; 
     const method = request.method; 
-
+    // reflector verifier le metadonnée bypassInventoryLock avec un valeur true , si existe l'opération doit être autorisée quand l'inventaire est en cours
     const bypassLock = this.reflector.get<boolean>('bypassInventoryLock', context.getHandler());
     if (bypassLock) {
       return true; 
     }
-
+    // acceder aux  pour verifier si un inventaire acitf 
     const activeInventory = await this.inventoryService.getActiveInventory();
     if (activeInventory) {
       if (['POST', 'PATCH', 'DELETE'].includes(method)) {

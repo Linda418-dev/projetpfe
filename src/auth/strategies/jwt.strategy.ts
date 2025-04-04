@@ -12,23 +12,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private userRepository: userRepository,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), // Récupérer le token depuis le header Authorization
-      ignoreExpiration: false, // Vérifie si le token est expiré
-      secretOrKey: configService.get<string>('JWT_SECRET'), // Récupère la clé secrète des variables d’environnement
+      // récupérer le token depuis le header Authorization
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
+      ignoreExpiration: false, // vérifie si le token est expiré
+      secretOrKey: configService.get<string>('JWT_SECRET'), // récupère la clé secrète des variables d’environnement
     });
   }
 
   async validate(payload: { id: string }): Promise<User> {
     const user = await this.userRepository.findOne({
       where: { id: payload.id },
-      relations: ['role'], // Vérifier que le rôle est bien chargé
+      relations: ['role'], // vérifier que le rôle est bien chargé
     });
   
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
   
-    console.log('Utilisateur authentifié:', user); // Debugging
+    console.log('Utilisateur authentifié:', user); 
     return user; 
   }
   

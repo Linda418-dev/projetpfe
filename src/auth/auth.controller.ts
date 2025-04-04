@@ -9,11 +9,12 @@ import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.
 @Controller('Accounts')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  @BypassInventoryLock() 
+
+  /*@BypassInventoryLock() 
   @Post('signup')
   async signup(@Body() createUserDto: CreateUserDto) {
     return this.authService.signup(createUserDto);
-  }
+  }*/
   @BypassInventoryLock() 
   @Post('signin')
   async signin(@Body() loginUserDto: LoginUserDto) {
