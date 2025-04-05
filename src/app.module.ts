@@ -30,7 +30,6 @@ import { InventoryModule } from './inventory/inventory.module';
 import { InventoryStatusHistoryModule } from './inventory-status-history/inventory-status-history.module';
 import { StatusModule } from './status/status.module';
 import { InventoryDetailsModule } from './inventory-details/inventory-details.module';
-import { InventoryLocationModule } from './inventory-location/inventory-location.module';
 import { Inventory } from './inventory/entities/inventory.entity';
 import { Status } from './status/entities/status.entity';
 import { APP_GUARD } from '@nestjs/core';
@@ -80,7 +79,7 @@ import { DepartmentRepository } from './department/repositories/department.repos
     InventoryStatusHistoryModule,
     StatusModule,
     InventoryDetailsModule,
-    InventoryLocationModule,
+  
     
     
     
