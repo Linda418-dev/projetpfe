@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Iinventory } from '../types/interfaces/inventory.interface';
 import { Status } from 'src/status/entities/status.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Place } from 'src/places/Entities/Place.entity';
 
 
 @Entity()
@@ -13,10 +14,10 @@ export class Inventory implements Iinventory {
   name: string;
 
   @Column({ type: 'date' })
-  launchDate: Date;
+  startDate: Date;
 
   @Column({ type: 'date', nullable: true })
-  closingDate: Date | null; 
+  endDate: Date | null; 
   
   @ManyToOne(() => Status, { eager: true }) 
   @JoinColumn({ name: 'statusId' })
@@ -26,6 +27,18 @@ export class Inventory implements Iinventory {
   @JoinTable()
   users: User[];
   
+
+  @ManyToOne(() => Place, (place) => place.inventories)
+  place: Place;
+  
+
+   // Ajout du champ JSONB pour les affectations opérateur - départements
+   @Column({ type: 'jsonb', nullable: true })
+   operatorAssignments: {
+     userId: string;
+     departmentIds: string[];
+   }[];
+   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  
       

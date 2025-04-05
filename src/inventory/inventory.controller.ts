@@ -23,19 +23,22 @@ export class InventoryController {
     }
     
     
-    @Roles('admin') 
+    /*@Roles('admin') 
     @UseGuards(JwtAuthGuard, RolesGuard) 
     @ApiOperation({ summary: 'Launch an inventory' })
     @Post('launch')
     async launchInventory(@Body() createInventoryDto: CreateInventoryDto) {
     return this.inventoryService.launchInventory(createInventoryDto.name, createInventoryDto.operatorIds);
-}
+   }*/
 
-   
     @BypassInventoryLock() 
-    @ApiOperation({ summary: 'Close an inventory' })
-    @Post('close')
-    async closeInventory() {
-      return this.inventoryService.closeInventory();
+    /*@Roles('admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)*/
+    @ApiOperation({ summary: 'Create a new inventory' })
+    @Post('create')
+    async createInventory(@Body() createInventoryDto: CreateInventoryDto) {
+        return this.inventoryService.createInventory(createInventoryDto);
     }
+   
+   
 }

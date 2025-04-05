@@ -16,38 +16,6 @@ export class AuthService {
     private bcryptService: BcryptService,
   ) {}
 
-  /*async signup(createUserDto: CreateUserDto) {
-    const { email, username, password, role } = createUserDto;
-
-      const userExists = await this.userRepository.findOne({
-      where: [{ email }, { username }],
-    });
-  
-    if (userExists) {
-      throw new ConflictException('User with this email or username already exists');
-    }
-  
-    const userRole = await this.roleRepository.findOne({ where: { role } });
-  
-    if (!userRole) {
-      throw new ConflictException('Invalid role');
-    }
-  
-    const hashedPassword = await this.bcryptService.hashPassword(password);
-  
-    const newUser = this.userRepository.create({
-      email,
-      username,
-      password: hashedPassword,
-      role: userRole,
-    });
-  
-    await this.userRepository.save(newUser);
-  
-    return { user: newUser };
-  }*/
-  
-
   async signin(loginUserDto: LoginUserDto) {
     const { identifier, password } = loginUserDto;
   

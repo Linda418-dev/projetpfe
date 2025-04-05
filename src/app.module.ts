@@ -42,6 +42,8 @@ import { InventoryGateway } from './inventory/inventory.gateway';
 import { userRepository } from './user/repositories/user.repository';
 import { InventoryStatusHistory } from './inventory-status-history/entities/inventory-status-history.entity';
 import { InventoryStatusHistoryRepository } from './inventory-status-history/repositories/inventory-status-history.repository';
+import { PlaceRepository } from './places/Repositories/Place.repository';
+import { DepartmentRepository } from './department/repositories/department.repository';
 
 @Module({
   imports: [
@@ -94,6 +96,8 @@ import { InventoryStatusHistoryRepository } from './inventory-status-history/rep
     InventoryGateway,
     userRepository,
     InventoryStatusHistoryRepository,
+    PlaceRepository,
+    DepartmentRepository,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,
