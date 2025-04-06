@@ -8,7 +8,7 @@ import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('Asset Resource')
 @Controller('assets')
 export class AssetController {
@@ -38,8 +38,8 @@ export class AssetController {
 
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
-    @UseGuards(JwtAuthGuard, RolesGuard)  
-    @Roles('admin') 
+    // @UseGuards(JwtAuthGuard, RolesGuard)  
+    // @Roles('admin') 
     async createAssetAndAssignToFile(@Body() createAssetDto: CreateAssetDto) {
     const { assetName, categoryName, supplierName, fileId, serviceId  } = createAssetDto;
     const asset = await this.assetService.createAssetAndAssignToFile(createAssetDto);

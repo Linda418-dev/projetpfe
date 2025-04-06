@@ -8,7 +8,7 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 
-@ApiBearerAuth()
+// @ApiBearerAuth()
 @ApiTags('user Resource')
 @Controller('users')
 export class UserController {
@@ -18,32 +18,32 @@ export class UserController {
   async getAllUsers() {
     return this.userService.getAllUsers(); 
   }
-  
+
   @Get(':id')
   async getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
   }
 
   @BypassInventoryLock()
-  @Post()
-  @UseGuards(JwtAuthGuard, RolesGuard) 
+  // @Post()
+  // @UseGuards(JwtAuthGuard, RolesGuard) 
   @Roles('admin') 
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
 
   @BypassInventoryLock()
-  @Put(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin') 
+   @Put(':id')
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('admin') 
   async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(id, updateUserDto);
   }
 
   @BypassInventoryLock()
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin') 
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('admin') 
   async deleteUser(@Param('id') id: string) {
     return this.userService.deleteUser(id);
   }

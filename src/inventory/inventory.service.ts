@@ -258,7 +258,7 @@ export class InventoryService {
       @Cron(CronExpression.EVERY_MINUTE)
       async autoCloseInventories() {
         const now = new Date();
-        // On ne récupère que les inventaires en cours dont la date de fin est passée
+        // récupère que les inventaires en cours avec la date de fin est passée
         const inventoriesToClose = await this.inventoryRepository.find({
           where: {
             endDate: LessThanOrEqual(now),
