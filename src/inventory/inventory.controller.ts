@@ -14,8 +14,8 @@ import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 @Controller('Inventories')
 export class InventoryController {
     constructor(private readonly inventoryService: InventoryService) {}
-    // @Roles('admin', 'operator')  
-    // @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin', 'operator')  
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
     async getInventories(@Req() req: Request) {
         console.log(req.user); 
