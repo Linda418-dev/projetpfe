@@ -16,7 +16,7 @@ export class UserService {
       async getAllUsers() {
         return this.userRepo.find(); 
       }
-      
+
       async getUserById(id: string) {
         const user = await this.userRepo.findOne({ where: { id } });
         if (!user) {
@@ -51,15 +51,20 @@ export class UserService {
       }
     
       async updateUser(id: string, updateUserDto: UpdateUserDto) {
-        const user = await this.userRepo.findOne({ where: { id } });
-    
-        if (!user) {
-          throw new NotFoundException('User not found');
-        }
-    
-        Object.assign(user, updateUserDto);
+      const user = await this.userRepo.findOne({ where: { id } });
+
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      if (updateUserDto.password) {
+        updateUserDto.password = await this.bcryptService.hashPassword(updateUserDto.password);
+       }
+
+       Object.assign(user, updateUserDto);
         return await this.userRepo.save(user);
       }
+
     
       async deleteUser(id: string) {
         const user = await this.userRepo.findOne({ where: { id } });

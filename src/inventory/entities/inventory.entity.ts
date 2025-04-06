@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Iinventory } from '../types/interfaces/inventory.interface';
 import { Status } from 'src/status/entities/status.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Place } from 'src/places/Entities/Place.entity';
+import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 
 
 @Entity()
@@ -31,9 +32,11 @@ export class Inventory implements Iinventory {
   @ManyToOne(() => Place, (place) => place.inventories)
   place: Place;
   
+  @OneToMany(() => InventoryDetails, (details) => details.inventory)
+  details: InventoryDetails[];
 
-   // Ajout du champ JSONB pour les affectations opérateur - départements
-   @Column({ type: 'jsonb', nullable: true })
+
+  @Column({ type: 'jsonb', nullable: true })
    operatorAssignments: {
      userId: string;
      departmentIds: string[];

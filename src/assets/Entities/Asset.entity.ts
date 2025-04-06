@@ -4,6 +4,7 @@ import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { Service } from 'src/service/entities/service.entity';
+import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -24,6 +25,9 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => Supplier, (supplier) => supplier.assets, { nullable: true, onDelete: "CASCADE" })
   supplier: Supplier;  
+
+  @OneToMany(() => InventoryDetails, (details) => details.asset)
+  inventoryDetails: InventoryDetails[];
 
   @Column({ nullable: true })
   supplierName: string; 

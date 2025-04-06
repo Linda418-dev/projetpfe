@@ -1,4 +1,63 @@
-import { Injectable } from '@nestjs/common';
+import {  BadRequestException, Injectable } from '@nestjs/common';
+import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
+import { InventoryDetailsRepository } from './repositories/inventory-details.repository';
+import { InventoryRepository } from 'src/inventory/repositories/inventory.repository';
+import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
+import { PlaceRepository } from 'src/places/Repositories/Place.repository';
+import { InventoryDetails } from './entities/inventory-details.entity';
+import { StatusEnum } from 'src/status/types/enums/status.enum';
 
 @Injectable()
-export class InventoryDetailsService {}
+export class InventoryDetailsService {
+  constructor(
+    private readonly inventoryDetailsRepository: InventoryDetailsRepository,
+   private readonly inventoryRepository: InventoryRepository,
+     private readonly assetRepository: AssetRepository,
+     private readonly placeRepository:PlaceRepository,
+  ) {}
+
+  
+
+  async createInventoryDetails(dto: CreateInventoryDetailsDto): Promise<InventoryDetails> {
+    const inventory = await this.inventoryRepository.findOne({
+      where: { id: dto.inventoryId },
+      relations: ['status'], // ⚠️ Important pour pouvoir lire status.name
+    });
+  
+    if (!inventory) {
+      throw new BadRequestException('Inventory not found');
+    }
+  
+    // 🔒 Vérification du statut
+    if (inventory.status?.name !== StatusEnum.IN_PROGRESS) {
+      throw new BadRequestException('Inventory is not in progress');
+    }
+  
+    const asset = await this.assetRepository.findOneByOrFail({ id: dto.assetId });
+    const place = await this.placeRepository.findOneByOrFail({ id: dto.placeId });
+  
+    const inventoryDetails = this.inventoryDetailsRepository.create({
+      inventory,
+      asset,
+      place,
+      status: dto.status,
+      scannedAt: new Date(),
+    });
+  
+    return await this.inventoryDetailsRepository.save(inventoryDetails);
+  }
+  
+  
+  async getAllInventoryDetails() {
+    return await this.inventoryDetailsRepository.find({
+      relations: ['inventory', 'asset', 'place'],
+    });
+  }
+
+  async getInventoryDetailsById(id: string) {
+    return await this.inventoryDetailsRepository.findOne({
+      where: { id },
+      relations: ['inventory', 'asset', 'place'],
+    });
+  }
+}

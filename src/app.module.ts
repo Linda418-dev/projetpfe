@@ -44,6 +44,7 @@ import { InventoryStatusHistoryRepository } from './inventory-status-history/rep
 import { PlaceRepository } from './places/Repositories/Place.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
 import { ScheduleModule } from '@nestjs/schedule';
+import { InventoryDetails } from './inventory-details/entities/inventory-details.entity';
 
 @Module({
   imports: [
@@ -60,7 +61,7 @@ import { ScheduleModule } from '@nestjs/schedule';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails], 
         synchronize: true, 
       }),
     }),
@@ -81,11 +82,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     InventoryStatusHistoryModule,
     StatusModule,
     InventoryDetailsModule,
-  
-    
-    
-    
-    
   ],
   controllers: [AppController],
   providers: [
