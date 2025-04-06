@@ -154,72 +154,82 @@ export class InventoryService {
 
       // méthode pour mettre à jour un inventaire 
       async updateInventory(id: string, dto: UpdateInventoryDto) {
+        // Récupérer l'inventaire
         const inventory = await this.inventoryRepository.findOne({
-          where: { id },
-          relations: ['place', 'status'],
+            where: { id },
+            relations: ['place', 'status'],
         });
-      
+    
+        // Vérifier si l'inventaire existe
         if (!inventory) {
-          throw new NotFoundException('Inventory not found');
+            throw new NotFoundException('Inventory not found');
         }
-      
-        // ne  modifier pas  l'inventaire si le statut est "COMPLETED"
+    
+        // Ne pas modifier si le statut est "COMPLETED"
         if (inventory.status.name === StatusEnum.COMPLETED) {
-          throw new BadRequestException('Cannot modify a completed inventory');
+            throw new BadRequestException('Cannot modify a completed inventory');
         }
-      
-        // name unique 
+    
+        // Vérifier si le nom est modifié et s'assurer qu'il est unique
         if (dto.name) {
-          const existing = await this.inventoryRepository.findOne({ where: { name: dto.name } });
-          if (existing && existing.id !== id) {
-            throw new BadRequestException('Another inventory with this name already exists');
-          }
-          inventory.name = dto.name;
+            const existing = await this.inventoryRepository.findOne({ where: { name: dto.name } });
+            if (existing && existing.id !== id) {
+                throw new BadRequestException('Another inventory with this name already exists');
+            }
+            inventory.name = dto.name;
         }
-      
+    
         // Mise à jour des dates
         if (dto.startDate) inventory.startDate = new Date(dto.startDate);
         if (dto.endDate) inventory.endDate = new Date(dto.endDate);
-      
+    
         // Mise à jour de la place
         if (dto.placeId) {
-          const place = await this.placeRepository.findOne({ where: { id: dto.placeId } });
-          if (!place) {
-            throw new NotFoundException('Place not found');
-          }
-          inventory.place = place;
+            const place = await this.placeRepository.findOne({ where: { id: dto.placeId } });
+            if (!place) {
+                throw new NotFoundException('Place not found');
+            }
+            inventory.place = place;
         }
-      
+    
         // Mise à jour des affectations opérateurs
         if (dto.operatorAssignments) {
-          const userIds = dto.operatorAssignments.map(assign => assign.userId);
-          const users = await this.userRepository.find({ where: { id: In(userIds) } });
-          const missingUserIds = userIds.filter(id => !users.some(u => u.id === id));
-          if (missingUserIds.length > 0) {
-            throw new NotFoundException(`Users not found: ${missingUserIds.join(', ')}`);
-          }
-      
-          const departments = await this.departmentRepository.find({ where: { placeId: inventory.place.id } });
-      
-          dto.operatorAssignments.forEach(assign => {
-            if (assign.departmentIds.length === 0) {
-              assign.departmentIds = departments.map(dep => dep.id);
+            // Sauvegarder les anciennes affectations
+            inventory.previousAssignments = inventory.operatorAssignments;
+    
+            // Vérifier que les utilisateurs existent
+            const userIds = dto.operatorAssignments.map(assign => assign.userId);
+            const users = await this.userRepository.find({ where: { id: In(userIds) } });
+            const missingUserIds = userIds.filter(id => !users.some(u => u.id === id));
+            if (missingUserIds.length > 0) {
+                throw new NotFoundException(`Users not found: ${missingUserIds.join(', ')}`);
             }
-            const invalidDepartments = assign.departmentIds.filter(depId =>
-              !departments.some(dep => dep.id === depId),
-            );
-            if (invalidDepartments.length > 0) {
-              throw new BadRequestException(`Invalid departments: ${invalidDepartments.join(', ')}`);
-            }
-          });
-      
-          inventory.operatorAssignments = dto.operatorAssignments;
+    
+            // Vérifier les départements valides
+            const departments = await this.departmentRepository.find({ where: { placeId: inventory.place.id } });
+    
+            dto.operatorAssignments.forEach(assign => {
+                // Si aucun département n'est affecté, assigner tous les départements de l'endroit
+                if (assign.departmentIds.length === 0) {
+                    assign.departmentIds = departments.map(dep => dep.id);
+                }
+                // Vérifier que les départements sont valides
+                const invalidDepartments = assign.departmentIds.filter(depId =>
+                    !departments.some(dep => dep.id === depId),
+                );
+                if (invalidDepartments.length > 0) {
+                    throw new BadRequestException(`Invalid departments: ${invalidDepartments.join(', ')}`);
+                }
+            });
+    
+            // Mettre à jour les affectations opérateurs
+            inventory.operatorAssignments = dto.operatorAssignments;
         }
-      
+    
+        // Sauvegarder l'inventaire mis à jour
         return await this.inventoryRepository.save(inventory);
-      }
-      
-      // méthode pour supprimer un inventaire 
+    }
+         // méthode pour supprimer un inventaire 
       async deleteInventory(id: string): Promise<{ message: string }> {
         const inventory = await this.inventoryRepository.findOne({
           where: { id },

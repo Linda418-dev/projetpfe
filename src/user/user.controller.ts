@@ -18,6 +18,11 @@ export class UserController {
   async getAllUsers() {
     return this.userService.getAllUsers(); 
   }
+  
+  @Get(':id')
+  async getUserById(@Param('id') id: string) {
+    return this.userService.getUserById(id);
+  }
 
   @BypassInventoryLock()
   @Post()

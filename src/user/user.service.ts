@@ -16,6 +16,14 @@ export class UserService {
       async getAllUsers() {
         return this.userRepo.find(); 
       }
+      
+      async getUserById(id: string) {
+        const user = await this.userRepo.findOne({ where: { id } });
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+        return user;
+      }
      
       async createUser(createUserDto: CreateUserDto) {
       const { email, username, password, role } = createUserDto;
@@ -23,6 +31,7 @@ export class UserService {
         if (userExists) {
           throw new ConflictException('User with this email or username already exists');
         }
+
     
         const userRole = await this.roleRepo.findOne({ where: { role } });
         if (!userRole) {

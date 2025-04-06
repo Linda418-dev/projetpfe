@@ -39,6 +39,13 @@ export class Inventory implements Iinventory {
      departmentIds: string[];
    }[];
    
+
+   @Column({ type: 'simple-json', nullable: true })
+   previousAssignments: {
+   userId: string;
+   departmentIds: string[];
+}[];
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  
       
