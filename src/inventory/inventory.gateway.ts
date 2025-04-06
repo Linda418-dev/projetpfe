@@ -21,5 +21,6 @@ export class InventoryGateway implements OnGatewayInit, OnGatewayConnection, OnG
   notifyInventoryLaunch() {
     console.log(' Sending inventory launch notification');
     this.server.emit('inventory-launched', { message: 'A new inventory has been launched !' });
+    
   } 
 }

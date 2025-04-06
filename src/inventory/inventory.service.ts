@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InventoryRepository } from './repositories/inventory.repository';
 import { Inventory } from './entities/inventory.entity';
-import { In, IsNull } from 'typeorm';
+import { In, IsNull, LessThanOrEqual } from 'typeorm';
 import { InventoryGateway } from './inventory.gateway';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { StatusEnum } from 'src/status/types/enums/status.enum';
@@ -11,6 +11,7 @@ import { CreateInventoryDto } from './types/dto/create-inventory.dto';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { DepartmentRepository } from 'src/department/repositories/department.repository';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class InventoryService {
@@ -24,7 +25,7 @@ export class InventoryService {
         private readonly departmentRepository : DepartmentRepository
     ) {}
 
-    async getInventories(user: any) {
+    async getAllInventories(user: any) {
       console.log(`Retrieving inventories for : ${user.role.role}`);
     
       if (user.role.role === 'admin') {
@@ -113,6 +114,7 @@ export class InventoryService {
         });
       
         await this.inventoryStatusHistoryRepository.save(history);
+       
       
         return savedInventory;
       }
@@ -146,7 +148,7 @@ export class InventoryService {
           status: inProgressStatus,
         });
         await this.inventoryStatusHistoryRepository.save(statusHistory);
-      
+        this.inventoryGateway.notifyInventoryLaunch();
         return updatedInventory;
       }
 
@@ -241,6 +243,39 @@ export class InventoryService {
       
         return { message: 'Inventory deleted successfully' };
       }
+
+
+      @Cron(CronExpression.EVERY_MINUTE)
+      async autoCloseInventories() {
+        const now = new Date();
+        // On ne récupère que les inventaires en cours dont la date de fin est passée
+        const inventoriesToClose = await this.inventoryRepository.find({
+          where: {
+            endDate: LessThanOrEqual(now),
+          },
+          relations: ['status'],
+        });
+        
+        const completedStatus = await this.statusRepository.findOne({
+         where: { name: StatusEnum.COMPLETED },
+        });
+        if (!completedStatus) {
+          return;
+        }
+        for (const inventory of inventoriesToClose) {
+           // Ne fermer que ceux qui sont EN COURS
+        if (inventory.status?.name === StatusEnum.IN_PROGRESS) {
+          inventory.status = completedStatus;
+          await this.inventoryRepository.save(inventory);
+          const history = this.inventoryStatusHistoryRepository.create({
+            inventory,
+            status: completedStatus,
+          });
+          await this.inventoryStatusHistoryRepository.save(history);
+          console.log(`Inventory "${inventory.name}" marked as COMPLETED`);
+        }
+      }
+    }
 
 
     async getActiveInventory() {

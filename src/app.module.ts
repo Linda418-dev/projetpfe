@@ -43,9 +43,11 @@ import { InventoryStatusHistory } from './inventory-status-history/entities/inve
 import { InventoryStatusHistoryRepository } from './inventory-status-history/repositories/inventory-status-history.repository';
 import { PlaceRepository } from './places/Repositories/Place.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule,],

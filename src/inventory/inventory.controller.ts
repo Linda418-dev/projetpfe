@@ -10,7 +10,6 @@ import { Request } from 'express';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 
 @ApiBearerAuth() 
-
 @ApiTags('inventory Resource')
 @Controller('Inventories')
 export class InventoryController {
@@ -20,18 +19,9 @@ export class InventoryController {
     @Get()
     async getInventories(@Req() req: Request) {
         console.log(req.user); 
-        return this.inventoryService.getInventories(req.user);
+        return this.inventoryService.getAllInventories(req.user);
     }
     
-    
-    /*@Roles('admin') 
-    @UseGuards(JwtAuthGuard, RolesGuard) 
-    @ApiOperation({ summary: 'Launch an inventory' })
-    @Post('launch')
-    async launchInventory(@Body() createInventoryDto: CreateInventoryDto) {
-    return this.inventoryService.launchInventory(createInventoryDto.name, createInventoryDto.operatorIds);
-   }*/
-
     @BypassInventoryLock() 
     /*@Roles('admin')
     @UseGuards(JwtAuthGuard, RolesGuard)*/
@@ -52,6 +42,10 @@ export class InventoryController {
    @Delete(':id')
    async deleteInventory(@Param('id') id: string) {
      return this.inventoryService.deleteInventory(id);
+   }
+   @Post('test-auto-close')
+   async testAutoClose() {
+     return this.inventoryService.autoCloseInventories();
    }
    
    
