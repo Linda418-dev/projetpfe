@@ -43,10 +43,7 @@ export class InventoryController {
    async deleteInventory(@Param('id') id: string) {
      return this.inventoryService.deleteInventory(id);
    }
-   @Post('test-auto-close')
-   async testAutoClose() {
-     return this.inventoryService.autoCloseInventories();
-   }
+  
    
    
 }
