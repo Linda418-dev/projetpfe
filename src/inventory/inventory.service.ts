@@ -6,12 +6,9 @@ import { InventoryGateway } from './inventory.gateway';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { StatusEnum } from 'src/status/types/enums/status.enum';
 import { userRepository } from 'src/user/repositories/user.repository';
-import { InventoryStatusHistory } from 'src/inventory-status-history/entities/inventory-status-history.entity';
-import { Status } from 'src/status/entities/status.entity';
 import { InventoryStatusHistoryRepository } from 'src/inventory-status-history/repositories/inventory-status-history.repository';
 import { CreateInventoryDto } from './types/dto/create-inventory.dto';
 import { PlaceRepository } from 'src/places/Repositories/Place.repository';
-import { User } from 'src/user/entities/user.entity';
 import { DepartmentRepository } from 'src/department/repositories/department.repository';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 
@@ -28,29 +25,32 @@ export class InventoryService {
     ) {}
 
     async getInventories(user: any) {
-        console.log(`Retrieving inventories for : ${user.role.role}`);
+      console.log(`Retrieving inventories for : ${user.role.role}`);
     
-        if (user.role.role === 'admin') {
-            // admin récupère tous les inventaires
-            const inventories = await this.inventoryRepository.find({
-                relations: ['users', 'status'],
-            });
-            return inventories;
-        }
-    
-        // opérateur récupère ses inventaires
-        const userInventories = await this.inventoryRepository.find({
-            relations: ['users', 'status'],
-            where: { users: { id: user.id } },
+      if (user.role.role === 'admin') {
+        // Admin récupère tous les inventaires
+        const inventories = await this.inventoryRepository.find({
+          relations: ['users', 'status'],
         });
+        return inventories;
+      }
     
-        console.log(`Operator inventories: `, userInventories); // Ajoute un log pour voir les résultats
-        return userInventories;
+      // Opérateur : récupérer les inventaires dans lesquels il est assigné via operatorAssignments
+      const allInventories = await this.inventoryRepository.find({
+        relations: ['status'],
+      });
+    
+      // Filtrer les inventaires où l'utilisateur est dans operatorAssignments
+      const assignedInventories = allInventories.filter(inventory =>
+        inventory.operatorAssignments?.some(assign => assign.userId === user.id)
+      );
+    
+      console.log(`Operator inventories: `, assignedInventories);
+      return assignedInventories;
     }
     
-
-
-    async createInventory(dto: CreateInventoryDto): Promise<Inventory> {
+    //méthode pour creer un inventaire 
+    async createInventory(dto: CreateInventoryDto) {
         const existingInventory = await this.inventoryRepository.findOne({ where: { name: dto.name } });
         if (existingInventory) {
           throw new BadRequestException('An inventory with this name already exists');
@@ -117,11 +117,9 @@ export class InventoryService {
         return savedInventory;
       }
       
-
-
-
-      async launchInventory(inventoryId: string): Promise<Inventory> {
-        // 1. Vérification de l'existence de l'inventaire
+    // méthode pour lancer inventaire 
+      async launchInventory(inventoryId: string) {
+        // verifier  l'inventaire par id  existe ou non 
         const inventory = await this.inventoryRepository.findOne({
           where: { id: inventoryId },
           relations: ['status'],
@@ -130,7 +128,7 @@ export class InventoryService {
           throw new NotFoundException('Inventory not found');
         }
       
-        // 2. Récupération du statut "In Progress"
+        //  récupération statut "In Progress"
         const inProgressStatus = await this.statusRepository.findOne({
           where: { name: StatusEnum.IN_PROGRESS },
         });
@@ -138,11 +136,11 @@ export class InventoryService {
           throw new NotFoundException('Status "In Progress" does not exist');
         }
       
-        // 3. Mise à jour du statut
+        // modifier du statut
         inventory.status = inProgressStatus;
         const updatedInventory = await this.inventoryRepository.save(inventory);
       
-        // 4. Enregistrement dans l'historique
+        //  enregistrer dans l'historique
         const statusHistory = this.inventoryStatusHistoryRepository.create({
           inventory: updatedInventory,
           status: inProgressStatus,
@@ -152,8 +150,8 @@ export class InventoryService {
         return updatedInventory;
       }
 
-      
-      async updateInventory(id: string, dto: UpdateInventoryDto): Promise<Inventory> {
+      // méthode pour mettre à jour un inventaire 
+      async updateInventory(id: string, dto: UpdateInventoryDto) {
         const inventory = await this.inventoryRepository.findOne({
           where: { id },
           relations: ['place', 'status'],
@@ -163,12 +161,12 @@ export class InventoryService {
           throw new NotFoundException('Inventory not found');
         }
       
-        // 🚫 Bloquer la modification si le statut est "COMPLETED"
+        // ne  modifier pas  l'inventaire si le statut est "COMPLETED"
         if (inventory.status.name === StatusEnum.COMPLETED) {
           throw new BadRequestException('Cannot modify a completed inventory');
         }
       
-        // Vérifier unicité du nom
+        // name unique 
         if (dto.name) {
           const existing = await this.inventoryRepository.findOne({ where: { name: dto.name } });
           if (existing && existing.id !== id) {
@@ -219,7 +217,7 @@ export class InventoryService {
         return await this.inventoryRepository.save(inventory);
       }
       
-      
+      // méthode pour supprimer un inventaire 
       async deleteInventory(id: string): Promise<{ message: string }> {
         const inventory = await this.inventoryRepository.findOne({
           where: { id },
@@ -244,13 +242,6 @@ export class InventoryService {
         return { message: 'Inventory deleted successfully' };
       }
 
-      
-    /*async saveStatusHistory(inventory: Inventory, status: Status) {
-        const statusHistory = new InventoryStatusHistory();
-        statusHistory.inventory = inventory;
-        statusHistory.status = status;
-        return await this.inventoryStatusHistoryRepository.save(statusHistory);
-    }*/
 
     async getActiveInventory() {
         return this.inventoryRepository.findOne({
