@@ -25,9 +25,9 @@ export class UserController {
   }
 
   @BypassInventoryLock()
-  // @Post()
+  @Post()
   // @UseGuards(JwtAuthGuard, RolesGuard) 
-  @Roles('admin') 
+  // @Roles('admin') 
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
