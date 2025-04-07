@@ -64,8 +64,7 @@ export class UserService {
        Object.assign(user, updateUserDto);
         return await this.userRepo.save(user);
       }
-
-    
+      
       async deleteUser(id: string) {
         const user = await this.userRepo.findOne({ where: { id } });
     

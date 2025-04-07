@@ -4,6 +4,7 @@ import { Status } from 'src/status/entities/status.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Place } from 'src/places/Entities/Place.entity';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
+import { InventoryAssignment } from 'src/inventory-assignment/entities/InventoryAssignment.entity';
 
 
 @Entity()
@@ -35,19 +36,8 @@ export class Inventory implements Iinventory {
   @OneToMany(() => InventoryDetails, (details) => details.inventory)
   details: InventoryDetails[];
 
-
-  @Column({ type: 'jsonb', nullable: true })
-   operatorAssignments: {
-     userId: string;
-     departmentIds: string[];
-   }[];
-   
-
-   @Column({ type: 'simple-json', nullable: true })
-   previousAssignments: {
-   userId: string;
-   departmentIds: string[];
-}[];
+  @OneToMany(() => InventoryAssignment, assignment => assignment.inventory)
+  operatorAssignments: InventoryAssignment[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

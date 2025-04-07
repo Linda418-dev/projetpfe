@@ -45,6 +45,9 @@ import { PlaceRepository } from './places/Repositories/Place.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
 import { ScheduleModule } from '@nestjs/schedule';
 import { InventoryDetails } from './inventory-details/entities/inventory-details.entity';
+import { InventoryAssignmentModule } from './inventory-assignment/inventory-assignment.module';
+import { InventoryAssignment } from './inventory-assignment/entities/InventoryAssignment.entity';
+import { InventoryAssignmentRepository } from './inventory-assignment/repositories/inventory-assignment.repository';
 
 @Module({
   imports: [
@@ -61,7 +64,7 @@ import { InventoryDetails } from './inventory-details/entities/inventory-details
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails], 
+        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
         synchronize: true, 
       }),
     }),
@@ -82,6 +85,7 @@ import { InventoryDetails } from './inventory-details/entities/inventory-details
     InventoryStatusHistoryModule,
     StatusModule,
     InventoryDetailsModule,
+    InventoryAssignmentModule,
   ],
   controllers: [AppController],
   providers: [
@@ -95,6 +99,7 @@ import { InventoryDetails } from './inventory-details/entities/inventory-details
     InventoryStatusHistoryRepository,
     PlaceRepository,
     DepartmentRepository,
+    InventoryAssignmentRepository,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,

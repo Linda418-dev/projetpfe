@@ -25,8 +25,6 @@ export class User implements IUser {
   @ManyToMany(() => Inventory, (inventory) => inventory.users)
   inventories: Inventory[];
    
-
-  
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

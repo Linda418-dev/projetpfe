@@ -17,10 +17,9 @@ export class InventoryController {
     @Roles('admin', 'operator')  
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Get()
-    async getInventories(@Req() req: Request) {
-        console.log(req.user); 
-        return this.inventoryService.getAllInventories(req.user);
-    }
+  async findAll(){
+    return this.inventoryService.getAllInventories();
+  }
     
     @BypassInventoryLock() 
     /*@Roles('admin')
@@ -35,10 +34,10 @@ export class InventoryController {
     async launchInventory(@Param('id') id: string) {
     return this.inventoryService.launchInventory(id);
    }
-   @Patch(':id')
+  /* @Patch(':id')
    async updateInventory(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
      return this.inventoryService.updateInventory(id, dto);
-   }
+   }*/
    @Delete(':id')
    async deleteInventory(@Param('id') id: string) {
      return this.inventoryService.deleteInventory(id);
