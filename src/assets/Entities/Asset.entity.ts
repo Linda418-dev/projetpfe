@@ -3,7 +3,6 @@ import { File } from 'src/uploads/entities/file.entity';
 import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
-import { Service } from 'src/service/entities/service.entity';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 
 @Entity('asset')
@@ -36,9 +35,6 @@ export class Asset implements IAsset {
   imageUrl: string;
 
   
-  
-  @ManyToOne(() => Service, (service) => service.assets, { nullable: false, onDelete: "CASCADE" })
-  service: Service;
 
   @Column()
   serviceId: string;

@@ -10,9 +10,7 @@ import { CategoryRepository } from 'src/category/Repositories/category.repositor
 import { CategoryService } from 'src/category/category.service';
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
-import { Place } from 'src/places/Entities/Place.entity';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
-import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { PaginationModule } from 'src/pagination/pagination.module';
 import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
@@ -21,12 +19,12 @@ import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Asset, Category, Supplier, Place]),  
+    TypeOrmModule.forFeature([Asset, Category, Supplier]),  
     UploadsModule,PaginationModule
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService , 
-    SupplierRepository,PlaceRepository,ServiceRepository,HistoryAssetRepository,JwtService],
+    SupplierRepository,ServiceRepository,HistoryAssetRepository,JwtService],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

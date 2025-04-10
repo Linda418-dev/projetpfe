@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post,Patch, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -33,7 +33,7 @@ export class UserController {
   }
 
   @BypassInventoryLock()
-   @Put(':id')
+   @Patch(':id')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles('admin') 
   async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {

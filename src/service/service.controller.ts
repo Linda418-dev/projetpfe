@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateServiceDto } from './types/dto/create-service.dto';
@@ -6,7 +6,8 @@ import { UpdateServiceDto } from './types/dto/update-service.dto';
 
 @ApiTags('Service Resource')
 @Controller('services')
-export class ServiceController { constructor(private readonly serviceService: ServiceService) {}
+export class ServiceController {
+     constructor(private readonly serviceService: ServiceService) {}
       
      @Get()
     @ApiOperation({ summary: 'get all services' })
@@ -16,9 +17,17 @@ export class ServiceController { constructor(private readonly serviceService: Se
 
      @Post()
      @ApiOperation({ summary: 'create service' })
-     createService(@Body() createServiceDto: CreateServiceDto) {
-         return this.serviceService.createService(createServiceDto);
+     createService(
+       @Body() createServiceDto: CreateServiceDto,
+       @Query('departmentId') departmentId: string,
+     ) {
+       if (!departmentId) {
+         throw new BadRequestException('Missing required query parameter: departmentId');
+       }
+     
+       return this.serviceService.createService(createServiceDto, departmentId);
      }
+     
 
      @Get(':id')
      @ApiOperation({ summary: 'get service  by id' })

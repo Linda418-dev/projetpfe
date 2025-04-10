@@ -12,11 +12,10 @@ import { FileRepository } from './repositories/file.repository';
 import { Category } from 'src/category/Entities/category.entity';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
-import { Place } from 'src/places/Entities/Place.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([File, Asset,Category,Supplier,Place]), 
+    TypeOrmModule.forFeature([File, Asset,Category,Supplier]), 
     MulterModule.register({
       fileFilter: (req, file, callback) => {
         const allowedMimeTypes = [

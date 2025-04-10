@@ -2,7 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDa
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { AssetStatus } from '../types/enums/inventory-details.enum';
 import { Asset } from 'src/assets/Entities/Asset.entity';
-import { Place } from 'src/places/Entities/Place.entity';
 
 @Entity('inventory_details')
 export class InventoryDetails {
@@ -27,9 +26,6 @@ export class InventoryDetails {
   @JoinColumn({ name: 'asset_id' })
   asset: Asset;
 
-  @ManyToOne(() => Place, (place) => place.inventoryDetails)
-  @JoinColumn({ name: 'place_id' })
-  place: Place;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

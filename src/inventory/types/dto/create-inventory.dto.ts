@@ -34,8 +34,8 @@ export class CreateInventoryDto {
     required: false,
     description: 'List of operators and their department assignments',
     example: [
-      { userId: 'uuid-user-linda', departmentIds: ['uuid-depA', 'uuid-depB'] },
-      { userId: 'uuid-user-sinda', departmentIds: ['uuid-depC'] },
+      { userId: 'uuid-user', departmentIds: ['uuid-depA', 'uuid-depB'] },
+      { userId: 'uuid-user', departmentIds: ['uuid-depC'] },
     ]
   })
   @IsOptional()

@@ -68,9 +68,7 @@ export class AssetsService {
             historyAsset.service = newService;
             await this.historyAssetRepository.save(historyAsset);
     
-            // Mettre à jour l'Asset avec le nouveau serviceId
-            fetchAsset.service = newService;
-            fetchAsset.serviceId = newService.id;
+        
         }
     
         Object.assign(fetchAsset, updateAssetDto);
@@ -98,9 +96,9 @@ export class AssetsService {
                 { name: ILike(`%${keyword}%`) },
                 { category: { name: ILike(`%${keyword}%`) } },
                 { supplier: { name: ILike(`%${keyword}%`) } },
-                { service: { name: ILike(`%${keyword}%`) } }, // 🔹 Ajout de la recherche par service
+                
             ],
-            relations: ['category', 'supplier', 'service'], // 🔹 Ajout de la relation 'service'
+            relations: ['category', 'supplier'], // 🔹 Ajout de la relation 'service'
         });
     
         return assets;
@@ -119,16 +117,12 @@ async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
     let service = await this.serviceRepository.findOne({ where: { id: createAssetdto.serviceId }, relations: ['assets'] });
     if (!service) throw new Error('Service not found');
 
-    
-   
-
     const asset = new Asset();
     asset.name = assetName;
     asset.category = category;
     asset.categoryName = category.name;
     asset.supplier = supplier;
     asset.supplierName = supplier.name;
-    asset.service = service;  // Associer l'Asset au Service
     asset.serviceId = service.id;
 
     await this.assetRepository.save(asset);

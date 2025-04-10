@@ -3,8 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PlacesModule } from './places/places.module';
-import { Place } from './places/Entities/Place.entity';
 import { AssetModule } from './assets/asset.module';
 import { Asset } from './assets/Entities/Asset.entity';
 import { CategoryModule } from './category/category.module';
@@ -41,13 +39,16 @@ import { InventoryGateway } from './inventory/inventory.gateway';
 import { userRepository } from './user/repositories/user.repository';
 import { InventoryStatusHistory } from './inventory-status-history/entities/inventory-status-history.entity';
 import { InventoryStatusHistoryRepository } from './inventory-status-history/repositories/inventory-status-history.repository';
-import { PlaceRepository } from './places/Repositories/Place.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
 import { ScheduleModule } from '@nestjs/schedule';
 import { InventoryDetails } from './inventory-details/entities/inventory-details.entity';
 import { InventoryAssignmentModule } from './inventory-assignment/inventory-assignment.module';
 import { InventoryAssignment } from './inventory-assignment/entities/InventoryAssignment.entity';
 import { InventoryAssignmentRepository } from './inventory-assignment/repositories/inventory-assignment.repository';
+import { SiteModule } from './site/site.module';
+import { Site } from './site/Entities/site.entity';
+import { LocationModule } from './location/location.module';
+import { Location } from './location/entities/location.entity';
 
 @Module({
   imports: [
@@ -64,18 +65,19 @@ import { InventoryAssignmentRepository } from './inventory-assignment/repositori
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Place,Asset,File,Supplier,Category ,Department,Service,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
         synchronize: true, 
       }),
     }),
+    SiteModule,
+    DepartmentModule,
+    ServiceModule,
+    LocationModule,
     AssetModule,
-    PlacesModule,
     CategoryModule,
     SupplierModule,
     UploadsModule,
     PaginationModule,
-    DepartmentModule,
-    ServiceModule,
     HistoryAssetModule,
     UserRoleModule,
     AuthModule,
@@ -86,6 +88,8 @@ import { InventoryAssignmentRepository } from './inventory-assignment/repositori
     StatusModule,
     InventoryDetailsModule,
     InventoryAssignmentModule,
+    
+   
   ],
   controllers: [AppController],
   providers: [
@@ -97,7 +101,6 @@ import { InventoryAssignmentRepository } from './inventory-assignment/repositori
     InventoryGateway,
     userRepository,
     InventoryStatusHistoryRepository,
-    PlaceRepository,
     DepartmentRepository,
     InventoryAssignmentRepository,
     {

@@ -2,7 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Iinventory } from '../types/interfaces/inventory.interface';
 import { Status } from 'src/status/entities/status.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Place } from 'src/places/Entities/Place.entity';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 import { InventoryAssignment } from 'src/inventory-assignment/entities/InventoryAssignment.entity';
 
@@ -29,9 +28,6 @@ export class Inventory implements Iinventory {
   @JoinTable()
   users: User[];
   
-
-  @ManyToOne(() => Place, (place) => place.inventories)
-  place: Place;
   
   @OneToMany(() => InventoryDetails, (details) => details.inventory)
   details: InventoryDetails[];

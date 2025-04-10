@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IService } from "../types/interfaces/service.interface";
 import { Department } from "src/department/entities/department.entity";
-import { Asset } from "src/assets/Entities/Asset.entity";
+import { Location } from "src/location/entities/location.entity";
 
 
 @Entity()
@@ -10,22 +10,15 @@ export class Service implements IService{
     @PrimaryGeneratedColumn('uuid')
     id: string;  
 
-    @Column()
-    name: string;
+    @Column({ unique: true })
+    name: string
 
-    @Column()
-    serviceLocation: string;
-    
-    @ManyToOne(() => Department, (department) => department.services, { nullable: false, onDelete: 'CASCADE' })
+    @ManyToOne(() => Department, (department) => department.services, { onDelete: 'CASCADE' })
     department: Department;
-
-    @Column()
-    departmentId: string;
-
-    @OneToMany(() => Asset, (asset) => asset.service, { cascade: true })
-    assets: Asset[];
-
     
+    @OneToMany(() => Location, (location) => location.service)
+    locations: Location[];
+
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  

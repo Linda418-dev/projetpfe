@@ -7,9 +7,7 @@ import { StatusEnum } from 'src/status/types/enums/status.enum';
 import { userRepository } from 'src/user/repositories/user.repository';
 import { InventoryStatusHistoryRepository } from 'src/inventory-status-history/repositories/inventory-status-history.repository';
 import { CreateInventoryDto } from './types/dto/create-inventory.dto';
-import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { DepartmentRepository } from 'src/department/repositories/department.repository';
-import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InventoryAssignmentRepository } from 'src/inventory-assignment/repositories/inventory-assignment.repository';
 import { Department } from 'src/department/entities/department.entity';
@@ -23,7 +21,6 @@ export class InventoryService {
         private readonly inventoryGateway: InventoryGateway,
         private readonly userRepository: userRepository,
         private readonly inventoryStatusHistoryRepository: InventoryStatusHistoryRepository,
-        private readonly placeRepository: PlaceRepository,
         private readonly departmentRepository : DepartmentRepository,
         private readonly inventoryAssignmentRepository : InventoryAssignmentRepository,
     ) {}
@@ -60,20 +57,17 @@ export class InventoryService {
       }
     
     //méthode pour creer un inventaire 
-    async createInventory(dto: CreateInventoryDto) {
-      // Vérification de l'existence de l'inventaire
+    /*async createInventory(dto: CreateInventoryDto) {
       const existingInventory = await this.inventoryRepository.findOne({ where: { name: dto.name } });
       if (existingInventory) {
         throw new BadRequestException('An inventory with this name already exists');
       }
   
-      // Validation du Place ID
       const place = await this.placeRepository.findOne({ where: { id: dto.placeId } });
       if (!place) {
         throw new NotFoundException('The specified place does not exist');
       }
   
-      // Validation du Status et assignation de "Pending" si non spécifié
       let status = dto.status ? await this.statusRepository.findOne({ where: { name: dto.status } }) : null;
       if (!status) {
         status = await this.statusRepository.findOne({ where: { name: StatusEnum.PENDING } });
@@ -81,16 +75,13 @@ export class InventoryService {
           throw new NotFoundException('The status "Pending" does not exist');
         }
       }
-  
-      // Récupération des départements associés à l'endroit (place)
+
       const departments: Department[] = await this.departmentRepository.find({ where: { placeId: dto.placeId } });
   
-      // Validation des affectations des opérateurs
       let users: User[] = [];
       if (dto.operatorAssignments) {
         const userIds = dto.operatorAssignments.map(assign => assign.userId);
-  
-        // Récupérer les utilisateurs avec le bon type
+
         users = await this.userRepository.find({ where: { id: In(userIds) } });
   
         const missingUserIds = userIds.filter(userId => !users.some(user => user.id === userId));
@@ -98,14 +89,13 @@ export class InventoryService {
           throw new NotFoundException(`The following users were not found: ${missingUserIds.join(', ')}`);
         }
   
-        // Validation des départements associés à chaque opérateur
+        
         dto.operatorAssignments.forEach(assign => {
-          // Si aucun département n'est spécifié, affecter tous les départements
           if (assign.departmentIds.length === 0) {
             assign.departmentIds = departments.map(department => department.id);
           }
   
-          // Vérifier que tous les départements spécifiés sont valides
+          
           const invalidDepartments = assign.departmentIds.filter(departmentId =>
             !departments.some(department => department.id === departmentId)
           );
@@ -115,7 +105,7 @@ export class InventoryService {
         });
       }
   
-      // Création des affectations des opérateurs
+     
       const operatorAssignments = dto.operatorAssignments?.map(assign => {
         return this.inventoryAssignmentRepository.create({
           user: users.find(user => user.id === assign.userId),
@@ -123,25 +113,25 @@ export class InventoryService {
         });
       }) || [];  // Si `operatorAssignments` est undefined, on assigne un tableau vide
   
-      // Sauvegarde des affectations des opérateurs
+      
       const savedAssignments = await this.inventoryAssignmentRepository.save(operatorAssignments);
   
-      // Création de l'inventaire
+     
       const inventory = this.inventoryRepository.create({
         name: dto.name,
         startDate: new Date(dto.startDate),
         endDate: dto.endDate ? new Date(dto.endDate) : null,
-        status: status,  // Assignation du status
-        place: place,    // Assignation du place
-        operatorAssignments: savedAssignments // Assignation des opérateurs
+        status: status,  
+        place: place,    
+        operatorAssignments: savedAssignments
       });
   
-      // Sauvegarde de l'inventaire
+      
       const savedInventory = await this.inventoryRepository.save(inventory);
   
       return savedInventory;
     }
-    
+    */
     
     // méthode pour lancer inventaire 
       async launchInventory(inventoryId: string) {

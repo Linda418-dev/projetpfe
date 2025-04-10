@@ -5,7 +5,6 @@ import { Repository } from "typeorm";
 import { File } from './entities/file.entity';
 import { Category } from "src/category/Entities/category.entity";
 import { Supplier } from "src/supplier/Entities/Supplier.entity";
-import { Place } from "src/places/Entities/Place.entity";
 
 @Injectable()
 export class UploadsService {
@@ -14,7 +13,6 @@ export class UploadsService {
     @InjectRepository(Asset) private assetRepository: Repository<Asset>,
     @InjectRepository(Category) private categoryRepository: Repository<Category>,
     @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
-    @InjectRepository(Place) private placeRepository: Repository<Place>,
 
 
 

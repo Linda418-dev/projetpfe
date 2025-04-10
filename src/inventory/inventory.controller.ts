@@ -9,7 +9,7 @@ import { CreateInventoryDto } from './types/dto/create-inventory.dto';
 import { Request } from 'express';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 
-// @ApiBearerAuth() 
+@ApiBearerAuth() 
 @ApiTags('inventory Resource')
 @Controller('Inventories')
 export class InventoryController {
@@ -21,14 +21,14 @@ export class InventoryController {
     return this.inventoryService.getAllInventories();
   }
     
-    @BypassInventoryLock() 
-    /*@Roles('admin')
-    @UseGuards(JwtAuthGuard, RolesGuard)*/
+    /*@BypassInventoryLock() 
+    @Roles('admin')
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @ApiOperation({ summary: 'Create a new inventory' })
     @Post('create')
     async createInventory(@Body() createInventoryDto: CreateInventoryDto) {
         return this.inventoryService.createInventory(createInventoryDto);
-    }
+    }*/
 
     @Patch(':id/launch')
     async launchInventory(@Param('id') id: string) {

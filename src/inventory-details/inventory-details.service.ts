@@ -3,7 +3,6 @@ import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
 import { InventoryDetailsRepository } from './repositories/inventory-details.repository';
 import { InventoryRepository } from 'src/inventory/repositories/inventory.repository';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
-import { PlaceRepository } from 'src/places/Repositories/Place.repository';
 import { InventoryDetails } from './entities/inventory-details.entity';
 import { StatusEnum } from 'src/status/types/enums/status.enum';
 
@@ -13,7 +12,6 @@ export class InventoryDetailsService {
     private readonly inventoryDetailsRepository: InventoryDetailsRepository,
    private readonly inventoryRepository: InventoryRepository,
      private readonly assetRepository: AssetRepository,
-     private readonly placeRepository:PlaceRepository,
   ) {}
 
   
@@ -21,7 +19,7 @@ export class InventoryDetailsService {
   async createInventoryDetails(dto: CreateInventoryDetailsDto): Promise<InventoryDetails> {
     const inventory = await this.inventoryRepository.findOne({
       where: { id: dto.inventoryId },
-      relations: ['status'], // ⚠️ Important pour pouvoir lire status.name
+      relations: ['status'], 
     });
   
     if (!inventory) {
@@ -34,12 +32,10 @@ export class InventoryDetailsService {
     }
   
     const asset = await this.assetRepository.findOneByOrFail({ id: dto.assetId });
-    const place = await this.placeRepository.findOneByOrFail({ id: dto.placeId });
   
     const inventoryDetails = this.inventoryDetailsRepository.create({
       inventory,
       asset,
-      place,
       status: dto.status,
       scannedAt: new Date(),
     });

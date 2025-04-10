@@ -1,8 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IDepartment } from "../types/interface/department.interface";
-import { Place } from "src/places/Entities/Place.entity";
+import { Site } from "src/site/Entities/site.entity";
 import { Service } from "src/service/entities/service.entity";
-import { User } from "src/user/entities/user.entity";
 
 
 @Entity()
@@ -13,18 +12,12 @@ export class Department implements IDepartment {
   @Column({ unique: true })
   name: string;
 
-  @ManyToOne(() => Place, (place) => place.departments, { nullable: false, onDelete: 'CASCADE' })
-  place: Place;
+  @ManyToOne(() => Site, (site) => site.departments, { onDelete: 'CASCADE' })
+  site: Site;
 
-  @Column()
-  placeId: string;
-
-  @OneToMany(() => Service, (service) => service.department, { cascade: true })
+  @OneToMany(() => Service, (service) => service.department)
   services: Service[];
-
- 
   
- 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

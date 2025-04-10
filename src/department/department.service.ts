@@ -2,63 +2,83 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { DepartmentRepository } from './repositories/department.repository';
 import { CreateDepartmentDto } from './types/dto/create-department.dto';
 import { UpdateDepartmentDto } from './types/dto/update-department.dto';
-import { PlaceRepository } from 'src/places/Repositories/Place.repository';
+import { SiteRepository } from 'src/site/Repositories/site.repository';
+import { ServiceRepository } from 'src/service/repositories/service.repository';
+import { LocationRepository } from 'src/location/repositories/location.repository';
 
 @Injectable()
 export class DepartmentService {
      constructor(private readonly departmentRepository : DepartmentRepository,
-        private readonly  placeRepository: PlaceRepository
+        private readonly siteRepository : SiteRepository,
+        private readonly serviceRepository : ServiceRepository,
+        private readonly  locationRepository : LocationRepository
+        
       ){}
        
       async getAllDepartments() {
         return this.departmentRepository.find({
-            relations: ['place', 'services'] 
+            relations: ['site'],  
         });
     }
     
+    async getDepartmentById(id: string) {
+        const fetchDepartment = await this.departmentRepository.findOne({
+            where: { id },       
+            relations: ['site'], 
+        });
+    
+        if (!fetchDepartment) {
+            throw new BadRequestException(`Department with id ${id} not found`);
+        }
+    
+        return fetchDepartment;
+    }
+    
 
-        async getDepartmentById(id: string) {
-            const fetchDepartment= await this.departmentRepository.findOneBy({id : id });
-             if (!fetchDepartment){
-                throw new BadRequestException(`Department with id ${id} not found`);
-            }
-            return fetchDepartment;
-        }
-        async createDepartment(createDepartmentDto: CreateDepartmentDto) {
-            const { name, placeId } = createDepartmentDto;
-        
-            // Vérifier si le Place existe
-            const place = await this.placeRepository.findOne({ where: { id: placeId } });
-            if (!place) {
-                throw new NotFoundException(`Place with id ${placeId} not found`);
-            }
-        
-            const department = this.departmentRepository.create({
-                name,
-                place,
-                placeId
-            });
-        
-            return this.departmentRepository.save(department);
-        }
+    async createDepartment(createDepartmentDto: CreateDepartmentDto, siteId: string) {
+      const site = await this.siteRepository.findOneBy({ id: siteId });
+      if (!site) {
+        throw new NotFoundException(`Site with id ${siteId} not found`);
+      }
+    
+      const department = this.departmentRepository.create({
+        name: createDepartmentDto.name,
+        site: site,
+      });
+    
+      const savedDepartment = await this.departmentRepository.save(department);
+    
+      const service = this.serviceRepository.create({
+        name: savedDepartment.name,
+        department: savedDepartment,
+      });
+      const savedService = await this.serviceRepository.save(service);
+    
+      const location = this.locationRepository.create({
+        name: savedDepartment.name,
+        service: savedService,
+      });
+      await this.locationRepository.save(location);
+    
+      return savedDepartment;
+    }
+    
+    
+    
         
     
-        async updateDepatment(id: string, updatedepartmentDto: UpdateDepartmentDto) {
-            const fetchDepartment = await this.getDepartmentById(id);
-            if (!fetchDepartment) {
-                throw new BadRequestException(`Department with id ${id} not found`);
-            }
-            Object.assign(fetchDepartment, updatedepartmentDto);
-            return this.departmentRepository.save(fetchDepartment);
+    async updateDepatment(id: string, updatedepartmentDto: UpdateDepartmentDto) {
+        const fetchDepartment = await this.getDepartmentById(id);
+        if (!fetchDepartment) {
+            throw new BadRequestException(`Department with id ${id} not found`);
         }
+        Object.assign(fetchDepartment, updatedepartmentDto);
+        return this.departmentRepository.save(fetchDepartment);
+    }
     
-        async deleteDepartment(id: string): Promise<{ message: string }> {
-            const result = await this.departmentRepository.delete(id);
-            
-            if (result.affected === 0) {
-                throw new NotFoundException('Department not found');
-            }
-            
-            return { message: 'Department deleted successfully' };
-        }
+    async deleteDepartment(id: string) {
+        const fetchDepartment = await this.getDepartmentById(id);
+        await this.departmentRepository.remove(fetchDepartment);
+        return { message: 'Department deleted successfully' };
+      }
 }
