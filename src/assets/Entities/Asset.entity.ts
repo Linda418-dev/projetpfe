@@ -3,6 +3,7 @@ import { File } from 'src/uploads/entities/file.entity';
 import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
+import { Location } from 'src/location/entities/location.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -21,6 +22,8 @@ export class Asset implements IAsset {
   @ManyToOne(() => Supplier, (supplier) => supplier.assets, { nullable: true, onDelete: "CASCADE" })
   supplier: Supplier;  
 
+  @ManyToOne(() => Location, (location) => location.assets, { nullable: false, eager: true, onDelete: "CASCADE" })
+  location: Location;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

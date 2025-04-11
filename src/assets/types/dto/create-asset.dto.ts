@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateAssetDto {
@@ -7,12 +7,16 @@ export class CreateAssetDto {
     name: string;
   
     @ApiProperty()
-    @IsString()
+    @IsUUID()
     categoryId: string;
     
     @ApiProperty()
-    @IsString()
+    @IsUUID()
     supplierId: string;
+
+    @ApiProperty()
+    @IsUUID()
+    locationId: string;
 
     @ApiProperty()
     @IsOptional()

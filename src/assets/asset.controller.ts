@@ -19,7 +19,7 @@ export class AssetController {
     async getAllAssets() {
         return this.assetService.getAllAssets();
     }*/
-   
+
      @Get()
      @ApiOperation({ summary: 'get all  assets with paginate keyword' })
       async getAssets(
@@ -34,7 +34,7 @@ export class AssetController {
     async createAssetAndAssignToFile(@Body() createAssetDto: CreateAssetDto) {
     const asset = await this.assetService.createAssetAndAssignToFile(createAssetDto);
    return {
-     message: 'Asset successfully created and assigned to file, category, and service',
+     message: 'Asset successfully created and assigned to file, category, and location',
      asset,
    };
   }

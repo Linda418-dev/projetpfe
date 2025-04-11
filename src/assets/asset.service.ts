@@ -7,12 +7,15 @@ import { CategoryRepository } from 'src/category/Repositories/category.repositor
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { Asset } from './Entities/Asset.entity';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
+import { LocationRepository } from 'src/location/repositories/location.repository';
+import { File } from 'src/uploads/entities/file.entity';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
         private fileRepository:FileRepository,
         private readonly categoryRepository : CategoryRepository,
         private readonly supplierRepository:SupplierRepository,
+        private readonly locationRepository : LocationRepository
     
        
     ) {}
@@ -49,7 +52,7 @@ export class AssetsService {
 
 
     async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
-        const { name, categoryId, supplierId, fileIds } = createAssetDto;
+        const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
       
         const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
         if (!category) throw new Error('Category not found');
@@ -57,31 +60,38 @@ export class AssetsService {
         const supplier = await this.supplierRepository.findOne({ where: { id: supplierId } });
         if (!supplier) throw new Error('Supplier not found');
       
-        const asset = new Asset();
-        asset.name = name;
-        asset.category = category;
-        asset.supplier = supplier;
+        const location = await this.locationRepository.findOne({ where: { id: locationId }, relations: ['service'] });
+        if (!location) throw new Error('Location not found');
       
-        const savedAsset = await this.assetRepository.save(asset);
+        let files: File[] = []; 
         if (fileIds?.length) {
-          const files = await this.fileRepository.findByIds(fileIds);
-      
+          files = await this.fileRepository.findByIds(fileIds);
           const foundIds = files.map((f) => f.id);
           const missingIds = fileIds.filter(id => !foundIds.includes(id));
       
           if (missingIds.length > 0) {
             throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
           }
+        }
       
+        const asset = new Asset();
+        asset.name = name;
+        asset.category = category;
+        asset.supplier = supplier;
+        asset.location = location;
+      
+        const savedAsset = await this.assetRepository.save(asset);
+      
+        if (files.length > 0) {
           for (const file of files) {
             file.asset = savedAsset;
           }
-      
           await this.fileRepository.save(files);
         }
       
         return savedAsset;
       }
+      
       
 }
 
