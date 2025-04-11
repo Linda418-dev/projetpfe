@@ -13,9 +13,6 @@ export class InventoryDetailsService {
    private readonly inventoryRepository: InventoryRepository,
      private readonly assetRepository: AssetRepository,
   ) {}
-
-  
-
   async createInventoryDetails(dto: CreateInventoryDetailsDto): Promise<InventoryDetails> {
     const inventory = await this.inventoryRepository.findOne({
       where: { id: dto.inventoryId },
@@ -35,7 +32,6 @@ export class InventoryDetailsService {
   
     const inventoryDetails = this.inventoryDetailsRepository.create({
       inventory,
-      asset,
       status: dto.status,
       scannedAt: new Date(),
     });

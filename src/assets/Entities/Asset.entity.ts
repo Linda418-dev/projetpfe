@@ -25,19 +25,9 @@ export class Asset implements IAsset {
   @ManyToOne(() => Supplier, (supplier) => supplier.assets, { nullable: true, onDelete: "CASCADE" })
   supplier: Supplier;  
 
-  @OneToMany(() => InventoryDetails, (details) => details.asset)
-  inventoryDetails: InventoryDetails[];
 
   @Column({ nullable: true })
   supplierName: string; 
-
-  @Column({ nullable: true })
-  imageUrl: string;
-
-  
-
-  @Column()
-  serviceId: string;
 
 
   @CreateDateColumn({ type: 'timestamp' })

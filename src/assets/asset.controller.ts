@@ -41,7 +41,7 @@ export class AssetController {
     // @UseGuards(JwtAuthGuard, RolesGuard)  
     // @Roles('admin') 
     async createAssetAndAssignToFile(@Body() createAssetDto: CreateAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, serviceId  } = createAssetDto;
+    const { assetName, categoryName, supplierName, fileId  } = createAssetDto;
     const asset = await this.assetService.createAssetAndAssignToFile(createAssetDto);
    return {
      message: 'Asset successfully created and assigned to file, category, and service',

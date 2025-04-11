@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Asset } from 'src/assets/Entities/Asset.entity';
 import { Repository } from "typeorm";
@@ -9,15 +9,7 @@ import { Supplier } from "src/supplier/Entities/Supplier.entity";
 @Injectable()
 export class UploadsService {
   constructor(
-    @InjectRepository(File) private fileRepository: Repository<File>,
-    @InjectRepository(Asset) private assetRepository: Repository<Asset>,
-    @InjectRepository(Category) private categoryRepository: Repository<Category>,
-    @InjectRepository(Supplier) private supplierRepository: Repository<Supplier>,
-
-
-
-
-  ) {}
+    @InjectRepository(File) private fileRepository: Repository<File>) {}
 
   async createFile(file: Express.Multer.File) {
     const newFile = this.fileRepository.create({
@@ -26,7 +18,11 @@ export class UploadsService {
       typeFile: file.mimetype,
     });
 
-    return this.fileRepository.save(newFile);
+    const savedFile  = await this.fileRepository.save(newFile);
+    return {
+      message: 'File uploaded successfully',
+      fileId: savedFile.id,  
+    };
   }
 
 
@@ -34,6 +30,14 @@ export class UploadsService {
     const files = await this.fileRepository.find();
     return files.map(file => ({ id: file.id, name: file.name }));
   }
+
+
+  async getFileById(id: string) {
+    const file = await this.fileRepository.findOne({ where: { id } });
+    if (!file) throw new NotFoundException('File not found');
+    return file;
+  }
+  
 
 
 

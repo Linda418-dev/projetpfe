@@ -22,9 +22,7 @@ export class InventoryDetails {
   @JoinColumn({ name: 'inventory_id' })
   inventory: Inventory;
 
-  @ManyToOne(() => Asset, (asset) => asset.inventoryDetails)
-  @JoinColumn({ name: 'asset_id' })
-  asset: Asset;
+
 
 
   @CreateDateColumn({ type: 'timestamp' })

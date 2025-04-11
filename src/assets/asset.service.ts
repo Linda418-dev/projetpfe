@@ -55,22 +55,6 @@ export class AssetsService {
             throw new BadRequestException(`Asset with id ${id} not found`);
         }
     
-        // Vérifier si le serviceId est mis à jour
-        if (updateAssetDto.serviceId && updateAssetDto.serviceId !== fetchAsset.serviceId) {
-            const newService = await this.serviceRepository.findOne({ where: { id: updateAssetDto.serviceId } });
-            if (!newService) {
-                throw new BadRequestException(`Service with id ${updateAssetDto.serviceId} not found`);
-            }
-    
-            // Créer un nouvel historique
-            const historyAsset = new HistoryAsset();
-            historyAsset.asset = fetchAsset;
-            historyAsset.service = newService;
-            await this.historyAssetRepository.save(historyAsset);
-    
-        
-        }
-    
         Object.assign(fetchAsset, updateAssetDto);
         return this.assetRepository.save(fetchAsset);
     }
@@ -98,55 +82,50 @@ export class AssetsService {
                 { supplier: { name: ILike(`%${keyword}%`) } },
                 
             ],
-            relations: ['category', 'supplier'], // 🔹 Ajout de la relation 'service'
+            relations: ['category', 'supplier'], 
         });
     
         return assets;
     }
     
 
-async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
-    const { assetName, categoryName, supplierName, fileId, serviceId  } = createAssetdto;
+    async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
+        const { assetName, categoryName, supplierName, fileId } = createAssetdto;
+      
+        const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
+        if (!category) throw new Error('Category not found');
+      
+        const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
+        if (!supplier) throw new Error('Supplier not found');
+      
+      
+        const asset = new Asset();
+        asset.name = assetName;
+        asset.category = category;
+        asset.categoryName = category.name;
+        asset.supplier = supplier;
+        asset.supplierName = supplier.name;
 
-    const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
-    if (!category) throw new Error('Category not found');
+      
+        await this.assetRepository.save(asset);
+      
+        const file = await this.fileRepository.findOne({ where: { id: fileId } });
+        if (!file) throw new Error('File not found');
     
-    const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
-    if (!supplier) throw new Error('Supplier not found');
-
-    let service = await this.serviceRepository.findOne({ where: { id: createAssetdto.serviceId }, relations: ['assets'] });
-    if (!service) throw new Error('Service not found');
-
-    const asset = new Asset();
-    asset.name = assetName;
-    asset.category = category;
-    asset.categoryName = category.name;
-    asset.supplier = supplier;
-    asset.supplierName = supplier.name;
-    asset.serviceId = service.id;
-
-    await this.assetRepository.save(asset);
-
-    const file = await this.fileRepository.findOne({ where: { id: fileId } });
-    if (!file) throw new Error('File not found');
-
-    file.asset = asset;
-    file.assetId = asset.id;
-    asset.imageUrl = file.urlFile;
-
-    await this.fileRepository.save(file);
-    await this.assetRepository.save(asset);
-
-    const historyAsset = new HistoryAsset();
-    historyAsset.asset = asset;
-    historyAsset.service = service;
+        file.asset = asset;
+        file.assetId = asset.id;
+      
+        await this.fileRepository.save(file);
     
-    await this.historyAssetRepository.save(historyAsset);
-
-    return asset;
-
-    
-}
+        const historyAsset = new HistoryAsset();
+        historyAsset.asset = asset;
+        
+      
+        await this.historyAssetRepository.save(historyAsset);
+      
+        return asset;
+      }
+      
 
 }
 

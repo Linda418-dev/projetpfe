@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsString, IsUUID } from "class-validator";
 
 export class CreateAssetDto {
    @ApiProperty({ description: 'Name of the asset' })
@@ -18,14 +18,5 @@ export class CreateAssetDto {
     @ApiProperty({ description: 'ID of the file' })
     @IsUUID()
     fileId: string;
-
-    @ApiProperty({ description: 'ID of the service' })
-    @IsUUID()
-    serviceId: string; 
-
-    
-    
-
-
     
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Post, Body, Get, UploadedFile, UseInterceptors, Param } from '@nestjs/common';
 import { ApiConsumes, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UploadsService } from './uploads.service';
 import { CreateFileDto } from './types/dto/create-file.dto';  
@@ -34,7 +34,13 @@ export class UploadsController {
   }
   
 
- 
+  @Get('file/:id')
+  @ApiOperation({ summary: 'Get file by ID' })
+  @ApiResponse({ status: 200, type: File })
+  async getFileById(@Param('id') id: string) {
+    return this.uploadsService.getFileById(id);
+  }
+  
 
   
 
