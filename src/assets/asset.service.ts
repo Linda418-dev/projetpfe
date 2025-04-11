@@ -1,16 +1,11 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { AssetRepository } from './Repositories/Asset.repository';
 import { CreateAssetDto } from './types/dto/create-asset.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { updateAssetDto } from './types/dto/update-asset.dto';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
-import { ILike } from 'typeorm';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { Asset } from './Entities/Asset.entity';
-import { PaginationService } from 'src/pagination/pagination.service';
-import { ServiceRepository } from 'src/service/repositories/service.repository';
-import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
-import { HistoryAsset } from 'src/history-asset/entities/history-Asset.entity';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 @Injectable()
 export class AssetsService {
@@ -18,17 +13,10 @@ export class AssetsService {
         private fileRepository:FileRepository,
         private readonly categoryRepository : CategoryRepository,
         private readonly supplierRepository:SupplierRepository,
-        private readonly paginationService:PaginationService,
-        private readonly serviceRepository: ServiceRepository,
-        private readonly historyAssetRepository :HistoryAssetRepository,
     
        
     ) {}
         
-    async getAllAssetsWithPagination(page:number=1,limit:number=4) {
-        return this.paginationService.paginate(this.assetRepository,page,limit);
-    }
-
     async getAssets(params:PaginateSearchDto){
         return this.assetRepository.getAllAssetWithPaginate(params);
 
@@ -58,75 +46,43 @@ export class AssetsService {
         Object.assign(fetchAsset, updateAssetDto);
         return this.assetRepository.save(fetchAsset);
     }
-    
-      
-      async getFilesWithNames() {
-        const files = await this.fileRepository.find(); 
-    
-        return files.map(file => ({
-          id: file.id,     
-          name: file.name,  
-        }));
-      }
-   
 
-      async searchAssets(keyword: string) {
-        if (!keyword) {
-            throw new BadRequestException('Keyword is required for search.');
-        }
-    
-        const assets = await this.assetRepository.find({
-            where: [
-                { name: ILike(`%${keyword}%`) },
-                { category: { name: ILike(`%${keyword}%`) } },
-                { supplier: { name: ILike(`%${keyword}%`) } },
-                
-            ],
-            relations: ['category', 'supplier'], 
-        });
-    
-        return assets;
-    }
-    
 
-    async createAssetAndAssignToFile(createAssetdto: CreateAssetDto) {
-        const { assetName, categoryName, supplierName, fileId } = createAssetdto;
+    async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
+        const { name, categoryId, supplierId, fileIds } = createAssetDto;
       
-        const category = await this.categoryRepository.findOne({ where: { name: categoryName }, relations: ['assets'] });
+        const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
         if (!category) throw new Error('Category not found');
       
-        const supplier = await this.supplierRepository.findOne({ where: { name: supplierName }, relations: ['assets'] });
+        const supplier = await this.supplierRepository.findOne({ where: { id: supplierId } });
         if (!supplier) throw new Error('Supplier not found');
       
-      
         const asset = new Asset();
-        asset.name = assetName;
+        asset.name = name;
         asset.category = category;
-        asset.categoryName = category.name;
         asset.supplier = supplier;
-        asset.supplierName = supplier.name;
-
       
-        await this.assetRepository.save(asset);
+        const savedAsset = await this.assetRepository.save(asset);
+        if (fileIds?.length) {
+          const files = await this.fileRepository.findByIds(fileIds);
       
-        const file = await this.fileRepository.findOne({ where: { id: fileId } });
-        if (!file) throw new Error('File not found');
-    
-        file.asset = asset;
-        file.assetId = asset.id;
+          const foundIds = files.map((f) => f.id);
+          const missingIds = fileIds.filter(id => !foundIds.includes(id));
       
-        await this.fileRepository.save(file);
-    
-        const historyAsset = new HistoryAsset();
-        historyAsset.asset = asset;
-        
+          if (missingIds.length > 0) {
+            throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
+          }
       
-        await this.historyAssetRepository.save(historyAsset);
+          for (const file of files) {
+            file.asset = savedAsset;
+          }
       
-        return asset;
+          await this.fileRepository.save(files);
+        }
+      
+        return savedAsset;
       }
       
-
 }
 
     

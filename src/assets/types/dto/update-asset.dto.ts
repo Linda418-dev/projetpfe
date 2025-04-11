@@ -1,24 +1,20 @@
 import { ApiProperty } from "@nestjs/swagger";
-import {   IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
+import {  IsOptional, IsString, IsUUID } from "class-validator";
 export class updateAssetDto{
     @ApiProperty()
     @IsString()
     @IsOptional()
     name: string;
 
+    @ApiProperty()
     @IsOptional()
     @IsUUID()
     categoryId?: string;
     
+    @ApiProperty()
     @IsOptional()
     @IsUUID()
     supplierId: string;
     
-    @IsOptional()
-    @IsUUID()
-    placeId: string;
 
-    @ApiProperty({ description: 'ID of the service' })
-    @IsUUID()
-    serviceId: string; 
 }

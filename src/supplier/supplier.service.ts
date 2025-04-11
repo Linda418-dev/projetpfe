@@ -30,28 +30,27 @@ export class SupplierService {
            return this.supplierRepository.remove(fetchSupplier);
         }
         async updateSupplier(id: string, updateSupplierDto: UpdateSupplierDto) {
-            const fetchSupplier = await this.getSupplierById(id);
+            const fetchSupplier = await this.supplierRepository.findOne({
+              where: { id },
+              relations: ['assets'], 
+            });
+          
             if (!fetchSupplier) {
-                throw new BadRequestException(`Supplier with id ${id} not found`);
+              throw new BadRequestException(`Supplier with id ${id} not found`);
             }
-        
-            // 🔹 Sauvegarder l'ancien nom du fournisseur
+          
             const oldSupplierName = fetchSupplier.name;
-        
-            // 🔄 Mettre à jour le nom du fournisseur
             Object.assign(fetchSupplier, updateSupplierDto);
-            await this.supplierRepository.save(fetchSupplier);
-        
-            // 🔹 Vérifier si le nom a changé
-            if (updateSupplierDto.name && updateSupplierDto.name !== oldSupplierName) {
-                // 🔄 Mettre à jour tous les assets liés à ce supplier
-                await this.assetRepository.update(
-                    { supplier: fetchSupplier },  // Condition : Assets liés à ce supplier
-                    { supplierName: updateSupplierDto.name } // Nouveau nom
-                );
-            }
-        
-            return fetchSupplier;
-        }
-       
+            const updatedSupplier = await this.supplierRepository.save(fetchSupplier);
+                const updatedAssets = await this.assetRepository.find({
+              where: { supplier: updatedSupplier },
+            });
+          
+            return {
+              message: 'Supplier updated successfully',
+              supplier: updatedSupplier,
+              assets: updatedAssets,
+            };
+          }
+          
 }

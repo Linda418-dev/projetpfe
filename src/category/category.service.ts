@@ -28,30 +28,28 @@ export class CategoryService {
         return this.categoryRepository.save(category);
     }
 
-    async updateCategory(id: string, updatecategoryDto: UpdateCategoryDto) {
-        const fetchCategory = await this.getCategoryById(id);
+    async updateCategory(id: string, updateCategoryDto: UpdateCategoryDto) {
+        const fetchCategory = await this.categoryRepository.findOne({
+          where: { id },
+          relations: ['assets'], 
+        });
+      
         if (!fetchCategory) {
-            throw new BadRequestException(`Category with id ${id} not found`);
+          throw new BadRequestException(`Category with id ${id} not found`);
         }
-    
-        // 🔹 Sauvegarder l'ancien nom de la catégorie
-        const oldCategoryName = fetchCategory.name;
-    
-        // 🔄 Mettre à jour le nom de la catégorie
-        Object.assign(fetchCategory, updatecategoryDto);
-        await this.categoryRepository.save(fetchCategory);
-    
-        // 🔹 Vérifier si le nom a changé
-        if (updatecategoryDto.name && updatecategoryDto.name !== oldCategoryName) {
-            // 🔄 Mettre à jour tous les assets liés à cette catégorie
-            await this.assetRepository.update(
-                { category: fetchCategory },  // Condition : Assets liés à cette catégorie
-                { categoryName: updatecategoryDto.name } // Nouveau nom
-            );
-        }
-    
-        return fetchCategory;
-    }
+        Object.assign(fetchCategory, updateCategoryDto);
+        const updatedCategory = await this.categoryRepository.save(fetchCategory);
+        const updatedAssets = await this.assetRepository.find({
+          where: { category: updatedCategory },
+        });
+      
+        return {
+          message: 'Category updated successfully',
+          category: updatedCategory,
+          assets: updatedAssets,
+        };
+      }
+      
     
 
     async deleteCategory(id: string) {

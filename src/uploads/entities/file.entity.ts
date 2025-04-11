@@ -1,9 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Asset } from 'src/assets/Entities/Asset.entity';
+import { IFile } from '../types/interfaces/file.interface';
 
 
 @Entity('file')
-export class File {
+export class File implements IFile {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -22,5 +23,11 @@ export class File {
 
   @Column({ nullable: true })  
   assetId: string;  
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+  
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }
 

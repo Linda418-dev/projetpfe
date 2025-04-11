@@ -18,9 +18,6 @@ export class Supplier implements ISupplier {
 
   @OneToMany(() => Asset, (asset) => asset.supplier,{ cascade: true })
   assets: Asset[];
-
-  @Column("simple-array", { nullable: true })
-  assetsNames: string[];
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

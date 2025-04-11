@@ -1,22 +1,23 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsUUID } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsArray, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateAssetDto {
-   @ApiProperty({ description: 'Name of the asset' })
+   @ApiProperty()
     @IsString()
-    assetName: string;
+    name: string;
   
-    @ApiProperty({ description: 'Name of the category' })
+    @ApiProperty()
     @IsString()
-    categoryName: string;
+    categoryId: string;
     
-    @ApiProperty({ description: 'Name of the supplier' })
+    @ApiProperty()
     @IsString()
-    supplierName: string;
-  
-  
-    @ApiProperty({ description: 'ID of the file' })
-    @IsUUID()
-    fileId: string;
+    supplierId: string;
+
+    @ApiProperty()
+    @IsOptional()
+    @IsArray()
+    @IsUUID('all', { each: true })
+    fileIds?: string[];
     
 }
