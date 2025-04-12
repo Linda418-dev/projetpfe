@@ -16,8 +16,6 @@ import { Department } from './department/entities/department.entity';
 import { DepartmentModule } from './department/department.module';
 import { ServiceModule } from './service/service.module';
 import { Service } from './service/entities/service.entity';
-import { HistoryAsset } from './history-asset/entities/history-Asset.entity';
-import { HistoryAssetModule } from './history-asset/history-asset.module';
 import { UserRoleModule } from './user-role/user-role.module';
 import { AuthModule } from './auth/auth.module';
 import { User } from './user/entities/user.entity';
@@ -49,6 +47,8 @@ import { SiteModule } from './site/site.module';
 import { Site } from './site/Entities/site.entity';
 import { LocationModule } from './location/location.module';
 import { Location } from './location/entities/location.entity';
+import { LocationHistoryModule } from './location-history/location-history.module';
+import { LocationHistory } from './location-history/entities/location-history.entity';
 
 @Module({
   imports: [
@@ -65,7 +65,7 @@ import { Location } from './location/entities/location.entity';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,HistoryAsset,User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory, User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
         synchronize: true, 
       }),
     }),
@@ -74,11 +74,11 @@ import { Location } from './location/entities/location.entity';
     ServiceModule,
     LocationModule,
     AssetModule,
+    LocationHistoryModule,
     CategoryModule,
     SupplierModule,
     UploadsModule,
     PaginationModule,
-    HistoryAssetModule,
     UserRoleModule,
     AuthModule,
     UserModule,
@@ -88,6 +88,7 @@ import { Location } from './location/entities/location.entity';
     StatusModule,
     InventoryDetailsModule,
     InventoryAssignmentModule,
+    
     
    
   ],

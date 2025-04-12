@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { Ilocation } from "../types/interfaces/location.interface";
 import { Service } from "src/service/entities/service.entity";
 import { Asset } from "src/assets/Entities/Asset.entity";
+import { LocationHistory } from "src/location-history/entities/location-history.entity";
 
 
 @Entity()
@@ -18,6 +19,9 @@ export class Location implements Ilocation{
 
     @OneToMany(() => Asset, (asset) => asset.location)
     assets: Asset[];
+
+    @OneToMany(() => LocationHistory, (history) => history.location)
+    locationHistory: LocationHistory[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  

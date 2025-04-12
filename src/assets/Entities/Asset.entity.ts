@@ -4,6 +4,7 @@ import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { Location } from 'src/location/entities/location.entity';
+import { LocationHistory } from 'src/location-history/entities/location-history.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -24,6 +25,9 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => Location, (location) => location.assets, { nullable: false, eager: true, onDelete: "CASCADE" })
   location: Location;
+
+  @OneToMany(() => LocationHistory, (history) => history.asset, { cascade: true })
+  locationHistory: LocationHistory[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

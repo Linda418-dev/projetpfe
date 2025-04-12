@@ -9,13 +9,16 @@ import { Asset } from './Entities/Asset.entity';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 import { LocationRepository } from 'src/location/repositories/location.repository';
 import { File } from 'src/uploads/entities/file.entity';
+import { LocationHistory } from 'src/location-history/entities/location-history.entity';
+import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
         private fileRepository:FileRepository,
         private readonly categoryRepository : CategoryRepository,
         private readonly supplierRepository:SupplierRepository,
-        private readonly locationRepository : LocationRepository
+        private readonly locationRepository : LocationRepository,
+        private readonly locationHistoryRepository : LocationHistoryRepository
     
        
     ) {}
@@ -41,14 +44,29 @@ export class AssetsService {
         return this.assetRepository.remove(fetchAsset);
     }
     async updateAsset(id: string, updateAssetDto: updateAssetDto) {
-        const fetchAsset = await this.getAssetById(id);
-        if (!fetchAsset) {
-            throw new BadRequestException(`Asset with id ${id} not found`);
-        }
-    
-        Object.assign(fetchAsset, updateAssetDto);
-        return this.assetRepository.save(fetchAsset);
-    }
+      const fetchAsset = await this.getAssetById(id);
+      if (!fetchAsset) {
+          throw new BadRequestException(`Asset with id ${id} not found`);
+      }
+      if (updateAssetDto.locationId && fetchAsset.location.id !== updateAssetDto.locationId) {
+          const newLocation = await this.locationRepository.findOne({
+              where: { id: updateAssetDto.locationId }
+          });
+  
+          if (!newLocation) {
+              throw new BadRequestException(`Location with id ${updateAssetDto.locationId} not found`);
+          }
+          const history = this.locationHistoryRepository.create({
+              asset: fetchAsset,
+              location: newLocation,
+          });
+          await this.locationHistoryRepository.save(history);
+          fetchAsset.location = newLocation;
+      }
+      Object.assign(fetchAsset, updateAssetDto);
+      return this.assetRepository.save(fetchAsset);
+  }
+  
 
 
     async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
@@ -81,6 +99,11 @@ export class AssetsService {
         asset.location = location;
       
         const savedAsset = await this.assetRepository.save(asset);
+
+        const locationHistory = new LocationHistory();
+        locationHistory.asset = savedAsset;
+        locationHistory.location = location;
+        await this.locationHistoryRepository.save(locationHistory);
       
         if (files.length > 0) {
           for (const file of files) {

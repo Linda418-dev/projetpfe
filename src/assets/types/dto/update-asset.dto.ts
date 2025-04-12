@@ -15,6 +15,12 @@ export class updateAssetDto{
     @IsOptional()
     @IsUUID()
     supplierId: string;
+
+    @IsOptional()
+    @IsUUID()
+    @ApiProperty()
+    locationId?: string;
+
     
 
 }

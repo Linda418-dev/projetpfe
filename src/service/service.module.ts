@@ -9,12 +9,12 @@ import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
 import { PaginationService } from 'src/pagination/pagination.service';
-import { HistoryAssetRepository } from 'src/history-asset/repositories/history-asset.repository';
 import { LocationRepository } from 'src/location/repositories/location.repository';
+import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 
 @Module({
   providers: [ServiceService,ServiceRepository, DepartmentRepository,LocationRepository, AssetRepository,AssetsService,FileRepository,CategoryRepository,SupplierRepository
-    ,PaginationService,HistoryAssetRepository
+    ,PaginationService,LocationHistoryRepository
   ],
   controllers: [ServiceController]
 })
