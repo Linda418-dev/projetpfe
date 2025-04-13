@@ -55,7 +55,6 @@ export class AssetsService {
         throw new BadRequestException(`Asset with id ${id} not found`);
       }
     
-      // 🔄 Gestion du changement de localisation
       if (updateAssetDto.locationId && fetchAsset.location.id !== updateAssetDto.locationId) {
         const newLocation = await this.locationRepository.findOne({
           where: { id: updateAssetDto.locationId },
@@ -72,8 +71,7 @@ export class AssetsService {
         await this.locationHistoryRepository.save(history);
         fetchAsset.location = newLocation;
       }
-    
-      // ✅ Gestion du changement de status
+
       if (updateAssetDto.statusId && fetchAsset.status?.id !== updateAssetDto.statusId) {
         const newStatus = await this.statusRepository.findOne({
           where: { id: updateAssetDto.statusId },
@@ -92,7 +90,7 @@ export class AssetsService {
         await this.assetStatusRepository.save(assetStatus);
       }
     
-      // 🧠 Appliquer les autres champs de manière générique
+    
       Object.assign(fetchAsset, updateAssetDto);
       return this.assetRepository.save(fetchAsset);
     }
