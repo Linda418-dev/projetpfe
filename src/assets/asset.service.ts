@@ -123,35 +123,34 @@ export class AssetsService {
       }
     }
   
-    // ✅ Récupérer le status "Good" par défaut
+    
     const defaultStatus = await this.statusRepository.findOne({
       where: { name: AssetStatusEnum.GOOD, type: 'asset' },
     });
     if (!defaultStatus) throw new Error('Default status "Good" not found');
   
-    // ✅ Créer l'asset avec le status
     const asset = new Asset();
     asset.name = name;
     asset.category = category;
     asset.supplier = supplier;
     asset.location = location;
-    asset.status = defaultStatus; // <=== assignation du status
+    asset.status = defaultStatus; 
   
     const savedAsset = await this.assetRepository.save(asset);
   
-    // ✅ Historique de localisation
+    
     const locationHistory = new LocationHistory();
     locationHistory.asset = savedAsset;
     locationHistory.location = location;
     await this.locationHistoryRepository.save(locationHistory);
   
-    // ✅ Historique de status
+  
     const assetStatus = new AssetStatus();
     assetStatus.asset = savedAsset;
     assetStatus.status = defaultStatus;
     await this.assetStatusRepository.save(assetStatus);
   
-    // 🔁 Fichiers
+   
     if (files.length > 0) {
       for (const file of files) {
         file.asset = savedAsset;
