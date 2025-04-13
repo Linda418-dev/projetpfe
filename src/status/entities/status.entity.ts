@@ -6,8 +6,11 @@ export class Status implements Istatus{
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
+
+  @Column()
+  type: 'asset' | 'inventory';
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

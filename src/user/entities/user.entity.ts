@@ -21,11 +21,6 @@ export class User implements IUser {
   @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
   role: UserRole;
    
-
-  @ManyToMany(() => Inventory, (inventory) => inventory.users)
-  inventories: Inventory[];
-   
-  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   

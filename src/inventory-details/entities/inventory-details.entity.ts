@@ -18,10 +18,7 @@ export class InventoryDetails {
   })
   status: AssetStatus;
 
-  @ManyToOne(() => Inventory, (inventory) => inventory.details)
-  @JoinColumn({ name: 'inventory_id' })
-  inventory: Inventory;
-
+ 
 
 
 

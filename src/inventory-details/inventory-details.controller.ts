@@ -9,7 +9,7 @@ export class InventoryDetailsController {
     constructor(private readonly inventoryDetailsService: InventoryDetailsService) {}
   
 
-    @Post()
+   /* @Post()
 async createInventoryDetails(@Body() dto: CreateInventoryDetailsDto) {
   return this.inventoryDetailsService.createInventoryDetails(dto);
 }
@@ -22,5 +22,5 @@ async createInventoryDetails(@Body() dto: CreateInventoryDetailsDto) {
     @Get(':id')
     async getInventoryDetailsById(@Param('id') id: string) {
       return this.inventoryDetailsService.getInventoryDetailsById(id);
-    }
+    }*/
 }

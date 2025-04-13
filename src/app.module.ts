@@ -49,6 +49,8 @@ import { LocationModule } from './location/location.module';
 import { Location } from './location/entities/location.entity';
 import { LocationHistoryModule } from './location-history/location-history.module';
 import { LocationHistory } from './location-history/entities/location-history.entity';
+import { AssetStatusModule } from './asset-status/asset-status.module';
+import { AssetStatus } from './asset-status/entities/asset-status.entity';
 
 @Module({
   imports: [
@@ -65,7 +67,7 @@ import { LocationHistory } from './location-history/entities/location-history.en
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory, User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
         synchronize: true, 
       }),
     }),
@@ -88,6 +90,7 @@ import { LocationHistory } from './location-history/entities/location-history.en
     StatusModule,
     InventoryDetailsModule,
     InventoryAssignmentModule,
+    AssetStatusModule,
     
     
    

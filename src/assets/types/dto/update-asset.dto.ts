@@ -21,6 +21,12 @@ export class updateAssetDto{
     @ApiProperty()
     locationId?: string;
 
+    @IsOptional()
+    @IsUUID()
+    @ApiProperty()
+    statusId?: string;
+
+
     
 
 }

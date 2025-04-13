@@ -28,7 +28,7 @@ export class InventoryController {
     @Post('create')
     async createInventory(@Body() createInventoryDto: CreateInventoryDto) {
         return this.inventoryService.createInventory(createInventoryDto);
-    }*/
+    }
 
     @Patch(':id/launch')
     async launchInventory(@Param('id') id: string) {
@@ -37,11 +37,11 @@ export class InventoryController {
   /* @Patch(':id')
    async updateInventory(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
      return this.inventoryService.updateInventory(id, dto);
-   }*/
+   }
    @Delete(':id')
    async deleteInventory(@Param('id') id: string) {
      return this.inventoryService.deleteInventory(id);
-   }
+   }*/
   
    
    

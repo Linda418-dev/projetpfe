@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsUUID, IsOptional, IsArray, IsDateString } from 'class-validator';
-import { StatusEnum } from 'src/status/types/enums/status.enum';
 
 export class CreateInventoryDto {
   @ApiProperty()
@@ -22,13 +21,6 @@ export class CreateInventoryDto {
   @IsDateString({}, { message: 'End date must be a valid ISO date' })
   endDate?: string;
 
-  @ApiProperty({
-    description: 'Status of the inventory',
-    enum: StatusEnum,  
-    default: StatusEnum.PENDING,  
-  })
-  @IsOptional()
-  status?: StatusEnum;
   
   @ApiProperty({
     required: false,

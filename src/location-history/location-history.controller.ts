@@ -2,7 +2,7 @@ import { Controller, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LocationHistoryService } from './location-history.service';
 
-@ApiTags('Location History')
+@ApiTags('Location History Resource ')
 @Controller('location-histories')
 export class LocationHistoryController {
     constructor (private readonly locationHistoryService : LocationHistoryService){}

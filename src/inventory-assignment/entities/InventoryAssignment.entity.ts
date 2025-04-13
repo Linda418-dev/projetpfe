@@ -9,8 +9,7 @@ export class InventoryAssignment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => Inventory, inventory => inventory.operatorAssignments)
-  inventory: Inventory;
+  
 
   @ManyToOne(() => User)
   user: User;

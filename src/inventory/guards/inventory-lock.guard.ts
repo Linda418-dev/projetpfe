@@ -4,13 +4,13 @@ import { InventoryService } from 'src/inventory/inventory.service';
 import { Request } from 'express'; 
 // guard pour controler l'accés  aux routes  HTTP quand un  inventaire  est en cours 
 @Injectable()
-export class InventoryLockGuard implements CanActivate {
+export class InventoryLockGuard /*implements CanActivate */{
   constructor(
     private readonly inventoryService: InventoryService,
     private readonly reflector: Reflector
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  /*async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const user: any = request.user; 
     const method = request.method; 
@@ -31,5 +31,5 @@ export class InventoryLockGuard implements CanActivate {
     }
 
     return true; 
-  }
+  }*/
 }

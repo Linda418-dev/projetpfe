@@ -3,7 +3,6 @@ import { InventoryRepository } from './repositories/inventory.repository';
 import { In, IsNull, LessThanOrEqual } from 'typeorm';
 import { InventoryGateway } from './inventory.gateway';
 import { StatusRepository } from 'src/status/repositories/status.repository';
-import { StatusEnum } from 'src/status/types/enums/status.enum';
 import { userRepository } from 'src/user/repositories/user.repository';
 import { InventoryStatusHistoryRepository } from 'src/inventory-status-history/repositories/inventory-status-history.repository';
 import { CreateInventoryDto } from './types/dto/create-inventory.dto';
@@ -131,7 +130,7 @@ export class InventoryService {
   
       return savedInventory;
     }
-    */
+    
     
     // méthode pour lancer inventaire 
       async launchInventory(inventoryId: string) {
@@ -242,7 +241,7 @@ export class InventoryService {
     
         // Sauvegarder l'inventaire mis à jour
         return await this.inventoryRepository.save(inventory);
-    }*/
+    }
          // méthode pour supprimer un inventaire 
       async deleteInventory(id: string): Promise<{ message: string }> {
         const inventory = await this.inventoryRepository.findOne({
@@ -306,7 +305,7 @@ export class InventoryService {
         return this.inventoryRepository.findOne({
             where: { endDate: IsNull() },
         });
-    }
+    }*/
 }
 
 

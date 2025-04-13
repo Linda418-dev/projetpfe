@@ -1,10 +1,7 @@
-import {  BadRequestException, Injectable } from '@nestjs/common';
-import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
+import {  Injectable } from '@nestjs/common';
 import { InventoryDetailsRepository } from './repositories/inventory-details.repository';
 import { InventoryRepository } from 'src/inventory/repositories/inventory.repository';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
-import { InventoryDetails } from './entities/inventory-details.entity';
-import { StatusEnum } from 'src/status/types/enums/status.enum';
 
 @Injectable()
 export class InventoryDetailsService {
@@ -13,7 +10,7 @@ export class InventoryDetailsService {
    private readonly inventoryRepository: InventoryRepository,
      private readonly assetRepository: AssetRepository,
   ) {}
-  async createInventoryDetails(dto: CreateInventoryDetailsDto): Promise<InventoryDetails> {
+ /* async createInventoryDetails(dto: CreateInventoryDetailsDto): Promise<InventoryDetails> {
     const inventory = await this.inventoryRepository.findOne({
       where: { id: dto.inventoryId },
       relations: ['status'], 
@@ -51,5 +48,5 @@ export class InventoryDetailsService {
       where: { id },
       relations: ['inventory', 'asset', 'place'],
     });
-  }
+  }*/
 }
