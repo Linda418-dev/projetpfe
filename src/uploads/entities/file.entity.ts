@@ -17,7 +17,7 @@ export class File implements IFile {
   @Column()
   typeFile: string;
 
-  @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true, eager: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true,onDelete: 'CASCADE' })
   @JoinColumn({ name: 'assetId' })
   asset: Asset;
 
