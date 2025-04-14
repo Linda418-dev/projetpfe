@@ -21,7 +21,7 @@ export class Asset implements IAsset {
   @OneToMany(() => File, (file) => file.asset, { onDelete: "CASCADE" })
   files: File[]; 
 
-  @ManyToOne(() => Supplier, (supplier) => supplier.assets, { nullable: true, onDelete: "CASCADE" })
+  @ManyToOne(() => Supplier, (supplier) => supplier.assets, { nullable: true,eager: true,  onDelete: "CASCADE" })
   supplier: Supplier;  
 
   @ManyToOne(() => Location, (location) => location.assets, { nullable: false, eager: true, onDelete: "CASCADE" })

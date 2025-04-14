@@ -75,11 +75,12 @@ import { AssetStatus } from './asset-status/entities/asset-status.entity';
     DepartmentModule,
     ServiceModule,
     LocationModule,
-    AssetModule,
-    LocationHistoryModule,
     CategoryModule,
     SupplierModule,
     UploadsModule,
+    AssetModule,
+    LocationHistoryModule,
+    AssetStatusModule,
     PaginationModule,
     UserRoleModule,
     AuthModule,
@@ -90,7 +91,7 @@ import { AssetStatus } from './asset-status/entities/asset-status.entity';
     StatusModule,
     InventoryDetailsModule,
     InventoryAssignmentModule,
-    AssetStatusModule,
+    
     
     
    

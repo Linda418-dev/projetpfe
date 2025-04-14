@@ -15,7 +15,7 @@ export class User implements IUser {
   @Column({ unique: true, nullable: true }) 
   email?: string;
 
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
