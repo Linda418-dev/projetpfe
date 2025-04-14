@@ -33,7 +33,6 @@ export class Asset implements IAsset {
   @ManyToOne(() => Status, { eager: true, nullable: false, onDelete: 'SET NULL' })
   status: Status;
 
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
