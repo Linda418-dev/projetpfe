@@ -23,8 +23,10 @@ export class AuthService {
     const isEmail = identifier.includes('@');
     const user = await this.userRepository.findOne({
       where: isEmail ? { email: identifier } : { username: identifier },
+      select: ['id', 'username', 'email', 'password'],
       relations: ['role'],
     });
+    
   
     if (!user) {
       throw new UnauthorizedException('User not found');
