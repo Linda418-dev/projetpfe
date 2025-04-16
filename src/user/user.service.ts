@@ -65,14 +65,34 @@ export class UserService {
         return await this.userRepo.save(user);
       }
       
-      async deleteUser(id: string) {
+      async deactivateUser(id: string) {
         const user = await this.userRepo.findOne({ where: { id } });
-    
+      
         if (!user) {
           throw new NotFoundException('User not found');
         }
-    
-        await this.userRepo.remove(user);
-        return { message: 'User deleted successfully' };
+      
+        user.isActive = false;
+      
+        await this.userRepo.save(user);
+        return { message: 'User has been deactivated successfully' };
       }
+
+      async activateUser(id: string) {
+        const user = await this.userRepo.findOne({ where: { id } });
+      
+        if (!user) {
+          throw new NotFoundException('User not found');
+        }
+      
+        if (user.isActive) {
+          return { message: 'User is already active' };
+        }
+      
+        user.isActive = true;
+        await this.userRepo.save(user);
+      
+        return { message: 'User reactivated successfully' };
+      }
+      
 }

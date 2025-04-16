@@ -1,8 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IUser } from "../types/interface/user.interface";
 import { UserRole } from "src/user-role/entities/user-role.entity";
-import { Inventory } from "src/inventory/entities/inventory.entity";
-import { Department } from "src/department/entities/department.entity";
 import { Affectation } from "src/affectation/entities/affectation.entity";
 
 @Entity()
@@ -18,6 +16,9 @@ export class User implements IUser {
 
   @Column({ select: false })
   password: string;
+
+  @Column({ default: true })
+  isActive: boolean;
 
   @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
   role: UserRole;

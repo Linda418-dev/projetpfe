@@ -44,7 +44,15 @@ export class UserController {
   @Delete(':id')
   // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles('admin') 
-  async deleteUser(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
+  async deactivateUser(@Param('id') id: string) {
+    return this.userService.deactivateUser(id);
   }
+  @BypassInventoryLock()
+   @Patch(':id/activate')
+   // @UseGuards(JwtAuthGuard, RolesGuard)
+   // @Roles('admin')
+    async activateUser(@Param('id') id: string) {
+     return this.userService.activateUser(id);
+  }
+
 }
