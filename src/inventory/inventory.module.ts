@@ -4,14 +4,13 @@ import { InventoryController } from './inventory.controller';
 import { InventoryRepository } from './repositories/inventory.repository';
 import { InventoryGateway } from './inventory.gateway';
 import { StatusRepository } from 'src/status/repositories/status.repository';
+import { InventoryStatusRepository } from 'src/inventory-status/repositories/inventory-status.repository';
 import { userRepository } from 'src/user/repositories/user.repository';
-import { InventoryStatusHistoryRepository } from 'src/inventory-status-history/repositories/inventory-status-history.repository';
-import { DepartmentRepository } from 'src/department/repositories/department.repository';
-import { InventoryAssignmentRepository } from 'src/inventory-assignment/repositories/inventory-assignment.repository';
+import { AffectationRepository } from 'src/affectation/repositories/affectation.repository';
+import { SiteRepository } from 'src/site/Repositories/site.repository';
 
 @Module({
-  providers: [InventoryService , InventoryRepository, InventoryGateway,StatusRepository, userRepository, InventoryStatusHistoryRepository,
-     DepartmentRepository,InventoryAssignmentRepository],
+  providers: [InventoryService , InventoryRepository, InventoryGateway,StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository],
   controllers: [InventoryController]
 })
 export class InventoryModule {}

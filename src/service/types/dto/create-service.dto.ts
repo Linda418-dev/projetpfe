@@ -10,7 +10,7 @@ export class CreateServiceDto {
     name: string;
     
     @ApiProperty()
-    @ValidateNested({ each: true })  
+    @ValidateNested()  
     @Type(() => CreateLocationDto)
     @IsOptional()  
     locations?: CreateLocationDto[];

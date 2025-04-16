@@ -1,5 +1,5 @@
 import { Iidentfiable } from "src/Shared/Interface/Identfiable.interface";
 
-export interface IinventoryHistoryStatus extends Iidentfiable {
+export interface IinventoryStatus extends Iidentfiable {
    
 }

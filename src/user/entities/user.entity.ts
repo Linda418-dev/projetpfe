@@ -1,8 +1,9 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IUser } from "../types/interface/user.interface";
 import { UserRole } from "src/user-role/entities/user-role.entity";
 import { Inventory } from "src/inventory/entities/inventory.entity";
 import { Department } from "src/department/entities/department.entity";
+import { Affectation } from "src/affectation/entities/affectation.entity";
 
 @Entity()
 export class User implements IUser {
@@ -20,6 +21,9 @@ export class User implements IUser {
 
   @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
   role: UserRole;
+
+  @OneToMany(() => Affectation, (affectation) => affectation.operator)
+  affectations: Affectation[];
    
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

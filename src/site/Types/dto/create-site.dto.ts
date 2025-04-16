@@ -27,7 +27,7 @@ export class CreateSiteDto {
           }
         ]
       })
-    @ValidateNested({ each: true })  
+    @ValidateNested()  
     @Type(() => CreateDepartmentDto)
     @IsOptional()  
     department?: CreateDepartmentDto[];

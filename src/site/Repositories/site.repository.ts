@@ -18,5 +18,12 @@ async findSiteWithRelationsById(id: string) {
     .where('site.id = :id', { id })
     .getOne();
 }
+async findAll() {
+  return this.createQueryBuilder('site')
+    .leftJoinAndSelect('site.departments', 'department')
+    .leftJoinAndSelect('department.services', 'service')
+    .leftJoinAndSelect('service.locations', 'location')
+    .getMany();
+}
 
 }

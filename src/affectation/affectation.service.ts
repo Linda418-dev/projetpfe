@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class StatusService  { 
-  
-}
+export class AffectationService {}

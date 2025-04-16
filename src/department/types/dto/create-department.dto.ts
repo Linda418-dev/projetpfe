@@ -11,7 +11,7 @@ export class CreateDepartmentDto {
     
 
     @ApiProperty()
-    @ValidateNested({ each: true })
+    @ValidateNested()
     @Type(() => CreateServiceDto)
     @IsOptional()
     services?: CreateServiceDto[];

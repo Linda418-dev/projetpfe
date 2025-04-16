@@ -1,17 +1,6 @@
-import { IsOptional, IsString, IsDateString, IsUUID, ValidateNested, IsArray } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsDateString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class OperatorAssignmentDto {
-  @ApiProperty()
-  @IsUUID()
-  userId: string;
-
-  @ApiProperty()
-  @IsArray()
-  @IsUUID('all', { each: true })
-  departmentIds: string[];
-}
 
 export class UpdateInventoryDto {
   @ApiProperty()
@@ -36,9 +25,5 @@ export class UpdateInventoryDto {
   @IsUUID()
   placeId?: string;
 
-  @ApiProperty()
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => OperatorAssignmentDto)
-  operatorAssignments?: OperatorAssignmentDto[];
+ 
 }

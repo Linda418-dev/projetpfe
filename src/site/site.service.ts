@@ -18,7 +18,7 @@ export class SiteService {
      ){}
 
         async getAllSites() {
-            return this.siteRepository.find();
+            return this.siteRepository.findAll();
         }
         async createSite(createSiteDto: CreateSiteDto) {
           //créer le site

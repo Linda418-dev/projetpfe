@@ -9,4 +9,11 @@ export class userRepository extends Repository<User> {
   constructor(private readonly dataSource: DataSource) {
     super(User, dataSource.createEntityManager());
   }
+
+  async findAllOperators() {
+    return this.createQueryBuilder('user')
+      .leftJoinAndSelect('user.role', 'role')
+      .where('role.role = :role', { role: 'operator' })
+      .getMany();
+  }
 }

@@ -23,7 +23,6 @@ import { UserModule } from './user/user.module';
 import { BcryptService } from './auth/common/bcrypt.service';
 import { UserRole } from './user-role/entities/user-role.entity';
 import { InventoryModule } from './inventory/inventory.module';
-import { InventoryStatusHistoryModule } from './inventory-status-history/inventory-status-history.module';
 import { StatusModule } from './status/status.module';
 import { InventoryDetailsModule } from './inventory-details/inventory-details.module';
 import { Inventory } from './inventory/entities/inventory.entity';
@@ -35,8 +34,6 @@ import { InventoryRepository } from './inventory/repositories/inventory.reposito
 import { StatusRepository } from './status/repositories/status.repository';
 import { InventoryGateway } from './inventory/inventory.gateway';
 import { userRepository } from './user/repositories/user.repository';
-import { InventoryStatusHistory } from './inventory-status-history/entities/inventory-status-history.entity';
-import { InventoryStatusHistoryRepository } from './inventory-status-history/repositories/inventory-status-history.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
 import { ScheduleModule } from '@nestjs/schedule';
 import { InventoryDetails } from './inventory-details/entities/inventory-details.entity';
@@ -51,6 +48,13 @@ import { LocationHistoryModule } from './location-history/location-history.modul
 import { LocationHistory } from './location-history/entities/location-history.entity';
 import { AssetStatusModule } from './asset-status/asset-status.module';
 import { AssetStatus } from './asset-status/entities/asset-status.entity';
+import { InventoryStatus } from './inventory-status/entities/inventory-status.entity';
+import { InventoryStatusRepository } from './inventory-status/repositories/inventory-status.repository';
+import { InventoryStatusModule } from './inventory-status/inventory-status.module';
+import { AffectationModule } from './affectation/affectation.module';
+import { AffectationRepository } from './affectation/repositories/affectation.repository';
+import { Affectation } from './affectation/entities/affectation.entity';
+import { SiteRepository } from './site/Repositories/site.repository';
 
 @Module({
   imports: [
@@ -67,7 +71,7 @@ import { AssetStatus } from './asset-status/entities/asset-status.entity';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatusHistory,InventoryDetails,InventoryAssignment], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails], 
         synchronize: true, 
       }),
     }),
@@ -87,10 +91,11 @@ import { AssetStatus } from './asset-status/entities/asset-status.entity';
     UserModule,
     UserRoleModule,
     InventoryModule,
-    InventoryStatusHistoryModule,
     StatusModule,
     InventoryDetailsModule,
     InventoryAssignmentModule,
+    InventoryStatusModule,
+    AffectationModule,
     
     
     
@@ -105,9 +110,11 @@ import { AssetStatus } from './asset-status/entities/asset-status.entity';
     StatusRepository,
     InventoryGateway,
     userRepository,
-    InventoryStatusHistoryRepository,
+    InventoryStatusRepository,
     DepartmentRepository,
     InventoryAssignmentRepository,
+    AffectationRepository,
+    SiteRepository,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,
