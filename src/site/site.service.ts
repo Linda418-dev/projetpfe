@@ -88,12 +88,13 @@ export class SiteService {
           }
           
           async updateSite(id: string, updateSiteDto: updateSiteDto) {
-            const fetchService = await this.getSiteById(id);
-            if (!fetchService) {
+            const fetchSite = await this.getSiteById(id);
+            if (!fetchSite) {
               throw new BadRequestException(`Site with id ${id} not found`);
             }
-            Object.assign(fetchService, updateSiteDto);
-            return this.serviceRepository.save(fetchService);
+            Object.assign(fetchSite, updateSiteDto);
+            return this.siteRepository.save(fetchSite);
           }
+          
           
 }

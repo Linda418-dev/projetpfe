@@ -9,11 +9,9 @@ export class InventoryStatus implements IinventoryStatus  {
   id: string;
 
   @ManyToOne(() => Inventory, { eager: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'inventoryId' })
   inventory: Inventory;
 
   @ManyToOne(() => Status, { eager: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'statusId' })
   status: Status;
 
   @CreateDateColumn({ type: 'timestamp' })

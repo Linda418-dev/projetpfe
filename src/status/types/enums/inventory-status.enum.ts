@@ -1,5 +1,5 @@
 export enum InventoryStatusEnum {
-    PENDING = 'Pending',
+    Planned = 'Planned',
     IN_PROGRESS = 'In Progress',
     COMPLETED = 'Completed',
   }

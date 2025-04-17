@@ -8,6 +8,7 @@ import { AffectationRepository } from 'src/affectation/repositories/affectation.
 import { SiteRepository } from 'src/site/Repositories/site.repository';
 import { User } from 'src/user/entities/user.entity';
 import { In } from 'typeorm';
+import { Cron } from '@nestjs/schedule';
 
 
 @Injectable()
@@ -19,10 +20,9 @@ export class InventoryService {
     private readonly affectationRepository : AffectationRepository,
     private readonly siteRepository : SiteRepository
   ){}
-
-  //  methode pour la creation d'un inventaire 
+  // methode pour la creation inventaire
   async createInventory(createinventorydto: CreateInventoryDto) {
-    //  le nom doit unique 
+    // Vérifie l'unicité du nom
     const existing = await this.inventoryRepository.findOne({
       where: { name: createinventorydto.name },
     });
@@ -31,7 +31,7 @@ export class InventoryService {
       throw new BadRequestException(`Inventory with name "${createinventorydto.name}" already exists`);
     }
   
-    // verifier le siteId existe ou non 
+    // Vérifie que le site existe
     const site = await this.siteRepository.findOne({
       where: { id: createinventorydto.siteId },
     });
@@ -40,17 +40,25 @@ export class InventoryService {
       throw new BadRequestException(`Site not found`);
     }
   
+    //  Vérifie que le statut "Planned" existe AVANT d'enregistrer l'inventaire
+    const plannedStatus = await this.statusRepository.findOne({
+      where: { name: 'Planned', type: 'inventory' },
+    });
+  
+    if (!plannedStatus) {
+      throw new BadRequestException(`Default inventory status "Planned" not found`);
+    }
+  
+    // Récupération des opérateurs
     let operators: User[] = [];
   
-    // si "All" est coché ,charger tous les utilisateurs avec rôle "operator"
     if (createinventorydto.allOperators) {
       operators = await this.userRepository.findAllOperators();
-
+  
       if (operators.length === 0) {
         throw new BadRequestException(`No operators found in the system.`);
       }
   
-    //  sinon on vérifie les IDs envoyés
     } else if (createinventorydto.operatorIds?.length > 0) {
       operators = await this.userRepository.find({
         where: { id: In(createinventorydto.operatorIds) },
@@ -60,7 +68,6 @@ export class InventoryService {
       if (operators.length !== createinventorydto.operatorIds.length) {
         throw new BadRequestException(`One or more operator IDs are invalid.`);
       }
-
   
       const invalidUsers = operators.filter(
         (user) => user.role?.role !== 'operator'
@@ -82,21 +89,15 @@ export class InventoryService {
   
     const savedInventory = await this.inventoryRepository.save(newInventory);
   
-    const pendingStatus = await this.statusRepository.findOne({
-      where: { name: 'Pending', type: 'inventory' },
-    });
-  
-    if (!pendingStatus) {
-      throw new BadRequestException(`Default inventory status "Pending" not found`);
-    }
-  
+    // Création du statut de l’inventaire
     const newStatus = this.inventoryStatusRepository.create({
       inventory: savedInventory,
-      status: pendingStatus,
+      status: plannedStatus,
     });
   
     await this.inventoryStatusRepository.save(newStatus);
   
+    // Affectations
     const affectations = operators.map((operator) =>
       this.affectationRepository.create({
         inventory: savedInventory,
@@ -107,27 +108,25 @@ export class InventoryService {
   
     return savedInventory;
   }
-
-
   
-  //methode pour lancer inventaire par id 
+
+
   async launchInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });
     if (!inventory) {
       throw new BadRequestException(`Inventory not found`);
     }
   
-    // verifier  le startDate  pour lancer
+    // Vérifier la date de début
     const today = new Date();
     const startDate = new Date(inventory.startDate);
   
-    // on ignore l'heure en ne comparant que la date
     const isBeforeStart = today.setHours(0, 0, 0, 0) < startDate.setHours(0, 0, 0, 0);
     if (isBeforeStart) {
       throw new BadRequestException(`Cannot launch inventory before its start date`);
     }
   
-    // verifier que le statut "In Progress" existe ou non 
+    // Vérifie l'existence du statut "In Progress"
     const inProgressStatus = await this.statusRepository.findOne({
       where: { name: 'In Progress', type: 'inventory' },
     });
@@ -136,18 +135,35 @@ export class InventoryService {
       throw new BadRequestException(`Status "In Progress" not found`);
     }
   
-    // verifier  si déjà en cours ou non 
+    // Récupère le dernier statut de l'inventaire
     const lastStatus = await this.inventoryStatusRepository.findOne({
       where: { inventory: { id } },
       order: { createdAt: 'DESC' },
       relations: ['status'],
     });
   
-    if (lastStatus?.status.name === 'In Progress') {
+    if (!lastStatus) {
+      throw new BadRequestException(`Inventory has no status yet`);
+    }
+  
+    const lastStatusName = lastStatus.status.name;
+  
+    // Empêcher  Si le status en cours
+    if (lastStatusName === 'In Progress') {
       throw new BadRequestException(`Inventory is already in progress`);
     }
   
-    // enregistrer nouvelle ligne dans inventory_status
+    // Empêcher  Si le status terminé
+    if (lastStatusName === 'Completed') {
+      throw new BadRequestException(`Cannot launch an inventory that is already completed`);
+    }
+  
+    // Lancer seulement si le dernier statut est "Planned"
+    if (lastStatusName !== 'Planned') {
+      throw new BadRequestException(`Inventory can only be launched if status is "Planned"`);
+    }
+  
+    // Enregistrement du nouveau statut
     const newInventoryStatus = this.inventoryStatusRepository.create({
       inventory,
       status: inProgressStatus,
@@ -156,14 +172,124 @@ export class InventoryService {
     await this.inventoryStatusRepository.save(newInventoryStatus);
   
     return {
-      message: `Inventory "${inventory.name}" has been launched.`,
+      message: `Inventory "${inventory.name}" has been launched`,
       inventoryId: inventory.id,
       status: inProgressStatus.name,
     };
   }
   
+  async deleteInventory(id: string) {
+    const inventory = await this.inventoryRepository.findOne({ where: { id } });
+  
+    if (!inventory) {
+      throw new BadRequestException(`Inventory with ID ${id} not found`);
+    }
+  
+    // Vérifie le dernier statut de l'inventaire
+    const lastStatus = await this.inventoryStatusRepository.findOne({
+      where: { inventory: { id } },
+      order: { createdAt: 'DESC' },
+      relations: ['status'],
+    });
+  
+    const statusName = lastStatus?.status.name;
+  
+    if (statusName === 'In Progress' || statusName === 'Completed') {
+      throw new BadRequestException(`Cannot delete inventory in status "${statusName}"`);
+    }
+  
+    await this.inventoryRepository.remove(inventory);
+  
+    return {
+      message: `Inventory "${inventory.name}" has been deleted successfully.`,
+      inventoryId: inventory.id,
+    };
+  }
+ 
+  @Cron('0 0 * * *') // Tous les jours à minuit
+async checkForExpiredInventories() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const inProgressOrPlannedInventories = await this.inventoryRepository.findWithStatuses(['Planned', 'In Progress']);
+
+  const expiredStatus = await this.statusRepository.findOne({
+    where: { name: 'Expired', type: 'inventory' },
+  });
+
+  if (!expiredStatus) {
+    throw new BadRequestException(`Status "Expired" not found`);
+  }
+
+  for (const inventory of inProgressOrPlannedInventories) {
+    const inventoryEnd = new Date(inventory.endDate);
+    inventoryEnd.setHours(0, 0, 0, 0);
+
+    if (inventoryEnd < today) {
+      // Ajouter ligne status "Expired"
+      const expiredEntry = this.inventoryStatusRepository.create({
+        inventory,
+        status: expiredStatus,
+      });
+      await this.inventoryStatusRepository.save(expiredEntry);
+
+      // ➤ Optionnel : notifier admin ici
+    }
+  }
+}
+
+async updateEndDateAndRestoreInventory(id: string, newEndDate: Date) {
+  const inventory = await this.inventoryRepository.findOne({ where: { id } });
+  if (!inventory) throw new BadRequestException(`Inventory not found`);
+
+  const lastStatus = await this.inventoryStatusRepository.findOne({
+    where: { inventory: { id } },
+    order: { createdAt: 'DESC' },
+    relations: ['status'],
+  });
+
+  if (!lastStatus) {
+    throw new BadRequestException(`No status found for inventory.`);
+  }
+
+  const now = new Date();
+
+  if (lastStatus.status.name === 'Expired' && newEndDate > now) {
+    inventory.endDate = newEndDate;
+    await this.inventoryRepository.save(inventory);
+
+    const inProgressStatus = await this.statusRepository.findOne({
+      where: { name: 'In Progress', type: 'inventory' },
+    });
+
+    if (!inProgressStatus) {
+      throw new BadRequestException(`Status "In Progress" not found`);
+    }
+
+    const newStatus = this.inventoryStatusRepository.create({
+      inventory,
+      status: inProgressStatus,
+    });
+    await this.inventoryStatusRepository.save(newStatus);
+
+    return {
+      message: `Inventory "${inventory.name}" endDate updated and status set to In Progress.`,
+      inventoryId: inventory.id,
+    };
+  } else {
+    throw new BadRequestException('Cannot restore inventory unless it is expired and new endDate is valid');
+  }
+}
+
+
+
   
 }
+
+
+
+
+
 
 
    
