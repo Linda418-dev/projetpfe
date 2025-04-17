@@ -21,7 +21,7 @@ export class Inventory implements Iinventory {
   @OneToMany(() => Affectation, (affectation) => affectation.inventory)
   affectations: Affectation[];
 
-  @ManyToOne(() => Site, { eager: true }) // `eager` si tu veux charger automatiquement le site
+  @ManyToOne(() => Site, { eager: true }) 
   site: Site; 
 
   @CreateDateColumn({ type: 'timestamp' })
