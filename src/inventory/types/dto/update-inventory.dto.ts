@@ -3,27 +3,20 @@ import { ApiProperty } from '@nestjs/swagger';
 
 
 export class UpdateInventoryDto {
-  @ApiProperty()
+
   @IsOptional()
   @IsString()
+  @ApiProperty({ required: false })
   name?: string;
 
-
-  @ApiProperty()
   @IsOptional()
   @IsDateString()
-  startDate?: string;
-
-
-  @ApiProperty()
-  @IsOptional()
-  @IsDateString()
+  @ApiProperty({ required: false })
   endDate?: string;
-  
-  @ApiProperty()
+
   @IsOptional()
   @IsUUID()
-  placeId?: string;
-
+  @ApiProperty({ required: false })
+  statusId?: string
  
 }

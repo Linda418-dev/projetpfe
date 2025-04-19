@@ -11,6 +11,8 @@ export class InventoryStatusService {
       findByInventory(inventoryId: string) {
         return this.inventoryStatusRepository.find({
           where: { inventory: { id: inventoryId } },
+          order: { createdAt: 'DESC' }, 
         });
       }
+      
 }

@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { Iinventory } from '../types/interfaces/inventory.interface';
 import { Affectation } from 'src/affectation/entities/affectation.entity';
 import { Site } from 'src/site/Entities/site.entity';
+import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 
 
 @Entity()
@@ -23,6 +24,9 @@ export class Inventory implements Iinventory {
 
   @ManyToOne(() => Site, { eager: true }) 
   site: Site; 
+
+  @OneToMany(() => InventoryStatus, (inventoryStatus) => inventoryStatus.inventory)
+  inventoryStatus: InventoryStatus[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

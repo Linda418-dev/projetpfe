@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Column } from 'typeorm';
 import { IinventoryStatus } from '../types/interfaces/inventory-status.interface';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { Status } from 'src/status/entities/status.entity';
@@ -7,11 +7,14 @@ import { Status } from 'src/status/entities/status.entity';
 export class InventoryStatus implements IinventoryStatus  {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+  
 
   @ManyToOne(() => Inventory, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'inventoryId' }) 
   inventory: Inventory;
 
   @ManyToOne(() => Status, { eager: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'statusId' })
   status: Status;
 
   @CreateDateColumn({ type: 'timestamp' })

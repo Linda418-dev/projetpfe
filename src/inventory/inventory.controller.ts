@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDto } from './types/dto/create-inventory.dto';
+import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 
 
 @ApiTags('inventory Resource')
@@ -22,9 +23,13 @@ export class InventoryController {
       return this.inventoryService.deleteInventory(id);
     }
 
-    @Patch(':id/update-endDate')
-    async updateEndDate(@Param('id') id: string,@Body() body: { endDate: Date }) {
-  return this.inventoryService.updateEndDateAndRestoreInventory(id, new Date(body.endDate));
+    
+
+    @Patch(':id')
+async update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
+  return this.inventoryService.updateInventory(id, dto);
 }
+
+
 
 }

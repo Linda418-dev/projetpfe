@@ -11,6 +11,7 @@ import { SiteRepository } from 'src/site/Repositories/site.repository';
 
 @Module({
   providers: [InventoryService , InventoryRepository, InventoryGateway,StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository],
-  controllers: [InventoryController]
+  controllers: [InventoryController],
+  exports: [InventoryService],
 })
 export class InventoryModule {}
