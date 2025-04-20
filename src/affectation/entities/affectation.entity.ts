@@ -1,8 +1,9 @@
 
-import {  CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {  CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Iaffectation } from '../types/interfaces/affectation.interface';
-import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { User } from 'src/user/entities/user.entity';
+import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
+import { Inventory } from 'src/inventory/entities/inventory.entity';
 
 @Entity()
 export class Affectation implements Iaffectation{
@@ -14,6 +15,9 @@ export class Affectation implements Iaffectation{
 
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   operator: User;
+
+  @OneToMany(() => InventoryDetails, (details) => details.affectation)
+  inventoryDetails: InventoryDetails[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Asset } from 'src/assets/Entities/Asset.entity';
 import { IFile } from '../types/interfaces/file.interface';
+import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 
 
 @Entity('file')
@@ -24,6 +25,13 @@ export class File implements IFile {
   @Column({ nullable: true })  
   assetId: string;  
 
+  @ManyToOne(() => InventoryDetails, (inventoryDetails) => inventoryDetails.files, {nullable: true, onDelete: 'CASCADE',})
+  @JoinColumn({ name: 'inventoryDetailsId' })
+  inventoryDetails: InventoryDetails;
+
+  @Column({ nullable: true })
+  inventoryDetailsId: string;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   

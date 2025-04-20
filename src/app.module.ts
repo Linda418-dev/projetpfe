@@ -37,9 +37,6 @@ import { userRepository } from './user/repositories/user.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
 import { ScheduleModule } from '@nestjs/schedule';
 import { InventoryDetails } from './inventory-details/entities/inventory-details.entity';
-import { InventoryAssignmentModule } from './inventory-assignment/inventory-assignment.module';
-import { InventoryAssignment } from './inventory-assignment/entities/InventoryAssignment.entity';
-import { InventoryAssignmentRepository } from './inventory-assignment/repositories/inventory-assignment.repository';
 import { SiteModule } from './site/site.module';
 import { Site } from './site/Entities/site.entity';
 import { LocationModule } from './location/location.module';
@@ -93,7 +90,6 @@ import { SiteRepository } from './site/Repositories/site.repository';
     InventoryModule,
     StatusModule,
     InventoryDetailsModule,
-    InventoryAssignmentModule,
     InventoryStatusModule,
     AffectationModule,
     
@@ -112,7 +108,6 @@ import { SiteRepository } from './site/Repositories/site.repository';
     userRepository,
     InventoryStatusRepository,
     DepartmentRepository,
-    InventoryAssignmentRepository,
     AffectationRepository,
     SiteRepository,
     {
