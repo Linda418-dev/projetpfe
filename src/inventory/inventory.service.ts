@@ -11,6 +11,8 @@ import { In, LessThan, Not } from 'typeorm';
 import { Cron} from '@nestjs/schedule';
 import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
+import { Inventory } from './entities/inventory.entity';
+import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 
 
 @Injectable()
@@ -222,9 +224,8 @@ export class InventoryService {
       inventoryId: inventory.id,
     };
   }
-
+//  methode pour update inventory 
   async updateInventory(id: string, dto: UpdateInventoryDto) {
-    // Recherche de l'inventaire avec les relations nécessaires
     const inventory = await this.inventoryRepository.findOne({
       where: { id },
       relations: ['inventoryStatus'],
@@ -248,38 +249,44 @@ export class InventoryService {
     const lastStatusName = lastStatus.status.name;
     let statusUpdated = false;
   
-    //Mise à jour vers "Completed"
-    if (dto.statusId) {
-      const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
-    
-      if (!status) {
-        throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
-      }
-    
-      if (status.name !== 'Completed') {
-        throw new BadRequestException(`Inventory status can only be updated to "Completed"`);
-      }
-    
-      // Récupérer l'inventaire complet avec ses relations
-      const freshInventory = await this.inventoryRepository.findOne({
-        where: { id },
-        relations: ['site', 'affectations'], // Ajoute toutes les relations nécessaires ici
-      });
-    
-      if (!freshInventory) {
-        throw new InternalServerErrorException('Inventory not found');
-      }
-    
-      // Création correcte du statut
-      const completedStatusEntry = this.inventoryStatusRepository.create({
-        inventory: freshInventory,
-        status: status,
-      });
-    
-      await this.inventoryStatusRepository.save(completedStatusEntry);
-      statusUpdated = true;
+  // Mise à jour vers "Completed"
+  if (dto.statusId) {
+    const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
+    if (!status) {
+      throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
     }
- 
+
+    // verifier le status n'est pas Completed
+    if (status.name !== 'Completed') {
+      throw new BadRequestException('Inventory status can only be updated to "Completed"');
+    }
+    // verifier le status n'est pas In Progress
+    if (lastStatusName !== 'In Progress') {
+      throw new BadRequestException('Inventory can only be completed if the current status is "In Progress"');
+    }
+
+    const saveInventory = await this.inventoryRepository.findOne({ where: { id } });
+    if (!saveInventory) {
+      throw new InternalServerErrorException('Inventory not found');
+    }
+
+    // Créer un objet compatible avec TypeORM pour la mise à jour du statut
+    const newInventoryStatus = this.inventoryStatusRepository.create({
+      inventory: saveInventory,
+      status: status,
+    });
+
+    // Sauvegarde du nouveau statut
+    const newInventoryStatusRecord = await this.inventoryStatusRepository.save(newInventoryStatus);
+    statusUpdated = true;
+
+    // Retourner les informations mises à jour
+    return {
+      inventory: saveInventory,
+      status: newInventoryStatusRecord,
+      statusUpdated: statusUpdated,
+    };
+  }
     // Mise à jour des champs si présents
     if (dto.name) inventory.name = dto.name;
     if (dto.endDate) inventory.endDate = new Date(dto.endDate);
@@ -298,15 +305,15 @@ export class InventoryService {
       }
   
       // Vérification de l'inventaire avant création du nouveau statut
-      const freshInventory2 = await this.inventoryRepository.findOne({ where: { id } });
+      const saveInventory2 = await this.inventoryRepository.findOne({ where: { id } });
   
-      if (!freshInventory2) {
+      if (!saveInventory2) {
         throw new InternalServerErrorException('Inventory not found');
       }
   
       // Création du statut "In Progress"
       const newStatus = this.inventoryStatusRepository.create({
-        inventory: freshInventory2,
+        inventory: saveInventory2,
         status: inProgressStatus,
       });
   
