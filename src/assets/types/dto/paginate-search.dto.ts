@@ -11,7 +11,7 @@ export class PaginateSearchDto extends PaginateDto implements SearchKeyword{
     skip:number;
 
 
-@ApiProperty()
+    @ApiProperty()
     @IsInt()
     @Type(() => Number)
     @Min(1)

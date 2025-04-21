@@ -24,6 +24,22 @@ export class InventoryService {
     private readonly affectationRepository : AffectationRepository,
     private readonly siteRepository : SiteRepository
   ){}
+
+ 
+  //  methode pou get All inventory selon le role 
+  async getAllInventories(user: User){
+    // si le role "admin" get  tous les inventaires
+    if (user.role.role === 'admin') {
+      return this.inventoryRepository.findAllWithRelations();
+      // sinon si opeartor elle return uniquement les inventaires où il est affecté 
+    } else if (user.role.role === 'operator') {
+      return this.inventoryRepository.findInventoriesByOperatorId(user.id);
+    } else {
+      return [];
+    }
+  }
+
+
   // methode pour la creation inventaire
   async createInventory(createinventorydto: CreateInventoryDto) {
     const existing = await this.inventoryRepository.findOne({
@@ -109,9 +125,14 @@ export class InventoryService {
   
     return savedInventory;
   }
-  
-
-
+  //  methode pour get inventory By Id
+  async getInventoryById(id: string) {
+    return this.inventoryRepository.findOne({
+      where: { id },
+      relations: ['site', 'affectations', 'affectations.operator'],
+    });
+  }
+// methode pour lancer inventaire
   async launchInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });
     if (!inventory) {
@@ -196,7 +217,7 @@ export class InventoryService {
     };
   }
   
-  
+  //  methode pour delete Inventory
   async deleteInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });
   
@@ -345,21 +366,22 @@ export class InventoryService {
   
   
   
-  
-  @Cron('*/1 * * * *') // Le CRON est exécuté toutes les minutes
+   // CRON  exécuté toutes les minutes pour tester les inventaire dont la date de fin est passée
+  @Cron('*/1 * * * *')
   async handleExpiredInventories() {
     const logger = new Logger(InventoryService.name);
     
     // Créer une date avec les heures réglées à minuit pour une comparaison cohérente
     const today = new Date();
-    today.setHours(0, 0, 0, 0);  // Réinitialise l'heure à minuit pour la comparaison
+     // Réinitialise l'heure à minuit pour la comparaison
+    today.setHours(0, 0, 0, 0); 
   
     logger.log('CRON Checking for expired inventories...');
   
     // Obtenir tous les inventaires dont la date de fin est passée
     const expiredInventories = await this.inventoryRepository.find({
       where: {
-        endDate: LessThan(today), // Compare la date sans l'heure
+        endDate: LessThan(today), 
       },
       relations: ['inventoryStatus'],
     });
