@@ -8,50 +8,50 @@ import { UpdateUserDto } from './types/dto/update-user.dto';
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepo: userRepository,
-    private readonly roleRepo: userRoleRepository,
+    private readonly userRepository: userRepository,
+    private readonly userRoleRepository: userRoleRepository,
     private readonly bcryptService: BcryptService
   ) {}
-     
+    // methode get All Users
       async getAllUsers() {
-        return this.userRepo.find(); 
+        return this.userRepository.find(); 
       }
-
+    // methode get user by id 
       async getUserById(id: string) {
-        const user = await this.userRepo.findOne({ where: { id } });
+        const user = await this.userRepository.findOne({ where: { id } });
         if (!user) {
           throw new NotFoundException('User not found');
         }
         return user;
       }
-     
+    //   methode pour creation user
       async createUser(createUserDto: CreateUserDto) {
       const { email, username, password, role } = createUserDto;
-      const userExists = await this.userRepo.findOne({ where: [{ email }, { username }] });
+      const userExists = await this.userRepository.findOne({ where: [{ email }, { username }] });
         if (userExists) {
           throw new ConflictException('User with this email or username already exists');
         }
 
     
-        const userRole = await this.roleRepo.findOne({ where: { role } });
+        const userRole = await this.userRoleRepository.findOne({ where: { role } });
         if (!userRole) {
           throw new ConflictException('Invalid role');
         }
     
         const hashedPassword = await this.bcryptService.hashPassword(password);
     
-        const newUser = this.userRepo.create({
+        const newUser = this.userRepository.create({
           email,
           username,
           password: hashedPassword,
           role: userRole,
         });
     
-        return await this.userRepo.save(newUser);
+        return await this.userRepository.save(newUser);
       }
-    
+    // methode pour update user 
       async updateUser(id: string, updateUserDto: UpdateUserDto) {
-      const user = await this.userRepo.findOne({ where: { id } });
+      const user = await this.userRepository.findOne({ where: { id } });
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -62,24 +62,35 @@ export class UserService {
        }
 
        Object.assign(user, updateUserDto);
-        return await this.userRepo.save(user);
+        return await this.userRepository.save(user);
       }
-      
+
+      // methode poure desactiver or supprimer user
       async deactivateUser(id: string) {
-        const user = await this.userRepo.findOne({ where: { id } });
+        const user = await this.userRepository.findOne({
+          where: { id },
+          relations: ['affectations'],
+        });
       
         if (!user) {
           throw new NotFoundException('User not found');
         }
       
-        user.isActive = false;
-      
-        await this.userRepo.save(user);
-        return { message: 'User has been deactivated successfully' };
+        if (user.affectations && user.affectations.length > 0) {
+          // si L'utilisateur a des affectations  on le désactive simplement
+          user.isActive = false;
+          await this.userRepository.save(user);
+          return { message: 'User has been deactivated because they have existing affectations.' };
+        } else {
+          // sinon Aucun  des affectations on peut le supprimer
+          await this.userRepository.remove(user);
+          return { message: 'User has been deleted successfully because they had no affectations.' };
+        }
       }
+      
 
       async activateUser(id: string) {
-        const user = await this.userRepo.findOne({ where: { id } });
+        const user = await this.userRepository.findOne({ where: { id } });
       
         if (!user) {
           throw new NotFoundException('User not found');
@@ -90,7 +101,7 @@ export class UserService {
         }
       
         user.isActive = true;
-        await this.userRepo.save(user);
+        await this.userRepository.save(user);
       
         return { message: 'User reactivated successfully' };
       }
