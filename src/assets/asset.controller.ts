@@ -14,11 +14,11 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 export class AssetController {
     constructor(private readonly assetService: AssetsService,  
     ) {}
-    /*@Get('all-assets')
+    @Get('all-assets')
     @ApiOperation({ summary: 'get all assets' })
     async getAllAssets() {
         return this.assetService.getAllAssets();
-    }*/
+    }
 
      @Get()
      @ApiOperation({ summary: 'get all  assets with paginate keyword' })
@@ -27,6 +27,8 @@ export class AssetController {
       ) {
         return this.assetService.getAssets(query);
       }  
+
+      
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
     // @UseGuards(JwtAuthGuard, RolesGuard)  
