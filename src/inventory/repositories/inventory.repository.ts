@@ -9,7 +9,7 @@ export class InventoryRepository extends Repository<Inventory> {
   constructor(private readonly dataSource: DataSource) {
     super(Inventory, dataSource.createEntityManager());
   }
-  async findAllWithLatestStatus(): Promise<Inventory[]> {
+  async findAllWithLatestStatus() {
     return this.createQueryBuilder('inventory')
       .leftJoinAndSelect('inventory.site', 'site')
       .leftJoinAndSelect('inventory.affectations', 'affectation')
@@ -30,7 +30,7 @@ export class InventoryRepository extends Repository<Inventory> {
   }
   
 
-  async findInventoriesByOperatorIdWithStatus(userId: string): Promise<Inventory[]> {
+  async findInventoriesByOperatorIdWithStatus(userId: string) {
     return this.createQueryBuilder('inventory')
       .leftJoinAndSelect('inventory.affectations', 'affectation')
       .leftJoinAndSelect('affectation.operator', 'operator')
@@ -52,6 +52,27 @@ export class InventoryRepository extends Repository<Inventory> {
   }
   
   
-
+  async getInventoryById(id: string){
+    return this.createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.site', 'site')
+      .leftJoinAndSelect('inventory.affectations', 'affectation')
+      .leftJoinAndSelect('affectation.operator', 'operator')
+      .leftJoinAndSelect(
+        'inventory.inventoryStatus',
+        'latestStatus',
+        `latestStatus.id = (
+          SELECT "statusSub"."id"
+          FROM "inventory_status" "statusSub"
+          WHERE "statusSub"."inventoryId" = "inventory"."id"
+          ORDER BY "statusSub"."createdAt" DESC
+          LIMIT 1
+        )`
+      )
+      .leftJoinAndSelect('latestStatus.status', 'statusDetail')
+      .where('inventory.id = :id', { id })
+      .getOne();
+  }
+  
+  
  
 }

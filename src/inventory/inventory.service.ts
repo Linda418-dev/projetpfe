@@ -126,11 +126,25 @@ export class InventoryService {
   }
   //  methode pour get inventory By Id
   async getInventoryById(id: string) {
-    return this.inventoryRepository.findOne({
+    const inventory = await this.inventoryRepository.findOne({
       where: { id },
-      relations: ['site', 'affectations', 'affectations.operator'],
+      relations: ['site', 'affectations', 'affectations.operator', 'inventoryStatus', 'inventoryStatus.status'],
     });
+  
+    if (!inventory) return null;
+  
+    const sortedStatuses = inventory.inventoryStatus.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  
+    const latestStatus = sortedStatuses[0];
+  
+    return {
+      ...inventory,
+      latestStatus, 
+    };
   }
+  
 // methode pour lancer inventaire
   async launchInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });
