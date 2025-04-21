@@ -27,17 +27,16 @@ export class InventoryService {
 
  
   //  methode pou get All inventory selon le role 
-  async getAllInventories(user: User){
-    // si le role "admin" get  tous les inventaires
+  async getAllInventories(user: User) {
     if (user.role.role === 'admin') {
-      return this.inventoryRepository.findAllWithRelations();
-      // sinon si opeartor elle return uniquement les inventaires où il est affecté 
+      return this.inventoryRepository.findAllWithLatestStatus();
     } else if (user.role.role === 'operator') {
-      return this.inventoryRepository.findInventoriesByOperatorId(user.id);
+      return this.inventoryRepository.findInventoriesByOperatorIdWithStatus(user.id);
     } else {
       return [];
     }
   }
+  
 
 
   // methode pour la creation inventaire

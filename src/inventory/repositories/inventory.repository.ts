@@ -9,21 +9,49 @@ export class InventoryRepository extends Repository<Inventory> {
   constructor(private readonly dataSource: DataSource) {
     super(Inventory, dataSource.createEntityManager());
   }
-
-  async findInventoriesByOperatorId(userId: string) {
+  async findAllWithLatestStatus(): Promise<Inventory[]> {
     return this.createQueryBuilder('inventory')
-      .leftJoinAndSelect('inventory.affectations', 'affectation')
       .leftJoinAndSelect('inventory.site', 'site')
-      .where('affectation.operator.id = :userId', { userId })
+      .leftJoinAndSelect('inventory.affectations', 'affectation')
+      .leftJoinAndSelect('affectation.operator', 'operator')
+      .leftJoinAndSelect(
+        'inventory.inventoryStatus',
+        'latestStatus',
+        `latestStatus.id = (
+          SELECT "statusSub"."id"
+          FROM "inventory_status" "statusSub"
+          WHERE "statusSub"."inventoryId" = "inventory"."id"
+          ORDER BY "statusSub"."createdAt" DESC
+          LIMIT 1
+        )`
+      )
+      .leftJoinAndSelect('latestStatus.status', 'statusDetail')
       .getMany();
   }
-
-  async findAllWithRelations(){
-    return this.find({
-      relations: ['site', 'affectations'],
-    });
-  }
- 
   
 
+  async findInventoriesByOperatorIdWithStatus(userId: string): Promise<Inventory[]> {
+    return this.createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.affectations', 'affectation')
+      .leftJoinAndSelect('affectation.operator', 'operator')
+      .leftJoinAndSelect('inventory.site', 'site')
+      .leftJoinAndSelect(
+        'inventory.inventoryStatus',
+        'latestStatus',
+        `latestStatus.id = (
+          SELECT "statusSub"."id"
+          FROM "inventory_status" "statusSub"
+          WHERE "statusSub"."inventoryId" = "inventory"."id"
+          ORDER BY "statusSub"."createdAt" DESC
+          LIMIT 1
+        )`
+      )
+      .leftJoinAndSelect('latestStatus.status', 'statusDetail')
+      .where('operator.id = :userId', { userId })
+      .getMany();
+  }
+  
+  
+
+ 
 }
