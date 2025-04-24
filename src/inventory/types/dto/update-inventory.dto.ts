@@ -12,6 +12,11 @@ export class UpdateInventoryDto {
   @IsOptional()
   @IsDateString()
   @ApiProperty({ required: false })
+  startDate?: string;
+
+  @IsOptional()
+  @IsDateString()
+  @ApiProperty({ required: false })
   endDate?: string;
 
   @IsOptional()

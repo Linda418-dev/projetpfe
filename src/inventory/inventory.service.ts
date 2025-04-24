@@ -11,9 +11,8 @@ import { In, LessThan, Not } from 'typeorm';
 import { Cron} from '@nestjs/schedule';
 import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
-import { Inventory } from './entities/inventory.entity';
 import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
-
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class InventoryService {
@@ -322,6 +321,15 @@ export class InventoryService {
     // Mise à jour des champs si présents
     if (dto.name) inventory.name = dto.name;
     if (dto.endDate) inventory.endDate = new Date(dto.endDate);
+
+  // Mise à jour de startDate uniquement si le statut est "Planned"
+if (dto.startDate) {
+  if (lastStatusName !== 'Planned') {
+    throw new BadRequestException('startDate can only be updated when the inventory status is "Planned"');
+  }
+  inventory.startDate = new Date(dto.startDate);
+}
+
   
     // Sauvegarde de l'inventaire avec les nouvelles informations
     const savedInventory = await this.inventoryRepository.save(inventory);
@@ -374,14 +382,18 @@ export class InventoryService {
       statusUpdated,
     };
   }
+
+  private getTodayStart(): Date {
+    return dayjs().startOf('day').toDate();
+  }
+  
   
    // CRON  exécuté toutes les minutes pour tester les inventaire dont la date de fin est passée
    @Cron('*/1 * * * *')
    async handleExpiredInventories() {
      const logger = new Logger(InventoryService.name);
    
-     const today = new Date();
-     today.setHours(0, 0, 0, 0);
+     const today = this.getTodayStart();
    
      logger.log('CRON Checking for expired inventories...');
    
