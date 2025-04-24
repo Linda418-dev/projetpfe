@@ -11,7 +11,6 @@ import { UploadsModule } from './uploads/uploads.module';
 import { Supplier } from './supplier/Entities/Supplier.entity';
 import { Category } from './category/Entities/category.entity';
 import { File } from './uploads/entities/file.entity';
-import { PaginationModule } from './pagination/pagination.module';
 import { Department } from './department/entities/department.entity';
 import { DepartmentModule } from './department/department.module';
 import { ServiceModule } from './service/service.module';
@@ -82,7 +81,6 @@ import { SiteRepository } from './site/Repositories/site.repository';
     AssetModule,
     LocationHistoryModule,
     AssetStatusModule,
-    PaginationModule,
     UserRoleModule,
     AuthModule,
     UserModule,

@@ -11,7 +11,6 @@ import { CategoryService } from 'src/category/category.service';
 import { Category } from 'src/category/Entities/category.entity';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
-import { PaginationModule } from 'src/pagination/pagination.module';
 import { JwtService } from '@nestjs/jwt';
 import { LocationRepository } from 'src/location/repositories/location.repository';
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
@@ -22,7 +21,7 @@ import { StatusRepository } from 'src/status/repositories/status.repository';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Asset, Category, Supplier]),  
-    UploadsModule,PaginationModule
+    UploadsModule
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService ,SupplierRepository, LocationRepository,LocationHistoryRepository

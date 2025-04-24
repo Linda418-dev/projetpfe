@@ -20,13 +20,10 @@ export class AssetController {
         return this.assetService.getAllAssets();
     }
 
-     @Get()
-     @ApiOperation({ summary: 'get all  assets with paginate keyword' })
-      async getAssets(
-      @Query() query: PaginateSearchDto,
-      ) {
-        return this.assetService.getAssets(query);
-      }  
+    @Get()
+    async getAssets(@Query() params: PaginateSearchDto) {
+      return this.assetService.getAssets(params);
+    } 
 
       
     @Post('create-asset')

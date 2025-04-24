@@ -37,8 +37,6 @@ export class InventoryService {
     }
   }
   
-
-
   // methode pour la creation inventaire
   async createInventory(createinventorydto: CreateInventoryDto) {
     const existing = await this.inventoryRepository.findOne({
@@ -377,84 +375,99 @@ export class InventoryService {
     };
   }
   
-  
-  
    // CRON  exécuté toutes les minutes pour tester les inventaire dont la date de fin est passée
-  @Cron('*/1 * * * *')
-  async handleExpiredInventories() {
-    const logger = new Logger(InventoryService.name);
-    
-    // Créer une date avec les heures réglées à minuit pour une comparaison cohérente
-    const today = new Date();
-     // Réinitialise l'heure à minuit pour la comparaison
-    today.setHours(0, 0, 0, 0); 
-  
-    logger.log('CRON Checking for expired inventories...');
-  
-    // Obtenir tous les inventaires dont la date de fin est passée
-    const expiredInventories = await this.inventoryRepository.find({
-      where: {
-        endDate: LessThan(today), 
-      },
-      relations: ['inventoryStatus'],
-    });
-  
-    if (expiredInventories.length === 0) {
-      logger.log('No expired inventories found');
-      return;
-    }
-  
-    const expiredStatus = await this.statusRepository.findOne({
-      where: { name: InventoryStatusEnum.EXPIRED, type: 'inventory' },
-    });
-  
-    if (!expiredStatus) {
-      logger.error('Status Expired not found');
-      throw new BadRequestException('Status "Expired" not found');
-    }
-  
-    let expiredCount = 0;
-  
-    for (const inventory of expiredInventories) {
-      logger.log(`Checking inventory: ${inventory.name} (ID: ${inventory.id})`);
-  
-      const lastStatus = await this.inventoryStatusRepository.findOne({
-        where: { inventory: { id: inventory.id } },
-        order: { createdAt: 'DESC' },
-        relations: ['status'],
-      });
-  
-      if (!lastStatus) {
-        logger.warn(`No status found for inventory ${inventory.name}`);
-        continue;
-      }
-  
-      if (lastStatus.status.name === InventoryStatusEnum.EXPIRED) {
-        logger.log(`Inventory "${inventory.name}" is already marked as expired, skipping`);
-        continue; // Si l'inventaire est déjà marqué comme expiré, on passe
-      }
-  
-      if (lastStatus.status.name !== InventoryStatusEnum.IN_PROGRESS) {
-        logger.log(`Last status = ${lastStatus.status.name} → skipped`);
-        continue;
-      }
-  
-      // Marquer l'inventaire comme expiré s'il est "In Progress"
-      const expiredEntry = this.inventoryStatusRepository.create({
-        inventory,
-        status: expiredStatus,
-      });
-  
-      await this.inventoryStatusRepository.save(expiredEntry);
-      logger.log(`Inventory "${inventory.name}" marked as expired`);
-      expiredCount++;
-    }
-  
-    logger.log(`Done: ${expiredCount} expired inventory(ies) updated`);
-  }
-  
-
-
+   @Cron('*/1 * * * *')
+   async handleExpiredInventories() {
+     const logger = new Logger(InventoryService.name);
+   
+     const today = new Date();
+     today.setHours(0, 0, 0, 0);
+   
+     logger.log('CRON Checking for expired inventories...');
+   
+     const expiredStatus = await this.statusRepository.findOne({
+       where: { name: InventoryStatusEnum.EXPIRED, type: 'inventory' },
+     });
+   
+     if (!expiredStatus) {
+       logger.error('Status "Expired" not found');
+       throw new BadRequestException('Status "Expired" not found');
+     }
+   
+     const expiredInventories = await this.inventoryRepository.find({
+       where: {
+         endDate: LessThan(today),
+       },
+       relations: ['inventoryStatus', 'inventoryStatus.status'],
+     });
+   
+     if (expiredInventories.length === 0) {
+       logger.log('No expired inventories found');
+       return;
+     }
+   
+     let expiredCount = 0;
+   
+     for (const inventory of expiredInventories) {
+       logger.log(`Checking inventory: ${inventory.name} (ID: ${inventory.id})`);
+   
+       const sortedStatuses = inventory.inventoryStatus.sort(
+         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+       );
+   
+       const lastStatus = sortedStatuses[0];
+   
+       if (!lastStatus) {
+         logger.warn(`No status found for inventory ${inventory.name}`);
+         continue;
+       }
+   
+       const alreadyExpired = inventory.inventoryStatus.some(
+         (statusEntry) => statusEntry.status.name === InventoryStatusEnum.EXPIRED
+       );
+   
+       if (alreadyExpired) {
+         logger.log(`Inventory "${inventory.name}" already has an expired status, skipping`);
+         continue;
+       }
+   
+       if (lastStatus.status.name !== InventoryStatusEnum.IN_PROGRESS) {
+         logger.log(`Inventory "${inventory.name}" is not in progress (status: ${lastStatus.status.name}), skipping`);
+         continue;
+       }
+   
+       //  Ajouter le statut "Expired"
+       const expiredEntry = this.inventoryStatusRepository.create({
+         inventory,
+         status: expiredStatus,
+       });
+   
+       const savedEntry = await this.inventoryStatusRepository.save(expiredEntry);
+       logger.log(`Inventory "${inventory.name}" marked as expired`);
+   
+       expiredCount++;
+   
+       // Nettoyage des doublons après insertion
+       const allExpiredStatuses = await this.inventoryStatusRepository.find({
+         where: {
+           inventory: { id: inventory.id },
+           status: { id: expiredStatus.id },
+         },
+         order: { createdAt: 'DESC' },
+       });
+   
+       if (allExpiredStatuses.length > 1) {
+         // On garde le plus récent, on supprime les autres
+         const [latest, ...duplicates] = allExpiredStatuses;
+         const idsToDelete = duplicates.map((d) => d.id);
+         await this.inventoryStatusRepository.delete(idsToDelete);
+         logger.warn(`Duplicate EXPIRED statuses removed for inventory "${inventory.name}"`);
+       }
+     }
+   
+     logger.log(`Done: ${expiredCount} inventory(ies) marked as expired`);
+   }
+   
 }
 
 

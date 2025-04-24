@@ -1,9 +1,11 @@
-import { IsInt } from "class-validator";
+import { IsInt, IsOptional } from "class-validator";
 
 export class PaginateDto{
+    @IsOptional()
     @IsInt()
-    take:number;
+    take?: number;
 
+    @IsOptional()
     @IsInt()
-    skip:number;
+    skip?: number;
 }

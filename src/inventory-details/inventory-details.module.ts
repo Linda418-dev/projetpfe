@@ -9,6 +9,10 @@ import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { Asset } from 'src/assets/Entities/Asset.entity';
 import { InventoryRepository } from 'src/inventory/repositories/inventory.repository';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
+import { FileRepository } from 'src/uploads/repositories/file.repository';
+import { AffectationRepository } from 'src/affectation/repositories/affectation.repository';
+import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
+import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([InventoryDetails, Inventory, Asset])],
@@ -18,7 +22,8 @@ import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
     InventoryDetailsRepository,
     InventoryRepository,
     AssetRepository,
-   
+    FileRepository,
+    AffectationRepository,AssetStatusRepository,LocationHistoryRepository
   ],
   exports: [InventoryDetailsRepository],
 })

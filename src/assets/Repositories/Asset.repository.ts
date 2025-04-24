@@ -11,24 +11,29 @@ export class AssetRepository extends Repository<Asset> {
     super(Asset, dataSource.createEntityManager());
   }
 
-  async getAllAssetWithPaginate(params:PaginateSearchDto){
+  async getAllAssetWithPaginate(params: PaginateSearchDto) {
+    const query = this.createQueryBuilder("asset");
 
-  const  query=this.createQueryBuilder('asset');
+    if (params.keyword) {
+      query.where("asset.name ILIKE :keyword", {
+        keyword: `%${params.keyword}%`,
+      });
+    }
+    if (params.skip) {
+      query.skip(params.skip);
+    }
+  
+    if (params.take) {
+      query.take(params.take);
+    }
 
-  if (params.keyword) {
-    query.where(
-      //Brackets regrouper les conditions 
-      new Brackets((qb) => {
-        qb.where('asset.name ILIKE :keyword', { keyword: `%${params.keyword}%` })
-          .orWhere('asset.supplierName ILIKE :keyword', { keyword: `%${params.keyword}%` })
-          .orWhere('asset.categoryName ILIKE :keyword', { keyword: `%${params.keyword}%` });
-      })
-    );
+    if (params.orderField && params.orderDirection) {
+      query.orderBy(`asset.${params.orderField}`, params.orderDirection);
+    }
+
+    return query.getManyAndCount();
   }
-query.take(params.take).skip(params.skip);
 
-//executer requete
-const [data,total]=await query.getManyAndCount();
-return {data,total}; 
-  }
+  
+  
 }

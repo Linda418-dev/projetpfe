@@ -8,7 +8,6 @@ import { AssetsService } from 'src/assets/asset.service';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
-import { PaginationService } from 'src/pagination/pagination.service';
 import { LocationRepository } from 'src/location/repositories/location.repository';
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
@@ -16,7 +15,7 @@ import { StatusRepository } from 'src/status/repositories/status.repository';
 
 @Module({
   providers: [ServiceService,ServiceRepository, DepartmentRepository,LocationRepository, AssetRepository,AssetsService,FileRepository,CategoryRepository,SupplierRepository
-    ,PaginationService,LocationHistoryRepository,AssetStatusRepository,StatusRepository
+    ,LocationHistoryRepository,AssetStatusRepository,StatusRepository
   ],
   controllers: [ServiceController]
 })

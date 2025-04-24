@@ -13,7 +13,8 @@ export class LocationHistory implements ILocationHistory {
 
   @ManyToOne(() => Location, (location) => location.locationHistory, { onDelete: 'CASCADE' })
   location: Location;
-
+  
+  
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

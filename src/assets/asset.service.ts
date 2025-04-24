@@ -29,10 +29,16 @@ export class AssetsService {
        
     ) {}
         
-    async getAssets(params:PaginateSearchDto){
-        return this.assetRepository.getAllAssetWithPaginate(params);
-
+    async getAssets(params: PaginateSearchDto) {
+      const [assets, total] = await this.assetRepository.getAllAssetWithPaginate(params);
+      return {
+        data: assets,
+        total,
+        skip: params.skip ,
+        take: params.take ,
+      };
     }
+    
     async getAllAssets() {
       return this.assetRepository.find();
   }

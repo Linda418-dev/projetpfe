@@ -14,7 +14,6 @@ export class AssetStatus implements IAssetStatus{
   @ManyToOne(() => Status, { eager: true, onDelete: 'CASCADE' })
   status: Status;
 
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   

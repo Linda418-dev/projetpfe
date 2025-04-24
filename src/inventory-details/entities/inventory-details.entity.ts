@@ -1,30 +1,33 @@
 import { Affectation } from 'src/affectation/entities/affectation.entity';
-import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
-import { LocationHistory } from 'src/location-history/entities/location-history.entity';
 import { File } from 'src/uploads/entities/file.entity';
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, Column } from 'typeorm';
+import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
+import { LocationHistory } from 'src/location-history/entities/location-history.entity';
 
 @Entity()
-export class  InventoryDetails{
+export class  InventoryDetails {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @CreateDateColumn({ type: 'timestamp' })
   scannedAt: Date;
 
-  @ManyToOne(() => Affectation, (affectation) => affectation.inventoryDetails, { onDelete: 'CASCADE',})
+  @ManyToOne(() => Affectation, (affectation) => affectation.inventoryDetails, {
+    onDelete: 'CASCADE',
+    eager: true,
+  })
   affectation: Affectation;
 
-  @Column({ nullable: true })
-  assetId: string;
-
-  @ManyToOne(() => LocationHistory, { eager: true, onDelete: 'SET NULL', nullable: true })
-  locationHistory: LocationHistory;
-
-  @ManyToOne(() => AssetStatus, { eager: true, onDelete: 'SET NULL', nullable: true, })
+  @ManyToOne(() => AssetStatus, { nullable: true, eager: true, onDelete: 'SET NULL' })
   assetStatus: AssetStatus;
 
-  @OneToMany(() => File, (file) => file.inventoryDetails, { cascade: true })
+  @ManyToOne(() => LocationHistory, { nullable: true, eager: true, onDelete: 'SET NULL' })
+  locationHistory: LocationHistory;
+
+  @OneToMany(() => File, (file) => file.inventoryDetails, {
+    cascade: true,
+    eager: true,
+  })
   files: File[];
 
   @CreateDateColumn({ type: 'timestamp' })
@@ -32,4 +35,5 @@ export class  InventoryDetails{
 
   @CreateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+
 }
