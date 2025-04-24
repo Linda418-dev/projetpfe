@@ -20,7 +20,7 @@ export class InventoryDetailsService {
 
   ) {}
   
-  async create(dto: CreateInventoryDetailsDto) {
+  async createInventorydetails(dto: CreateInventoryDetailsDto) {
     const affectation = await this.affectationRepository.findOneOrFail({
       where: { id: dto.affectationId },
     });
@@ -55,6 +55,25 @@ export class InventoryDetailsService {
     return this.inventoryDetailsRepository.save(inventoryDetail);
   }
   
+  async  getAllInventoryDetails() {
+    return this.inventoryDetailsRepository.find({
+      relations: ['affectation', 'assetStatus', 'locationHistory', 'files'],
+      order: { scannedAt: 'DESC' },
+    });
+  }
+  
+  async  getInventorydetailsById(id: string) {
+    const detail = await this.inventoryDetailsRepository.findOne({
+      where: { id },
+      relations: ['affectation', 'assetStatus', 'locationHistory', 'files'],
+    });
+  
+    if (!detail) {
+      throw new NotFoundException(`InventoryDetail with ID ${id} not found`);
+    }
+  
+    return detail;
+  }
   
   
   

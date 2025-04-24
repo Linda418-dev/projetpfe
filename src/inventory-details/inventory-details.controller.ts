@@ -8,11 +8,21 @@ import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
 export class InventoryDetailsController {
     constructor(private readonly inventoryDetailsService: InventoryDetailsService) {}
   
-    @Post()
-    create(@Body() dto: CreateInventoryDetailsDto) {
-     return this.inventoryDetailsService.create(dto);
+    @Get()
+    getAllInventoryDetails() {
+      return this.inventoryDetailsService. getAllInventoryDetails();
     }
 
+    @Post()
+    createInventorydetails(@Body() dto: CreateInventoryDetailsDto) {
+     return this.inventoryDetailsService.createInventorydetails(dto);
+    }
+    
+    @Get(':id')
+    getInventorydetailsById(@Param('id') id: string) {
+      return this.inventoryDetailsService. getInventorydetailsById(id);
+    }
+    
   
 
 }
