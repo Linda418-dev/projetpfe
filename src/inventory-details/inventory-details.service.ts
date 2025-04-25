@@ -25,10 +25,18 @@ export class InventoryDetailsService {
       where: { id: dto.affectationId },
     });
   
-    //  Récupérer les fichiers s’ils existent
-    const files = dto.fileIds?.length ? await this.fileRepository.findByIds(dto.fileIds) : [];
+    // Récupérer les fichiers s’ils existent
+    const files = dto.fileIds?.length
+      ? await this.fileRepository.findByIds(dto.fileIds)
+      : [];
   
-    //  Si assetStatusId n’est pas fourni → récupérer le dernier AssetStatus de l’asset
+    // Injecter assetId dans les fichiers (modification directe des entités)
+    for (const file of files) {
+      file.assetId = dto.assetId;
+    }
+    await this.fileRepository.save(files);
+  
+    // Si assetStatusId n’est pas fourni récupérer le dernier AssetStatus de l’asset
     const assetStatus = dto.assetStatusId
       ? await this.assetStatusRepository.findOne({ where: { id: dto.assetStatusId } })
       : await this.assetStatusRepository.findOne({
@@ -36,7 +44,7 @@ export class InventoryDetailsService {
           order: { createdAt: 'DESC' },
         });
   
-    //  Si locationHistoryId n’est pas fourni → récupérer la dernière LocationHistory de l’asset
+    // Si locationHistoryId n’est pas fourni récupérer la dernière LocationHistory de l’asset
     const locationHistory = dto.locationHistoryId
       ? await this.locationHistoryRepository.findOne({ where: { id: dto.locationHistoryId } })
       : await this.locationHistoryRepository.findOne({
@@ -54,6 +62,7 @@ export class InventoryDetailsService {
   
     return this.inventoryDetailsRepository.save(inventoryDetail);
   }
+  
   
   async  getAllInventoryDetails() {
     return this.inventoryDetailsRepository.find({

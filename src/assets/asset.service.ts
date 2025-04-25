@@ -52,9 +52,11 @@ export class AssetsService {
     }
 
     async deleteAsset(id: string) {
-        const fetchAsset = await this.getAssetById(id);
-        return this.assetRepository.remove(fetchAsset);
-    }
+      const asset = await this.getAssetById(id);
+      await this.assetRepository.remove(asset);
+      return { message: 'Asset deleted successfully' };
+  }
+  
     async updateAsset(id: string, updateAssetDto: updateAssetDto) {
       const fetchAsset = await this.getAssetById(id);
       if (!fetchAsset) {
