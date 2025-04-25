@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsOptional, IsNotEmpty, IsArray } from 'class-validator';
+import { IsUUID, IsOptional, IsNotEmpty, IsArray, IsString } from 'class-validator';
 
 export class CreateInventoryDetailsDto {
   @ApiProperty()
@@ -22,6 +22,11 @@ export class CreateInventoryDetailsDto {
   @IsNotEmpty()
   assetId: string;
 
+  @ApiProperty({ required: false })
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true }) 
+  anomalies?: string[];
 
   @ApiProperty()
   @IsArray()

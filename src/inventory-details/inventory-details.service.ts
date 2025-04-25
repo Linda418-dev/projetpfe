@@ -8,6 +8,7 @@ import { LocationHistoryRepository } from 'src/location-history/repositories/loc
 import { In } from 'typeorm';
 import { File } from 'src/uploads/entities/file.entity';
 import { InventoryDetails } from './entities/inventory-details.entity';
+import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
 
 @Injectable()
 export class InventoryDetailsService {
@@ -16,7 +17,8 @@ export class InventoryDetailsService {
     private readonly fileRepository : FileRepository,
     private readonly inventoryDetailsRepository : InventoryDetailsRepository,
     private readonly assetStatusRepository : AssetStatusRepository,
-    private readonly  locationHistoryRepository : LocationHistoryRepository
+    private readonly  locationHistoryRepository : LocationHistoryRepository,
+    private readonly anomalyRepository : AnomalyRepository
 
   ) {}
   
@@ -60,7 +62,26 @@ export class InventoryDetailsService {
       scannedAt: new Date(),
     } as Partial<InventoryDetails>);
   
-    return this.inventoryDetailsRepository.save(inventoryDetail);
+    const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
+
+    // Création des anomalies si elles existent
+    if (dto.anomalies?.length) {
+      const anomaliesToCreate = dto.anomalies.map(description => 
+        this.anomalyRepository.create({
+          description,
+          inventoryDetail: savedInventoryDetail,
+        })
+      );
+  
+      // Sauvegarde des anomalies en une seule fois
+      await this.anomalyRepository.save(anomaliesToCreate);
+  
+      savedInventoryDetail.anomalies = anomaliesToCreate;
+    } else {
+      savedInventoryDetail.anomalies = [];
+    }
+  
+    return savedInventoryDetail;
   }
   
   

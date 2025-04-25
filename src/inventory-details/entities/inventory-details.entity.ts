@@ -3,9 +3,11 @@ import { File } from 'src/uploads/entities/file.entity';
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, Column } from 'typeorm';
 import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
 import { LocationHistory } from 'src/location-history/entities/location-history.entity';
+import { IInventoryDetails } from '../types/interfaces/inventory-details.interface';
+import { Anomaly } from 'src/anomaly/Entities/anomaly.entity';
 
 @Entity()
-export class  InventoryDetails {
+export class  InventoryDetails implements IInventoryDetails{
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -29,6 +31,9 @@ export class  InventoryDetails {
     eager: true,
   })
   files: File[];
+
+  @OneToMany(() => Anomaly, anomaly => anomaly.inventoryDetail, { cascade: true })
+  anomalies: Anomaly[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

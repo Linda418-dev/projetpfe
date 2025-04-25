@@ -12,7 +12,7 @@ import { Cron} from '@nestjs/schedule';
 import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
-import * as dayjs from 'dayjs';
+import * as moment from 'moment';
 
 @Injectable()
 export class InventoryService {
@@ -384,10 +384,8 @@ if (dto.startDate) {
   }
 
   private getTodayStart(): Date {
-    return dayjs().startOf('day').toDate();
+    return moment().startOf('day').toDate();
   }
-  
-  
    // CRON  exécuté toutes les minutes pour tester les inventaire dont la date de fin est passée
    @Cron('*/1 * * * *')
    async handleExpiredInventories() {

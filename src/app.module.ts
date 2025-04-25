@@ -51,6 +51,8 @@ import { AffectationModule } from './affectation/affectation.module';
 import { AffectationRepository } from './affectation/repositories/affectation.repository';
 import { Affectation } from './affectation/entities/affectation.entity';
 import { SiteRepository } from './site/Repositories/site.repository';
+import { AnomalyModule } from './anomaly/anomaly.module';
+import { Anomaly } from './anomaly/Entities/anomaly.entity';
 
 @Module({
   imports: [
@@ -67,7 +69,7 @@ import { SiteRepository } from './site/Repositories/site.repository';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly], 
         synchronize: true, 
       }),
     }),
@@ -90,6 +92,7 @@ import { SiteRepository } from './site/Repositories/site.repository';
     InventoryDetailsModule,
     InventoryStatusModule,
     AffectationModule,
+    AnomalyModule,
     
     
     
