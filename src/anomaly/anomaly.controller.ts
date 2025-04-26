@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Patch } from '@nestjs/common';
 import { AnomalyService } from './anomaly.service';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -16,4 +16,10 @@ export class AnomalyController {
     getAnomalyById(@Param('id') id: string) {
       return this.anomalyService.getAnomalyById(id);
     }
+
+    @Patch(':id/accept')
+    acceptAnomaly(@Param('id') id: string){
+      return this.anomalyService.acceptAnomaly(id);
+    }
+ 
 }

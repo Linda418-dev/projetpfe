@@ -38,4 +38,5 @@ export class Asset implements IAsset {
 
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+  serialNumber: any;
 }

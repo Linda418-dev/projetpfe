@@ -98,13 +98,41 @@ export class AssetsService {
         await this.assetStatusRepository.save(assetStatus);
       }
     
-    
-      Object.assign(fetchAsset, updateAssetDto);
-      return this.assetRepository.save(fetchAsset);
+  // Update Category
+  if (updateAssetDto.categoryId && fetchAsset.category?.id !== updateAssetDto.categoryId) {
+    const newCategory = await this.categoryRepository.findOne({
+      where: { id: updateAssetDto.categoryId },
+    });
+
+    if (!newCategory) {
+      throw new BadRequestException(`Category with id ${updateAssetDto.categoryId} not found`);
+    }
+
+    fetchAsset.category = newCategory;
+  }
+
+  if (updateAssetDto.supplierId && fetchAsset.supplier?.id !== updateAssetDto.supplierId) {
+    const newSupplier = await this.supplierRepository.findOne({
+      where: { id: updateAssetDto.supplierId },
+    });
+  
+    if (!newSupplier) {
+      throw new BadRequestException(`Supplier with id ${updateAssetDto.supplierId} not found`);
+    }
+  
+    fetchAsset.supplier = newSupplier;
+  }
+
+  // Update Name (champ simple aussi)
+  if (updateAssetDto.name) {
+    fetchAsset.name = updateAssetDto.name;
+  }
+
+  // Enfin, sauvegarde proprement
+  return this.assetRepository.save(fetchAsset);
+
     }
     
-  
-
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
     const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
   

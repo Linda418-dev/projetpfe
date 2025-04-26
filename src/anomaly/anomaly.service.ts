@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { AnomalyRepository } from './Repositories/anomaly.repository';
+import { AnomalyStatus } from './types/enums/anomaly-status.enum';
 
 @Injectable()
 export class AnomalyService {
@@ -23,4 +24,13 @@ export class AnomalyService {
 
     return anomaly;
   }
+
+  
+  async acceptAnomaly(id: string){
+    const anomaly = await this.getAnomalyById(id);
+    anomaly.status = AnomalyStatus.ACCEPTED;
+    return await this.anomalyRepository.save(anomaly);
+  }
+
+
 }
