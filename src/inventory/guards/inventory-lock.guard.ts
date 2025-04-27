@@ -10,7 +10,7 @@ export class InventoryLockGuard /*implements CanActivate */{
       private readonly reflector: Reflector
     ) {}
   
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    /*async canActivate(context: ExecutionContext): Promise<boolean> {
       const request = context.switchToHttp().getRequest<Request>();
       const user: any = request.user;
       const method = request.method;
@@ -36,7 +36,7 @@ export class InventoryLockGuard /*implements CanActivate */{
       }
   
       return true; // Allow if no active inventory
-    }
+    }*/
   }
   
 

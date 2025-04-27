@@ -235,8 +235,8 @@ export class InventoryService {
       .leftJoinAndSelect('inventory.inventoryStatus', 'inventoryStatus')
       .leftJoinAndSelect('inventoryStatus.status', 'status')
       .where('status.name = :statusName', { statusName: 'In Progress' })
-      .orderBy('inventoryStatus.createdAt', 'DESC')  // Ensure the latest status is used
-      .getOne(); // Get a single inventory (since it's supposed to be active)
+      .orderBy('inventoryStatus.createdAt', 'DESC')  
+      .getOne(); 
   
     // If there's no active inventory found, return null or handle accordingly
     if (!activeInventory) {
@@ -277,6 +277,7 @@ export class InventoryService {
       inventoryId: inventory.id,
     };
   }
+
 //  methode pour update inventory 
   async updateInventory(id: string, dto: UpdateInventoryDto) {
     const inventory = await this.inventoryRepository.findOne({
@@ -323,7 +324,6 @@ export class InventoryService {
       throw new InternalServerErrorException('Inventory not found');
     }
 
-    // Créer un objet compatible avec TypeORM pour la mise à jour du statut
     const newInventoryStatus = this.inventoryStatusRepository.create({
       inventory: saveInventory,
       status: status,
@@ -353,36 +353,37 @@ if (dto.startDate) {
 }
 
   
-    // Sauvegarde de l'inventaire avec les nouvelles informations
-    const savedInventory = await this.inventoryRepository.save(inventory);
-  
-    // Si endDate modifiée et statut actuel = "Expired", revenir à "In Progress"
-    if (dto.endDate && lastStatusName === InventoryStatusEnum.EXPIRED) {
+   //  Mise à jour du endDate si statut Planned ou Expired
+  if (dto.endDate) {
+    if (lastStatusName !== InventoryStatusEnum.Planned && lastStatusName !== InventoryStatusEnum.EXPIRED) {
+      throw new BadRequestException('endDate can only be updated when the inventory status is "Planned" or "Expired"');
+    }
+
+    inventory.endDate = new Date(dto.endDate);
+
+    // Si le statut était Expired → repasser à In Progress
+    if (lastStatusName === InventoryStatusEnum.EXPIRED) {
       const inProgressStatus = await this.statusRepository.findOne({
         where: { name: InventoryStatusEnum.IN_PROGRESS, type: 'inventory' },
       });
-  
+
       if (!inProgressStatus) {
-        throw new BadRequestException(`Status "In Progress" not found`);
+        throw new BadRequestException('Status "In Progress" not found');
       }
-  
-      // Vérification de l'inventaire avant création du nouveau statut
-      const saveInventory2 = await this.inventoryRepository.findOne({ where: { id } });
-  
-      if (!saveInventory2) {
-        throw new InternalServerErrorException('Inventory not found');
-      }
-  
-      // Création du statut "In Progress"
+
       const newStatus = this.inventoryStatusRepository.create({
-        inventory: saveInventory2,
+        inventory,
         status: inProgressStatus,
       });
-  
-      await this.inventoryStatusRepository.save(newStatus);
-      statusUpdated = true;
+
+      const  newInventoryStatus =await this.inventoryStatusRepository.save(newStatus);
+      return  newInventoryStatus ;
     }
-  
+  }
+
+     //  Sauvegarder l'inventaire
+     const savedInventory = await this.inventoryRepository.save(inventory);
+
     // Recharge complet de l'inventaire avec les statuts et le site
     const updatedInventory = await this.inventoryRepository.findOne({
       where: { id: savedInventory.id },

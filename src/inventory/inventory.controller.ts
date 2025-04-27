@@ -5,6 +5,7 @@ import { CreateInventoryDto } from './types/dto/create-inventory.dto';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
+import { BypassInventoryLock } from './guards/bypass-inventory-lock.decorator';
 
 @ApiBearerAuth()
 @ApiTags('inventory Resource')
@@ -37,9 +38,7 @@ export class InventoryController {
      async delete(@Param('id') id: string) {
       return this.inventoryService.deleteInventory(id);
     }
-
-    
-
+ 
     @Patch(':id')
 async update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
   return this.inventoryService.updateInventory(id, dto);
