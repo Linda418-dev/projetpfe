@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
@@ -25,6 +25,11 @@ export class AssetController {
       return this.assetService.getAssets(params);
     } 
 
+    @Get('percentage-good-assets')
+    @ApiOperation({ summary: 'get Assets Status Statistics' })
+    async getAssetsStatusStatistics() {
+      return this.assetService.getAssetsStatusStatistics();
+    }
       
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
@@ -54,9 +59,6 @@ export class AssetController {
     @ApiOperation({ summary: 'delete asset' })
     async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.assetService.deleteAsset(id);
-    }
-  
-    
-     
+    }   
   }
   

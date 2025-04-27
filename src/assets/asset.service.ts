@@ -198,7 +198,53 @@ export class AssetsService {
   }
   
       
-      
+  async getAssetsStatusStatistics() {
+    const allAssets = await this.assetRepository.find({
+      relations: ['status'],
+    });
+  
+    const totalAssets = allAssets.length;
+  
+    if (totalAssets === 0) {
+      return {
+        totalAssets: 0,
+        goodAssets: 0,
+        damagedAssets: 0,
+        inRepairAssets: 0,
+        percentageGood: 0,
+        percentageDamaged: 0,
+        percentageInRepair: 0,
+      };
+    }
+  
+    const goodAssetsCount = allAssets.filter(
+      (asset) => asset.status.name === AssetStatusEnum.GOOD,
+    ).length;
+  
+    const damagedAssetsCount = allAssets.filter(
+      (asset) => asset.status.name === AssetStatusEnum.DAMAGED,
+    ).length;
+  
+    const inRepairAssetsCount = allAssets.filter(
+      (asset) => asset.status.name === AssetStatusEnum.IN_REPAIR,
+    ).length;
+  
+    const percentageGood = (goodAssetsCount / totalAssets) * 100;
+    const percentageDamaged = (damagedAssetsCount / totalAssets) * 100;
+    const percentageInRepair = (inRepairAssetsCount / totalAssets) * 100;
+  
+    return {
+      totalAssets,
+      goodAssets: goodAssetsCount,
+      damagedAssets: damagedAssetsCount,
+      inRepairAssets: inRepairAssetsCount,
+      percentageGood: Math.round(percentageGood * 100) / 100,
+      percentageDamaged: Math.round(percentageDamaged * 100) / 100,
+      percentageInRepair: Math.round(percentageInRepair * 100) / 100,
+    };
+  }
+  
+    
 }
 
     

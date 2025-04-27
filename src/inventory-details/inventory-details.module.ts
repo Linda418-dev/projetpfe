@@ -14,6 +14,7 @@ import { AffectationRepository } from 'src/affectation/repositories/affectation.
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
+import { InventoryStatusRepository } from 'src/inventory-status/repositories/inventory-status.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([InventoryDetails, Inventory, Asset])],
@@ -24,7 +25,7 @@ import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
     InventoryRepository,
     AssetRepository,
     FileRepository,
-    AffectationRepository,AssetStatusRepository,LocationHistoryRepository,AnomalyRepository
+    AffectationRepository,AssetStatusRepository,LocationHistoryRepository,AnomalyRepository,InventoryStatusRepository
   ],
   exports: [InventoryDetailsRepository],
 })

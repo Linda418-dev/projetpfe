@@ -226,7 +226,29 @@ export class InventoryService {
       status: inProgressStatus.name,
     };
   }
+  // Inside InventoryService class
+
+  async getActiveInventory() {
+    // Use QueryBuilder to get the latest inventory with 'In Progress' status
+    const activeInventory = await this.inventoryRepository
+      .createQueryBuilder('inventory')
+      .leftJoinAndSelect('inventory.inventoryStatus', 'inventoryStatus')
+      .leftJoinAndSelect('inventoryStatus.status', 'status')
+      .where('status.name = :statusName', { statusName: 'In Progress' })
+      .orderBy('inventoryStatus.createdAt', 'DESC')  // Ensure the latest status is used
+      .getOne(); // Get a single inventory (since it's supposed to be active)
   
+    // If there's no active inventory found, return null or handle accordingly
+    if (!activeInventory) {
+      return null;
+    }
+  
+    // Return the active inventory if it's found
+    return activeInventory;
+  }
+  
+  
+
   //  methode pour delete Inventory
   async deleteInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });

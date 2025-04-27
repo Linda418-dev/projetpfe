@@ -1,4 +1,4 @@
-import {  Injectable, NotFoundException } from '@nestjs/common';
+import {  BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { AffectationRepository } from 'src/affectation/repositories/affectation.repository';
@@ -9,6 +9,8 @@ import { InventoryDetails } from './entities/inventory-details.entity';
 import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
 import * as ExcelJS from 'exceljs';
 import { Response } from 'express';
+import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
+import { InventoryStatusRepository } from 'src/inventory-status/repositories/inventory-status.repository';
 @Injectable()
 export class InventoryDetailsService {
   constructor(
@@ -17,7 +19,8 @@ export class InventoryDetailsService {
     private readonly inventoryDetailsRepository : InventoryDetailsRepository,
     private readonly assetStatusRepository : AssetStatusRepository,
     private readonly  locationHistoryRepository : LocationHistoryRepository,
-    private readonly anomalyRepository : AnomalyRepository
+    private readonly anomalyRepository : AnomalyRepository,
+    private readonly inventoryStatusRepository : InventoryStatusRepository
 
   ) {}
   
@@ -104,29 +107,18 @@ export class InventoryDetailsService {
     return detail;
   }
   
-  
   async exportInventoryToExcel(inventoryId: string, res: Response) {
-    const inventoryDetails = await this.inventoryDetailsRepository.find({
-      relations: [
-        'affectation',
-        'affectation.inventory',
-        'assetStatus',
-        'assetStatus.asset',
-        'assetStatus.status',
-        'locationHistory',
-        'locationHistory.asset',
-        'locationHistory.location',
-      ],      
-      where: {
-        affectation: {
-          inventory: {
-            id: inventoryId,
-          },
-        },
-      },
-      order: { scannedAt: 'DESC' },
-    });
-  
+     // On va chercher le dernier status de l'inventaire
+     const lastInventoryStatus = await this.inventoryStatusRepository.findLastStatusByInventoryId(inventoryId);
+     
+     if (!lastInventoryStatus) {
+      throw new NotFoundException('Aucun statut trouvé pour cet inventaire.');
+    }
+    if (lastInventoryStatus.status.name !== InventoryStatusEnum.COMPLETED) {
+      throw new BadRequestException('Seuls les inventaires terminés peuvent être exportés.');
+    }
+    const inventoryDetails = await this.inventoryDetailsRepository.findDetailsByInventoryId(inventoryId);
+
     if (!inventoryDetails.length) {
       throw new NotFoundException('Aucun détail trouvé pour cet inventaire.');
     }
@@ -152,20 +144,18 @@ export class InventoryDetailsService {
     });
   
     for (const detail of inventoryDetails) {
-      const assetFromStatus = detail.assetStatus?.asset;
-      const assetFromLocation = detail.locationHistory?.asset;
-
-      console.log('Detail:', {
-        assetStatus: detail.assetStatus,
-        asset: assetFromStatus,
-        locationAsset: assetFromLocation
-      });
-      
+      const asset = detail.assetStatus?.asset ?? detail.locationHistory?.asset;
+  
+      const assetId = asset?.id || 'Inconnu';
+      const status = asset?.status?.name || 'Inconnu';
+      const location = asset?.location?.name || 'Inconnue';
+      const scannedAt = detail.scannedAt ? detail.scannedAt.toLocaleString('fr-FR') : '';
+  
       worksheet.addRow({
-        assetId: assetFromStatus?.serialNumber || assetFromLocation?.serialNumber || 'Inconnu',
-        status: detail.assetStatus?.status?.name ?? 'Inconnu',
-        location: detail.locationHistory?.location?.name ?? 'Inconnue',
-        scannedAt: detail.scannedAt ? detail.scannedAt.toLocaleString('fr-FR') : '',
+        assetId,
+        status,
+        location,
+        scannedAt,
       });
     }
   
@@ -181,4 +171,6 @@ export class InventoryDetailsService {
     await workbook.xlsx.write(res);
     res.end();
   }
+  
+  
 }

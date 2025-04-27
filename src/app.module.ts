@@ -93,10 +93,6 @@ import { Anomaly } from './anomaly/Entities/anomaly.entity';
     InventoryStatusModule,
     AffectationModule,
     AnomalyModule,
-    
-    
-    
-   
   ],
   controllers: [AppController],
   providers: [
