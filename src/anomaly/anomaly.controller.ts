@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { AnomalyService } from './anomaly.service';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 
 @ApiTags('Anomaly Resource')
 @Controller('anomalies')
@@ -10,6 +11,11 @@ export class AnomalyController {
     @Get()
     getAllanomalies() {
       return this.anomalyService.getAllanomalies();
+    }
+
+    @Post()
+    createAnomaly(@Body() createAnomalyDto: CreateAnomalyDto) {
+      return this.anomalyService.createAnomaly(createAnomalyDto);
     }
   
     @Get(':id')

@@ -19,7 +19,6 @@ export class InventoryDetailsService {
     private readonly inventoryDetailsRepository : InventoryDetailsRepository,
     private readonly assetStatusRepository : AssetStatusRepository,
     private readonly  locationHistoryRepository : LocationHistoryRepository,
-    private readonly anomalyRepository : AnomalyRepository,
     private readonly inventoryStatusRepository : InventoryStatusRepository
 
   ) {}
@@ -65,24 +64,6 @@ export class InventoryDetailsService {
     } as Partial<InventoryDetails>);
   
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
-
-    // Création des anomalies si elles existent
-    if (dto.anomalies?.length) {
-      const anomaliesToCreate = dto.anomalies.map(description => 
-        this.anomalyRepository.create({
-          description,
-          inventoryDetail: savedInventoryDetail,
-        })
-      );
-  
-      // Sauvegarde des anomalies en une seule fois
-      await this.anomalyRepository.save(anomaliesToCreate);
-  
-      savedInventoryDetail.anomalies = anomaliesToCreate;
-    } else {
-      savedInventoryDetail.anomalies = [];
-    }
-  
     return savedInventoryDetail;
   }
   

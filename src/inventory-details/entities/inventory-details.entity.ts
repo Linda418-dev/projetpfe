@@ -32,7 +32,10 @@ export class  InventoryDetails implements IInventoryDetails{
   })
   files: File[];
 
-  @OneToMany(() => Anomaly, anomaly => anomaly.inventoryDetail, { cascade: true })
+  @OneToMany(() => Anomaly, (anomaly) => anomaly.inventoryDetail, {
+    cascade: true,
+    eager: true,
+  })
   anomalies: Anomaly[];
 
   @CreateDateColumn({ type: 'timestamp' })

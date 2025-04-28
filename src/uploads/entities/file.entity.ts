@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDa
 import { Asset } from 'src/assets/Entities/Asset.entity';
 import { IFile } from '../types/interfaces/file.interface';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
+import { Anomaly } from 'src/anomaly/Entities/anomaly.entity';
 
 
 @Entity('file')
@@ -31,6 +32,15 @@ export class File implements IFile {
 
   @Column({ nullable: true })
   inventoryDetailsId: string;
+
+
+  @ManyToOne(() => Anomaly, (anomaly) => anomaly.files, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'anomalyId' })
+  anomaly: Anomaly;
+
+  
+  @Column({ nullable: true })
+  anomalyId: string;
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
