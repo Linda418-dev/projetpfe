@@ -19,6 +19,7 @@ export class InventoryController {
       const user = req.user;
       return this.inventoryService.getAllInventories(user);
     }
+    @BypassInventoryLock()
      @Post()
      async create(@Body() dto: CreateInventoryDto) {
       return this.inventoryService.createInventory(dto);
@@ -38,7 +39,8 @@ export class InventoryController {
      async delete(@Param('id') id: string) {
       return this.inventoryService.deleteInventory(id);
     }
- 
+
+   @BypassInventoryLock()
     @Patch(':id')
 async update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
   return this.inventoryService.updateInventory(id, dto);

@@ -9,7 +9,7 @@ export class CreateAnomalyDto {
     @ApiProperty()
     @IsOptional()
     @IsArray()
-    @IsUUID('all', { each: true }) // <- vérifie que chaque ID est bien un UUID
+    @IsUUID('all', { each: true }) 
     fileIds?: string[];
 
     @ApiProperty()

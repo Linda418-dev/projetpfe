@@ -23,9 +23,19 @@ export class AnomalyController {
       return this.anomalyService.getAnomalyById(id);
     }
 
+    @Patch(':id/progress')
+    progressAnomaly(@Param('id') id: string){
+      return this.anomalyService.progressAnomaly(id);
+    }
+
     @Patch(':id/accept')
     acceptAnomaly(@Param('id') id: string){
       return this.anomalyService.acceptAnomaly(id);
+    }
+
+    @Patch(':id/refuse')
+    refuseAnomaly(@Param('id') id: string){
+      return this.anomalyService.refuseAnomaly(id);
     }
  
 }

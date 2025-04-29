@@ -72,6 +72,24 @@ export class InventoryRepository extends Repository<Inventory> {
       .where('inventory.id = :id', { id })
       .getOne();
   }
+
+  async findActiveInventory() {
+    return this.createQueryBuilder('inventory')
+      .leftJoinAndSelect(
+        'inventory.inventoryStatus',
+        'latestStatus',
+        `latestStatus.id = (
+          SELECT "statusSub"."id"
+          FROM "inventory_status" "statusSub"
+          WHERE "statusSub"."inventoryId" = "inventory"."id"
+          ORDER BY "statusSub"."createdAt" DESC
+          LIMIT 1
+        )`
+      )
+      .leftJoinAndSelect('latestStatus.status', 'statusDetail')
+      .where('statusDetail.name = :statusName', { statusName: 'In Progress' })
+      .getOne();
+  }
   
   
  

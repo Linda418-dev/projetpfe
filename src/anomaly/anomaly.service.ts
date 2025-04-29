@@ -14,11 +14,12 @@ export class AnomalyService {
         private readonly fileRepository : FileRepository,
         private readonly inventoryDetailRepository : InventoryDetailsRepository
     ){}
-    
+
+
   async getAllanomalies(){
     return await this.anomalyRepository.find({ relations: ['inventoryDetail'] });
   }
-
+  
   async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
     const { description, fileIds, inventoryDetailId } = createAnomalyDto;
   
@@ -60,7 +61,6 @@ export class AnomalyService {
     return savedAnomaly;
   }
   
-
   async getAnomalyById(id: string) {
     const anomaly = await this.anomalyRepository.findOne({
       where: { id },
@@ -74,12 +74,22 @@ export class AnomalyService {
     return anomaly;
   }
 
-  
+  async progressAnomaly(id: string){
+    const anomaly = await this.getAnomalyById(id);
+    anomaly.status = AnomalyStatus.IN_PROGRESS;
+    return await this.anomalyRepository.save(anomaly);
+  }
+
   async acceptAnomaly(id: string){
     const anomaly = await this.getAnomalyById(id);
     anomaly.status = AnomalyStatus.ACCEPTED;
     return await this.anomalyRepository.save(anomaly);
   }
 
-
+   async refuseAnomaly(id: string) {
+    const anomaly = await this.getAnomalyById(id);
+    anomaly.status = AnomalyStatus.REFUSED;
+    await this.anomalyRepository.save(anomaly);
+  }
+  
 }
