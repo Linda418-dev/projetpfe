@@ -10,6 +10,7 @@ import { BypassInventoryLock } from './guards/bypass-inventory-lock.decorator';
 @ApiBearerAuth()
 @ApiTags('inventory Resource')
 @Controller('Inventories')
+
 export class InventoryController {
     constructor(private readonly inventoryService: InventoryService) {}
 

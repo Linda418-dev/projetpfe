@@ -22,7 +22,6 @@ export class CreateInventoryDetailsDto {
   @IsNotEmpty()
   assetId: string;
 
-
   @ApiProperty()
   @IsArray()
   @IsUUID('all', { each: true })

@@ -123,12 +123,10 @@ export class AssetsService {
     fetchAsset.supplier = newSupplier;
   }
 
-  // Update Name (champ simple aussi)
   if (updateAssetDto.name) {
     fetchAsset.name = updateAssetDto.name;
   }
 
-  // Enfin, sauvegarde proprement
   return this.assetRepository.save(fetchAsset);
 
     }
