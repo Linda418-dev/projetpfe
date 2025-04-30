@@ -20,7 +20,7 @@ export class AnomalyService {
     }
     
   async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
-    const { description, fileIds } = createAnomalyDto;
+    const { description, fileIds , assetId } = createAnomalyDto;
 
     let files: File[] = [];
     if (fileIds && fileIds.length > 0) {
@@ -41,6 +41,11 @@ export class AnomalyService {
     if (files.length > 0) {
       for (const file of files) {
         file.anomaly = savedAnomaly;
+
+        if (assetId) {
+          file.assetId = assetId;
+        }
+
         await this.fileRepository.save(file);
       }
     }
