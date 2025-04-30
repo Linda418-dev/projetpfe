@@ -26,7 +26,4 @@ export class updateAnomalyDto{
     @ApiProperty()
     statusId?: string;
 
-
-    
-
 }

@@ -19,7 +19,8 @@ export class InventoryDetailsService {
     private readonly inventoryDetailsRepository : InventoryDetailsRepository,
     private readonly assetStatusRepository : AssetStatusRepository,
     private readonly  locationHistoryRepository : LocationHistoryRepository,
-    private readonly inventoryStatusRepository : InventoryStatusRepository
+    private readonly inventoryStatusRepository : InventoryStatusRepository,
+    private readonly anomalyRepository : AnomalyRepository
 
   ) {}
   
@@ -54,13 +55,17 @@ export class InventoryDetailsService {
           where: { asset: { id: dto.assetId } },
           order: { createdAt: 'DESC' },
         });
-  
+        const anomaly = dto.anomalyId
+        ? await this.anomalyRepository.findOne({ where: { id: dto.anomalyId } })
+        : null;
+        
     const inventoryDetail = this.inventoryDetailsRepository.create({
       affectation,
       assetStatus,
       locationHistory,
       files,
       scannedAt: new Date(),
+      anomaly,
     } as Partial<InventoryDetails>);
   
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);

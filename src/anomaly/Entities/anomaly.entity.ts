@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 import { AnomalyStatus } from '../types/enums/anomaly-status.enum';
 import { File } from 'src/uploads/entities/file.entity';
@@ -18,14 +18,7 @@ export class Anomaly {
   @OneToMany(() => File, (file) => file.anomaly)
   files: File[];
 
-  @ManyToOne(() => InventoryDetails, (inventoryDetail) => inventoryDetail.anomalies, {
-    onDelete: 'CASCADE',
-  })
-  inventoryDetail: InventoryDetails;
-
-  @Column({ nullable: true })
-  inventoryDetailId: string;
-
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

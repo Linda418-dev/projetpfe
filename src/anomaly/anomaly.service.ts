@@ -17,12 +17,12 @@ export class AnomalyService {
 
 
   async getAllanomalies(){
-    return await this.anomalyRepository.find({ relations: ['inventoryDetail'] });
+    return await this.anomalyRepository.find();
   }
   
   async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
-    const { description, fileIds, inventoryDetailId } = createAnomalyDto;
-  
+    const { description, fileIds } = createAnomalyDto;
+
     let files: File[] = [];
     if (fileIds && fileIds.length > 0) {
       files = await this.fileRepository.findByIds(fileIds);
@@ -32,21 +32,9 @@ export class AnomalyService {
       }
     }
   
-    let inventoryDetail: InventoryDetails | null = null;  
-    if (inventoryDetailId) {
-      inventoryDetail = await this.inventoryDetailRepository.findOne({
-        where: { id: inventoryDetailId },
-      });
-  
-      if (!inventoryDetail) {
-        throw new NotFoundException(`InventoryDetail with ID ${inventoryDetailId} not found`);
-      }
-    }
-  
     const anomaly = this.anomalyRepository.create({
       description,
       status: AnomalyStatus.PENDING,
-      inventoryDetail: inventoryDetail ?? undefined,
     });
   
     const savedAnomaly = await this.anomalyRepository.save(anomaly);
