@@ -3,6 +3,7 @@ import { InventoryDetailsService } from './inventory-details.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
 import { Response } from 'express';
+import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 
 
 @ApiTags('inventory-details Resource')
@@ -14,7 +15,7 @@ export class InventoryDetailsController {
     getAllInventoryDetails() {
       return this.inventoryDetailsService. getAllInventoryDetails();
     }
-
+    @BypassInventoryLock()
     @Post()
     createInventorydetails(@Body() dto: CreateInventoryDetailsDto) {
      return this.inventoryDetailsService.createInventorydetails(dto);
