@@ -22,9 +22,14 @@ export class InventoryDetailsService {
   ) {}
   
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
-    const affectation = await this.affectationRepository.findOneOrFail({
+    // verifier le id de l'affectation existe ou non 
+    const affectation = await this.affectationRepository.findOne({
       where: { id: dto.affectationId },
     });
+    
+    if (!affectation) {
+      throw new NotFoundException('Affectation not found.');
+    }
   
     // Récupérer les fichiers s’ils existent
     const files = dto.fileIds?.length
@@ -37,21 +42,26 @@ export class InventoryDetailsService {
     }
     await this.fileRepository.save(files);
   
-    
-  // Récupérer le dernier AssetStatus
+    // Récupérer le dernier AssetStatus
     const assetStatus = await this.assetStatusRepository.findOne({
     where: { asset: { id: dto.assetId } },
     order: { createdAt: 'DESC' },
     });
+    if (!assetStatus) {
+      throw new NotFoundException('No AssetStatus found for this asset.');
+    }
 
-  // Récupérer la dernière LocationHistory
-  const locationHistory = await this.locationHistoryRepository.findOne({
+    // Récupérer la dernière LocationHistory
+    const locationHistory = await this.locationHistoryRepository.findOne({
     where: { asset: { id: dto.assetId } },
     order: { createdAt: 'DESC' },
-  });
-        const anomaly = dto.anomalyId
-        ? await this.anomalyRepository.findOne({ where: { id: dto.anomalyId } })
-        : null;
+    });
+    if (!locationHistory) {
+      throw new NotFoundException('No LocationHistory found for this asset.');
+    }
+    
+    const anomaly = dto.anomalyId
+    ? await this.anomalyRepository.findOne({ where: { id: dto.anomalyId } }): null;
 
     const inventoryDetail = this.inventoryDetailsRepository.create({
       affectation,
@@ -65,7 +75,6 @@ export class InventoryDetailsService {
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
     return savedInventoryDetail;
   }
-  
   
   async  getAllInventoryDetails() {
     return this.inventoryDetailsRepository.find({

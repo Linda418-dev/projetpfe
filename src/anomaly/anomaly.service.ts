@@ -4,22 +4,21 @@ import { AnomalyStatus } from './types/enums/anomaly-status.enum';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { File } from 'src/uploads/entities/file.entity';
-import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
-import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 
 @Injectable()
 export class AnomalyService {
     constructor (
         private readonly anomalyRepository : AnomalyRepository,
         private readonly fileRepository : FileRepository,
-        private readonly inventoryDetailRepository : InventoryDetailsRepository
     ){}
 
 
-  async getAllanomalies(){
-    return await this.anomalyRepository.find();
-  }
-  
+    async getAllanomalies() {
+      return await this.anomalyRepository.find({
+        relations: ['files'],
+      });
+    }
+    
   async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
     const { description, fileIds } = createAnomalyDto;
 
@@ -52,7 +51,7 @@ export class AnomalyService {
   async getAnomalyById(id: string) {
     const anomaly = await this.anomalyRepository.findOne({
       where: { id },
-      relations: ['inventoryDetail'],
+      relations: ['files'],
     });
 
     if (!anomaly) {
