@@ -11,17 +11,36 @@ export class UploadsService {
   async createFile(file: Express.Multer.File) {
     const newFile = this.fileRepository.create({
       name: file.originalname,
-      urlFile: `/uploads/${file.filename}`,
+     urlFile: `uploads/${file.filename}`,
+      //urlFile: file.originalname,
+
       typeFile: file.mimetype,
     });
 
     const savedFile  = await this.fileRepository.save(newFile);
     return {
       message: 'File uploaded successfully',
-      fileId: savedFile.id,  
+      fileId: savedFile.id,
+      urlFile: savedFile.urlFile,
+      typeFile: savedFile.typeFile,
     };
   }
 
+
+  async createFiles(files: Express.Multer.File[]) {
+    const newFiles = files.map(file => this.fileRepository.create({
+      name: file.originalname,
+      urlFile: file.originalname, 
+      typeFile: file.mimetype,
+    }));
+  
+    const savedFiles = await this.fileRepository.save(newFiles);
+  
+    return {
+      message: 'Files uploaded successfully',
+      fileIds: savedFiles.map(file => file.id),
+    };
+  }
 
   async GetAllFiles() {
     const files = await this.fileRepository.find();

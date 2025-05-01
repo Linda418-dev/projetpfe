@@ -19,7 +19,9 @@ import { Supplier } from 'src/supplier/Entities/Supplier.entity';
     MulterModule.register({
       fileFilter: (req, file, callback) => {
         const allowedMimeTypes = [
-          'image/jpeg',  
+          'image/jpeg', 
+          'image/jpg',  
+ 
           'image/png',   
           'image/gif',   
           'image/webp',   
@@ -34,7 +36,7 @@ import { Supplier } from 'src/supplier/Entities/Supplier.entity';
           callback(new Error('files autorisées'), false);
         }
       },
-      storage: diskStorage({
+     storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
           const name = path.parse(file.originalname).name;

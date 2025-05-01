@@ -40,8 +40,8 @@ export class InventoryController {
     }
  
     @Patch(':id')
-async update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
-  return this.inventoryService.updateInventory(id, dto);
+    async update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
+    return this.inventoryService.updateInventory(id, dto);
 }
 
 
