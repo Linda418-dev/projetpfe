@@ -59,6 +59,13 @@ export class AssetController {
     @ApiOperation({ summary: 'delete asset' })
     async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.assetService.deleteAsset(id);
-    }   
+    }  
+
+    @Get(':id/history')
+    @ApiOperation({ summary: 'Get asset history status and location' })
+    async getHistoryAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.assetService.getHistoryAssetById(id);
+    }
+ 
   }
   
