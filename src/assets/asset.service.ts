@@ -251,21 +251,35 @@ export class AssetsService {
     const statusHistory = await this.assetStatusRepository.find({
       where: { asset: { id: assetId } },
       relations: ['status'],
-      order: { createdAt: 'DESC' }
     });
   
     const locationHistory = await this.locationHistoryRepository.find({
       where: { asset: { id: assetId } },
       relations: ['location'],
-      order: { createdAt: 'DESC' }
     });
+  
+    const statusList = statusHistory.map((s) => ({
+      type: 'status',
+      createdAt: s.createdAt,
+      data: s,
+    }));
+  
+    const locationList = locationHistory.map((l) => ({
+      type: 'location',
+      createdAt: l.createdAt,
+      data: l,
+    }));
+  
+    const combinedHistory = [...statusList, ...locationList].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
   
     return {
       assetId,
-      statusHistory,
-      locationHistory
+      history: combinedHistory,
     };
   }
+  
   
 }
 
