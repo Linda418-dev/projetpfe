@@ -23,6 +23,7 @@ export class AssetStatusService {
     
         return assetStatus;
       }
+      
       // Récupérer  les historiques du status par un assetid
       async getHistoryByAssetId(assetId: string) {
         return this.assetStatusRepository.find({

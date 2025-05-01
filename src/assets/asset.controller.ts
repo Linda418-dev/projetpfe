@@ -8,7 +8,7 @@ import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
 
-// @ApiBearerAuth()
+@ApiBearerAuth()
 @ApiTags('Asset Resource')
 @Controller('assets')
 export class AssetController {
@@ -43,7 +43,7 @@ export class AssetController {
    };
   }
 
-  @Get(':id')
+    @Get(':id')
     @ApiOperation({ summary: 'get asset by id' })
     async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getAssetById(id);
@@ -59,6 +59,13 @@ export class AssetController {
     @ApiOperation({ summary: 'delete asset' })
     async deleteAsset(@Param('id', new ParseUUIDPipe()) id: string) {
         return this.assetService.deleteAsset(id);
-    }   
+    }  
+
+    @Get(':id/history')
+    @ApiOperation({ summary: 'Get asset history status and location' })
+    async getHistoryAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.assetService.getHistoryAssetById(id);
+    }
+ 
   }
   

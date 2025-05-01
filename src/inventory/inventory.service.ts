@@ -45,6 +45,21 @@ export class InventoryService {
     if (existing) {
       throw new BadRequestException(`Inventory with name "${createinventorydto.name}" already exists`);
     }
+
+     /* Vérification des dates
+  const now = new Date();
+  const startDate = new Date(createinventorydto.startDate);
+  const endDate = new Date(createinventorydto.endDate);
+
+  // Vérifie que la date de début n’est pas dans le passé
+  if (startDate < now) {
+    throw new BadRequestException('Start date cannot be in the past.');
+  }
+
+  //  Vérifie que la date de début est avant ou égale à la date de fin
+  if (endDate && startDate > endDate) {
+    throw new BadRequestException('Start date must be before or equal to end date.');
+  }*/
   
     // Vérifie que le site existe
     const site = await this.siteRepository.findOne({
@@ -121,6 +136,7 @@ export class InventoryService {
   
     return savedInventory;
   }
+
   //  methode pour get inventory By Id
   async getInventoryById(id: string) {
     const inventory = await this.inventoryRepository.findOne({
@@ -227,25 +243,11 @@ export class InventoryService {
     };
   }
   // Inside InventoryService class
-
   async getActiveInventory() {
-    // Use QueryBuilder to get the latest inventory with 'In Progress' status
-    const activeInventory = await this.inventoryRepository
-      .createQueryBuilder('inventory')
-      .leftJoinAndSelect('inventory.inventoryStatus', 'inventoryStatus')
-      .leftJoinAndSelect('inventoryStatus.status', 'status')
-      .where('status.name = :statusName', { statusName: 'In Progress' })
-      .orderBy('inventoryStatus.createdAt', 'DESC')  
-      .getOne(); 
-  
-    // If there's no active inventory found, return null or handle accordingly
-    if (!activeInventory) {
-      return null;
-    }
-  
-    // Return the active inventory if it's found
-    return activeInventory;
+    return this.inventoryRepository.findActiveInventory();
+
   }
+  
   
   
 

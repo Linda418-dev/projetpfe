@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, OneToOne, JoinColumn } from 'typeorm';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 import { AnomalyStatus } from '../types/enums/anomaly-status.enum';
+import { File } from 'src/uploads/entities/file.entity';
 
 
 @Entity()
@@ -11,12 +12,13 @@ export class Anomaly {
   @Column()
   description: string;
 
-  @Column({ type: 'enum', enum: AnomalyStatus ,  default: AnomalyStatus.PENDING})
+  @Column({ type: 'enum', enum: AnomalyStatus })
   status: AnomalyStatus;
 
-  @ManyToOne(() => InventoryDetails, inventoryDetail => inventoryDetail.anomalies, { onDelete: 'CASCADE' })
-  inventoryDetail: InventoryDetails;
+  @OneToMany(() => File, (file) => file.anomaly)
+  files: File[];
 
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

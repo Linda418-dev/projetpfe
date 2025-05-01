@@ -123,12 +123,10 @@ export class AssetsService {
     fetchAsset.supplier = newSupplier;
   }
 
-  // Update Name (champ simple aussi)
   if (updateAssetDto.name) {
     fetchAsset.name = updateAssetDto.name;
   }
 
-  // Enfin, sauvegarde proprement
   return this.assetRepository.save(fetchAsset);
 
     }
@@ -244,7 +242,31 @@ export class AssetsService {
     };
   }
   
-    
+  async getHistoryAssetById(assetId: string) {
+    const asset = await this.assetRepository.findOneBy({ id: assetId });
+    if (!asset) {
+      throw new BadRequestException(`Asset with id ${assetId} not found`);
+    }
+  
+    const statusHistory = await this.assetStatusRepository.find({
+      where: { asset: { id: assetId } },
+      relations: ['status'],
+      order: { createdAt: 'DESC' }
+    });
+  
+    const locationHistory = await this.locationHistoryRepository.find({
+      where: { asset: { id: assetId } },
+      relations: ['location'],
+      order: { createdAt: 'DESC' }
+    });
+  
+    return {
+      assetId,
+      statusHistory,
+      locationHistory
+    };
+  }
+  
 }
 
     

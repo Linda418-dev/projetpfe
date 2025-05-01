@@ -22,15 +22,15 @@ export class CreateInventoryDetailsDto {
   @IsNotEmpty()
   assetId: string;
 
-  @ApiProperty({ required: false })
-  @IsArray()
-  @IsOptional()
-  @IsString({ each: true }) 
-  anomalies?: string[];
-
   @ApiProperty()
   @IsArray()
   @IsUUID('all', { each: true })
   @IsOptional()
   fileIds?: string[];
+
+  @ApiProperty()
+  @IsUUID()
+  @IsOptional()
+  anomalyId?: string;
+
 }
