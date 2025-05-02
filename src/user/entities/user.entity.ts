@@ -8,6 +8,9 @@ export class User implements IUser {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  playerId: string;
+
   @Column({ unique: true, nullable: true }) 
   username?: string;
 

@@ -53,6 +53,8 @@ import { Affectation } from './affectation/entities/affectation.entity';
 import { SiteRepository } from './site/Repositories/site.repository';
 import { AnomalyModule } from './anomaly/anomaly.module';
 import { Anomaly } from './anomaly/Entities/anomaly.entity';
+import { NotificationModule } from './notification/notification.module';
+import { NotificationService } from './notification/notification.service';
 
 @Module({
   imports: [
@@ -93,6 +95,7 @@ import { Anomaly } from './anomaly/Entities/anomaly.entity';
     InventoryStatusModule,
     AffectationModule,
     AnomalyModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [
@@ -107,6 +110,8 @@ import { Anomaly } from './anomaly/Entities/anomaly.entity';
     DepartmentRepository,
     AffectationRepository,
     SiteRepository,
+    NotificationService,
+    ConfigService,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,

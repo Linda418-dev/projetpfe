@@ -13,6 +13,7 @@ import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enu
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 import * as moment from 'moment';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class InventoryService {
@@ -21,7 +22,8 @@ export class InventoryService {
     private readonly inventoryStatusRepository : InventoryStatusRepository,
     private readonly userRepository : userRepository,
     private readonly affectationRepository : AffectationRepository,
-    private readonly siteRepository : SiteRepository
+    private readonly siteRepository : SiteRepository,
+    private readonly notificationService : NotificationService
   ){}
 
  
@@ -235,6 +237,15 @@ export class InventoryService {
     });
   
     await this.inventoryStatusRepository.save(newInventoryStatus);
+
+    const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id); // à définir
+
+    await this.notificationService.notifyOperators(
+      playerIds,
+      'Inventory Launched',
+      `The inventory "${inventory.name}" has started.`
+    );
+
   
     return {
       message: `Inventory "${inventory.name}" has been launched`,
@@ -242,6 +253,18 @@ export class InventoryService {
       status: inProgressStatus.name,
     };
   }
+
+  async getOperatorsPlayerIdsForInventory(inventoryId: string): Promise<string[]> {
+    const affectations = await this.affectationRepository.find({
+      where: { inventory: { id: inventoryId } },
+      relations: ['operator'],
+    });
+  
+    return affectations
+      .map(a => a.operator?.playerId) // playerId = ID OneSignal
+      .filter(pid => !!pid);
+  }
+  
   // Inside InventoryService class
   async getActiveInventory() {
     return this.inventoryRepository.findActiveInventory();
