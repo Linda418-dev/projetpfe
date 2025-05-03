@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post,Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post,Patch, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -8,7 +8,7 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 
-// @ApiBearerAuth()
+@ApiBearerAuth()
 @ApiTags('user Resource')
 @Controller('users')
 export class UserController {
@@ -49,11 +49,21 @@ export class UserController {
   }
   
   @BypassInventoryLock()
-   @Patch(':id/activate')
+  @Patch(':id/activate')
    // @UseGuards(JwtAuthGuard, RolesGuard)
    // @Roles('admin')
     async activateUser(@Param('id') id: string) {
      return this.userService.activateUser(id);
+  }
+
+  @Post('me/player-id/:playerId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async updatePlayerId(
+    @Param('playerId') playerId: string, 
+    @Req() req,
+  ) {
+    console.log('Reçu playerId :', playerId);
+    return this.userService.updatePlayerId(req.user.id, playerId);
   }
 
 }

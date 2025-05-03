@@ -105,5 +105,10 @@ export class UserService {
       
         return { message: 'User reactivated successfully' };
       }
+
+      async updatePlayerId(userId: number, playerId: string) {
+        await this.userRepository.update(userId, { playerId });
+        return { message: 'Player ID mis à jour' };
+      }
       
 }
