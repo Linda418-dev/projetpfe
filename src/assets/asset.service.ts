@@ -243,77 +243,88 @@ export class AssetsService {
   }
   
   async getHistoryAssetById(assetId: string) {
-    // Vérifier que l'asset existe
     const asset = await this.assetRepository.findOneBy({ id: assetId });
     if (!asset) {
       throw new BadRequestException(`Asset with id ${assetId} not found`);
     }
   
-    // Récupération de l'historique des localisations
+    // Récupère tous les historiques
     const locationHistory = await this.locationHistoryRepository
       .createQueryBuilder('locationHistory')
       .leftJoinAndSelect('locationHistory.location', 'location')
       .where('locationHistory.assetId = :assetId', { assetId })
       .getMany();
   
-    // Récupération de l'historique des statuts
     const statusHistory = await this.assetStatusRepository
       .createQueryBuilder('assetStatus')
       .leftJoinAndSelect('assetStatus.status', 'status')
       .where('assetStatus.assetId = :assetId', { assetId })
       .getMany();
   
-    // Création d'une liste commune avec type et date
+    // Récupère la dernière location connue s’il y en a une
+    const lastLocationEntry = await this.locationHistoryRepository
+      .createQueryBuilder('locationHistory')
+      .leftJoinAndSelect('locationHistory.location', 'location')
+      .where('locationHistory.assetId = :assetId', { assetId })
+      .orderBy('locationHistory.createdAt', 'DESC')
+      .getOne();
+  
+    const lastStatusEntry = await this.assetStatusRepository
+      .createQueryBuilder('assetStatus')
+      .leftJoinAndSelect('assetStatus.status', 'status')
+      .where('assetStatus.assetId = :assetId', { assetId })
+      .orderBy('assetStatus.createdAt', 'DESC')
+      .getOne();
+  
+    let lastLocation = lastLocationEntry
+      ? {
+          id: lastLocationEntry.location.id,
+          name: lastLocationEntry.location.name,
+        }
+      : null;
+  
+    let lastStatus = lastStatusEntry
+      ? {
+          id: lastStatusEntry.status.id,
+          name: lastStatusEntry.status.name,
+        }
+      : null;
+  
     const combined = [
       ...locationHistory.map((l) => ({
-        type: 'location' as const,
+        assetId,
         date: new Date(l.createdAt),
-        data: {
-          assetId: assetId,
-          location: {
-            id: l.location.id,
-            name: l.location.name,
-          },
-          status: null,
+        location: {
+          id: l.location.id,
+          name: l.location.name,
         },
+        status: null,
       })),
       ...statusHistory.map((s) => ({
-        type: 'status' as const,
+        assetId,
         date: new Date(s.createdAt),
-        data: {
-          assetId: assetId,
-          location: null,
-          status: {
-            id: s.status.id,
-            name: s.status.name,
-          },
+        location: null,
+        status: {
+          id: s.status.id,
+          name: s.status.name,
         },
       })),
     ];
   
-    // Tri par date
     combined.sort((a, b) => a.date.getTime() - b.date.getTime());
   
-    // Fusion des enregistrements proches (moins de 1 seconde d’écart)
     const history: any[] = [];
-    for (const item of combined) {
-      const last = history[history.length - 1];
   
-      if (
-        last &&
-        Math.abs(item.date.getTime() - new Date(last.date).getTime()) < 1000
-      ) {
-        // Fusionner les données
-        last.location = item.data.location ?? last.location;
-        last.status = item.data.status ?? last.status;
-      } else {
-        history.push({
-          assetId: item.data.assetId,
-          location: item.data.location,
-          status: item.data.status,
-          date: item.date.toISOString(),
-        });
-      }
+    for (const item of combined) {
+      if (item.location) lastLocation = item.location;
+      if (item.status) lastStatus = item.status;
+  
+      history.push({
+        assetId: item.assetId,
+        location: lastLocation,
+        status: lastStatus,
+        date: item.date.toISOString(),
+      });
     }
   
     return {
