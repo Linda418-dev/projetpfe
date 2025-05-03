@@ -301,7 +301,6 @@ export class AssetsService {
           name: l.location.name,
         },
         status: null,
-        createdAt: l.createdAt, // Ajout de la date de création
       })),
       ...statusHistory.map((s) => ({
         assetId,
@@ -311,7 +310,6 @@ export class AssetsService {
           id: s.status.id,
           name: s.status.name,
         },
-        createdAt: s.createdAt, // Ajout de la date de création
       })),
     ];
   
@@ -330,7 +328,6 @@ export class AssetsService {
         location: lastLocation,
         status: lastStatus,
         date: item.date.toISOString(),
-        createdAt: item.createdAt.toISOString(), // Ajout de la date de création
       };
   
       const lastEvent = history[history.length - 1];
@@ -347,7 +344,7 @@ export class AssetsService {
       }
     }
   
-    // Format final avec l'ID et le nom de location et status, ainsi que createdAt
+    // Format final avec l'ID et le nom de location et status
     const formattedHistory = history.map((event) => ({
       asset: asset.id,  // L'ID de l'asset
       location: event.location
@@ -356,7 +353,6 @@ export class AssetsService {
       status: event.status
         ? { id: event.status.id, name: event.status.name }  // ID et nom du statut
         : { id: null, name: 'Unknown' },  // Default to 'Unknown' if no status
-      createdAt: event.createdAt,  // Ajout de la date de création
     }));
   
     return {
