@@ -248,20 +248,21 @@ export class AssetsService {
       throw new BadRequestException(`Asset with id ${assetId} not found`);
     }
   
-    // Récupère tous les historiques
+    // Récupération des historiques de localisation
     const locationHistory = await this.locationHistoryRepository
       .createQueryBuilder('locationHistory')
       .leftJoinAndSelect('locationHistory.location', 'location')
       .where('locationHistory.assetId = :assetId', { assetId })
       .getMany();
   
+    // Récupération des historiques de statut
     const statusHistory = await this.assetStatusRepository
       .createQueryBuilder('assetStatus')
       .leftJoinAndSelect('assetStatus.status', 'status')
       .where('assetStatus.assetId = :assetId', { assetId })
       .getMany();
   
-    // Récupère la dernière location connue s’il y en a une
+    // Dernière localisation connue
     const lastLocationEntry = await this.locationHistoryRepository
       .createQueryBuilder('locationHistory')
       .leftJoinAndSelect('locationHistory.location', 'location')
@@ -269,6 +270,7 @@ export class AssetsService {
       .orderBy('locationHistory.createdAt', 'DESC')
       .getOne();
   
+    // Dernier statut connu
     const lastStatusEntry = await this.assetStatusRepository
       .createQueryBuilder('assetStatus')
       .leftJoinAndSelect('assetStatus.status', 'status')
@@ -311,25 +313,51 @@ export class AssetsService {
       })),
     ];
   
+    // Trie par date croissante
     combined.sort((a, b) => a.date.getTime() - b.date.getTime());
   
     const history: any[] = [];
   
     for (const item of combined) {
+      // Mise à jour des dernières valeurs
       if (item.location) lastLocation = item.location;
       if (item.status) lastStatus = item.status;
   
-      history.push({
+      const currentEvent = {
         assetId: item.assetId,
         location: lastLocation,
         status: lastStatus,
         date: item.date.toISOString(),
-      });
+      };
+  
+      const lastEvent = history[history.length - 1];
+  
+      // Vérification si l'événement actuel est un doublon basé sur location et status
+      const isDuplicate =
+        lastEvent &&
+        lastEvent.location?.id === currentEvent.location?.id &&
+        lastEvent.status?.id === currentEvent.status?.id;
+  
+      // Ajout seulement si l'événement n'est pas un doublon
+      if (!isDuplicate) {
+        history.push(currentEvent);
+      }
     }
+  
+    // Format final avec l'ID et le nom de location et status
+    const formattedHistory = history.map((event) => ({
+      asset: asset.id,  // L'ID de l'asset
+      location: event.location
+        ? { id: event.location.id, name: event.location.name }  // ID et nom de la localisation
+        : { id: null, name: 'Unknown' },  // Default to 'Unknown' if no location
+      status: event.status
+        ? { id: event.status.id, name: event.status.name }  // ID et nom du statut
+        : { id: null, name: 'Unknown' },  // Default to 'Unknown' if no status
+    }));
   
     return {
       assetId,
-      history,
+      history: formattedHistory,
     };
   }
   
