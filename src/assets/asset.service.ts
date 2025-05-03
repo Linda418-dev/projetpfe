@@ -249,25 +249,22 @@ export class AssetsService {
       throw new BadRequestException(`Asset with id ${assetId} not found`);
     }
   
-    // Historique des statuts
     const statusHistory = await this.assetStatusRepository.find({
       where: { asset: { id: assetId } },
       relations: ['status'],
     });
   
-    // Historique des localisations
     const locationHistory = await this.locationHistoryRepository.find({
       where: { asset: { id: assetId } },
       relations: ['location'],
     });
   
-    // Ajout de l’assetId dans chaque entrée + typage clair
     const statusList = statusHistory.map((s) => ({
       type: 'status' as const,
       createdAt: s.createdAt,
-      assetId: assetId,
       data: {
         id: s.id,
+        assetId: assetId, // <- ici dans le data
         status: s.status,
       },
     }));
@@ -275,24 +272,23 @@ export class AssetsService {
     const locationList = locationHistory.map((l) => ({
       type: 'location' as const,
       createdAt: l.createdAt,
-      assetId: assetId,
       data: {
         id: l.id,
+        assetId: assetId, // <- ici aussi
         location: l.location,
       },
     }));
   
-    // Fusion et tri par date croissante
     const combinedHistory = [...statusList, ...locationList].sort(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
   
-    // Résultat final
     return {
       assetId,
       history: combinedHistory,
     };
   }
+  
   
   
   
