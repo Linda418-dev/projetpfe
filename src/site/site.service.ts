@@ -16,11 +16,12 @@ export class SiteService {
         private readonly serviceRepository : ServiceRepository,
         private readonly locationRepository : LocationRepository
      ){}
+     
       //  methode pour get all sites 
         async getAllSites() {
             return this.siteRepository.findAll();
         }
-        
+
         // methode pour le creation d'un site
         async createSite(createSiteDto: CreateSiteDto) {
           //créer le site
@@ -73,6 +74,8 @@ export class SiteService {
         
           return site;
         }   
+
+        // methode pour get site by id
         async getSiteById(id: string) {
           const site = await this.siteRepository.findSiteWithRelationsById(id);
         
@@ -82,19 +85,20 @@ export class SiteService {
         
           return site;
         }
-
-          async deleteSite(id: string) {
-            const fetchSite = await this.getSiteById(id);
-            await this.siteRepository.remove(fetchSite);
-            return { message: 'Site deleted successfully' };
-          }
+        // methode pour supprimer site
+        async deleteSite(id: string) {
+          const fetchSite = await this.getSiteById(id);
+          await this.siteRepository.remove(fetchSite);
+          return { message: 'Site deleted successfully' };
+        }
           
-          async updateSite(id: string, updateSiteDto: updateSiteDto) {
-            const fetchSite = await this.getSiteById(id);
-            if (!fetchSite) {
-              throw new BadRequestException(`Site with id ${id} not found`);
-            }
-            Object.assign(fetchSite, updateSiteDto);
-            return this.siteRepository.save(fetchSite);
-          }          
+        // methode pour update Site 
+        async updateSite(id: string, updateSiteDto: updateSiteDto) {
+          const fetchSite = await this.getSiteById(id);
+          if (!fetchSite) {
+            throw new BadRequestException(`Site with id ${id} not found`);
+          }
+          Object.assign(fetchSite, updateSiteDto);
+          return this.siteRepository.save(fetchSite);
+        }          
 }

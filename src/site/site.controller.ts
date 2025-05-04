@@ -4,7 +4,6 @@ import { SiteService } from './site.service';
 import { CreateSiteDto } from './Types/dto/create-site.dto';
 import { updateSiteDto } from './Types/dto/update-site.dto';
 
-
 @ApiTags('Site Resource')
 @Controller('sites')
 export class SiteController {

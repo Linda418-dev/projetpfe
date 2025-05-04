@@ -59,10 +59,7 @@ export class UserController {
   @Post('me/player-id/:playerId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   async updatePlayerId(
-    @Param('playerId') playerId: string, 
-    @Req() req,
-  ) {
-    console.log('Reçu playerId :', playerId);
+    @Param('playerId') playerId: string, @Req() req,) {
     return this.userService.updatePlayerId(req.user.id, playerId);
   }
 

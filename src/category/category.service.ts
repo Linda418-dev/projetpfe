@@ -9,25 +9,27 @@ export class CategoryService {
     constructor(private readonly categoryRepository : CategoryRepository,
         private readonly assetRepository : AssetRepository
      ){}
-   
+  //  methode pour get All categories
     async getAllCategories() {
         return this.categoryRepository.find({
             relations: ['assets'], 
         });
     }
+    // methode pour get Category By id 
     async getCategoryById(id: string) {
         const category = await this.categoryRepository.findOne({
             where: { id },
             relations: ['assets'], 
         });
-        if (!category) throw new NotFoundException('Catégorie non trouvée');
+        if (!category) throw new NotFoundException('Category not found');
         return category;
     }
+  //  methode pour creation category
     async createCategory(createCategoryDto: CreateCategoryDto) {
         const category = this.categoryRepository.create(createCategoryDto);
         return this.categoryRepository.save(category);
     }
-
+  //  methode pour modifier le category
     async updateCategory(id: string, updateCategoryDto: UpdateCategoryDto) {
         const fetchCategory = await this.categoryRepository.findOne({
           where: { id },
@@ -49,11 +51,12 @@ export class CategoryService {
           assets: updatedAssets,
         };
       }
-      
-    
-
+    // methode pour supprimer category 
     async deleteCategory(id: string) {
         const result = await this.categoryRepository.delete(id);
-        if (result.affected === 0) throw new NotFoundException('Catégorie non trouvée');
+        if (result.affected === 0){
+          throw new NotFoundException('Category not found')
+        } 
+        return { message: 'Category deleted successfully' };
     }
 }

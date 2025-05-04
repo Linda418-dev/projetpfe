@@ -72,7 +72,6 @@ import { Notification } from './notification/entities/notification.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-
         entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly,Notification], 
         synchronize: true, 
       }),

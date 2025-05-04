@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity,  ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { IUser } from "../types/interface/user.interface";
 import { UserRole } from "src/user-role/entities/user-role.entity";
 import { Affectation } from "src/affectation/entities/affectation.entity";

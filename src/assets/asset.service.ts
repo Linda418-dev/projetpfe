@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { AssetRepository } from './Repositories/Asset.repository';
 import { CreateAssetDto } from './types/dto/create-asset.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
@@ -41,7 +41,7 @@ export class AssetsService {
     
     async getAllAssets() {
       return this.assetRepository.find();
-  }
+    }
 
     async getAssetById(id: string) {
         const fetchAsset = await this.assetRepository.findOneBy({ id });
@@ -98,8 +98,8 @@ export class AssetsService {
         await this.assetStatusRepository.save(assetStatus);
       }
     
-  // Update Category
-  if (updateAssetDto.categoryId && fetchAsset.category?.id !== updateAssetDto.categoryId) {
+    // Update Category
+    if (updateAssetDto.categoryId && fetchAsset.category?.id !== updateAssetDto.categoryId) {
     const newCategory = await this.categoryRepository.findOne({
       where: { id: updateAssetDto.categoryId },
     });
@@ -109,9 +109,9 @@ export class AssetsService {
     }
 
     fetchAsset.category = newCategory;
-  }
+    }
 
-  if (updateAssetDto.supplierId && fetchAsset.supplier?.id !== updateAssetDto.supplierId) {
+   if (updateAssetDto.supplierId && fetchAsset.supplier?.id !== updateAssetDto.supplierId) {
     const newSupplier = await this.supplierRepository.findOne({
       where: { id: updateAssetDto.supplierId },
     });
@@ -195,119 +195,114 @@ export class AssetsService {
     return savedAsset;
   }
    
-  
   async getHistoryAssetById(assetId: string) {
-    // Récupération de l'asset
-    const asset = await this.assetRepository.findOneBy({ id: assetId });
+    // 1. Récupérer l'asset actuel avec sa localisation et son statut
+    const asset = await this.assetRepository.findOne({
+      where: { id: assetId },
+      relations: ['location', 'status'],
+    });
+  
     if (!asset) {
-      throw new BadRequestException(`Asset with id ${assetId} not found`);
+      throw new NotFoundException('Asset not found');
     }
   
-    // Récupération des historiques de localisation
-    const locationHistory = await this.locationHistoryRepository
-      .createQueryBuilder('locationHistory')
-      .leftJoinAndSelect('locationHistory.location', 'location')
-      .where('locationHistory.assetId = :assetId', { assetId })
-      .getMany();
+    console.log('Asset trouvé:', asset); // Log de l'asset récupéré
   
-    // Récupération des historiques de statut
-    const statusHistory = await this.assetStatusRepository
-      .createQueryBuilder('assetStatus')
-      .leftJoinAndSelect('assetStatus.status', 'status')
-      .where('assetStatus.assetId = :assetId', { assetId })
-      .getMany();
+    // 2. Récupérer l'historique de localisation
+    const locationEvents = await this.locationHistoryRepository
+      .createQueryBuilder('lh')
+      .leftJoin('lh.location', 'location')
+      .where('lh.assetId = :assetId', { assetId })
+      .orderBy('lh.createdAt', 'ASC')
+      .select([
+        'lh.createdAt AS date',
+        `'location' AS type`,
+        'location.name AS value',
+      ])
+      .getRawMany();
   
-    // Dernière localisation connue
-    const lastLocationEntry = await this.locationHistoryRepository
-      .createQueryBuilder('locationHistory')
-      .leftJoinAndSelect('locationHistory.location', 'location')
-      .where('locationHistory.assetId = :assetId', { assetId })
-      .orderBy('locationHistory.createdAt', 'DESC')
-      .getOne();
+    console.log('Événements de localisation:', locationEvents); // Log des événements de localisation
   
-    // Dernier statut connu
-    const lastStatusEntry = await this.assetStatusRepository
-      .createQueryBuilder('assetStatus')
-      .leftJoinAndSelect('assetStatus.status', 'status')
-      .where('assetStatus.assetId = :assetId', { assetId })
-      .orderBy('assetStatus.createdAt', 'DESC')
-      .getOne();
+    // 3. Récupérer l'historique de statut
+    const statusEvents = await this.assetStatusRepository
+      .createQueryBuilder('astatus')
+      .leftJoin('astatus.status', 'status')
+      .where('astatus.assetId = :assetId', { assetId })
+      .orderBy('astatus.createdAt', 'ASC')
+      .select([
+        'astatus.createdAt AS date',
+        `'status' AS type`,
+        'status.name AS value',
+      ])
+      .getRawMany();
   
-    let lastLocation = lastLocationEntry
-      ? { id: lastLocationEntry.location.id, name: lastLocationEntry.location.name }
-      : null;
+    console.log('Événements de statut:', statusEvents); // Log des événements de statut
   
-    let lastStatus = lastStatusEntry
-      ? { id: lastStatusEntry.status.id, name: lastStatusEntry.status.name }
-      : null;
+    // 4. Fusionner les événements
+    const allEvents: {
+      date: Date;
+      type: 'location' | 'status';
+      value: string;
+    }[] = [...locationEvents, ...statusEvents];
   
-    // Combine locationHistory et statusHistory
-    const combined = [
-      ...locationHistory.map((l) => ({
-        assetId,
-        date: new Date(l.createdAt),
-        location: { id: l.location.id, name: l.location.name },
-        status: null,
-        createdAt: l.createdAt,
-      })),
-      ...statusHistory.map((s) => ({
-        assetId,
-        date: new Date(s.createdAt),
-        location: null,
-        status: { id: s.status.id, name: s.status.name },
-        createdAt: s.createdAt,
-      })),
-    ];
+    // 5. Trier les événements par date avant le regroupement
+    allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-    // Trie par date croissante
-    combined.sort((a, b) => a.date.getTime() - b.date.getTime());
+    // 6. Grouper les événements par date exacte arrondie à la seconde
+    const groupedMap = new Map<string, { date: Date; values: { location?: string; status?: string } }>();
   
-    const history: any[] = [];
+    for (const event of allEvents) {
+      // Arrondir la date à la seconde (supprimer les millisecondes)
+      const dateKey = new Date(event.date).setMilliseconds(0);
+      const group = groupedMap.get(dateKey.toString());
   
-    // Construction de l'historique
-    for (const item of combined) {
-      // Mise à jour des dernières valeurs
-      if (item.location) lastLocation = item.location;
-      if (item.status) lastStatus = item.status;
-  
-      const currentEvent = {
-        assetId: item.assetId,
-        location: lastLocation,
-        status: lastStatus,
-        date: item.date.toISOString(),
-        createdAt: item.createdAt.toISOString(),
-      };
-  
-      const lastEvent = history[history.length - 1];
-  
-      // Vérification si l'événement actuel est un doublon basé sur location et status
-      const isDuplicate =
-        lastEvent &&
-        lastEvent.location?.id === currentEvent.location?.id &&
-        lastEvent.status?.id === currentEvent.status?.id;
-  
-      // Ajout seulement si l'événement n'est pas un doublon
-      if (!isDuplicate) {
-        history.push(currentEvent);
+      if (group) {
+        // Mettre à jour les valeurs si elles changent
+        group.values[event.type] = event.value;
+      } else {
+        groupedMap.set(dateKey.toString(), {
+          date: new Date(dateKey),
+          values: { [event.type]: event.value },
+        });
       }
     }
   
-    // Format final avec l'ID et le nom de location et status, ainsi que createdAt
-    const formattedHistory = history.map((event) => ({
-      asset: asset.id,  // L'ID de l'asset
-      location: event.location
-        ? { id: event.location.id, name: event.location.name }  // ID et nom de la localisation
-        : { id: null, name: 'Unknown' },  // Default to 'Unknown' if no location
-      status: event.status
-        ? { id: event.status.id, name: event.status.name }  // ID et nom du statut
-        : { id: null, name: 'Unknown' },  // Default to 'Unknown' if no status
-      createdAt: event.createdAt,  // Ajout de la date de création
-    }));
+    // 7. Créer la timeline finale en respectant l'ordre chronologique
+    const timeline: {
+      asset: string;
+      assetId: string;
+      location: string;
+      locationId: string;
+      status: string;
+      statusId: string;
+      date: Date;
+    }[] = [];
+      
+    // Valeurs initiales
+    let currentLocation = asset.location.name;
+    let currentStatus = asset.status.name;
   
-    return {
-      assetId,
-      history: formattedHistory,
-    };
+    // 8. Ajouter les événements à la timeline en respectant l'ordre
+    for (const group of groupedMap.values()) {
+      // Si l'emplacement ou le statut a changé, les ajouter à la timeline
+      if (group.values.location) currentLocation = group.values.location;
+      if (group.values.status) currentStatus = group.values.status;
+  
+      timeline.push({
+        asset: asset.name,
+        assetId: asset.id,
+        location: currentLocation,
+        locationId: asset.location.id, // Ajout de l'ID
+        status: currentStatus,
+        statusId: asset.status.id,     // Ajout de l'ID
+        date: group.date,
+      });
+      
+    }
+  
+    console.log('Timeline finale:', timeline); // Log de la timeline
+  
+    return timeline;
   }
   
   

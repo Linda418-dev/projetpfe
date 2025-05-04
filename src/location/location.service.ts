@@ -10,9 +10,10 @@ export class LocationService {
             private readonly locationRepository: LocationRepository,
             private readonly serviceRepository : ServiceRepository
         ) {}
-    
-        async getAllLocations() {
-            return this.locationRepository.find({
+
+      // methode pour gett All locations
+      async getAllLocations() {
+        return this.locationRepository.find({
               relations: {
                 service: {
                   department: {
@@ -22,8 +23,23 @@ export class LocationService {
               }
             });
           }
-    
-          async getLocationById(id: string) {
+          
+      // methode pour creation location
+      async createLocation(createLocationDto: CreateLocationDto, serviceId: string) {
+        const service = await this.serviceRepository.findOneBy({ id: serviceId });
+          if (!service) {
+              throw new NotFoundException(`Service with id ${serviceId} not found`);
+            }
+            const location = this.locationRepository.create({
+              name: createLocationDto.name,
+              service: service,
+            });
+          
+            return this.locationRepository.save(location);
+      } 
+
+      // methode get locations by id 
+      async getLocationById(id: string) {
             const location = await this.locationRepository.findOne({
               where: { id },
               relations: {
@@ -34,47 +50,29 @@ export class LocationService {
                 }
               }
             });
-          
             if (!location) {
               throw new BadRequestException(`Location with id ${id} not found`);
             }
-          
-            return location;
-          }
-    
-    
-          async createLocation(createLocationDto: CreateLocationDto, serviceId: string) {
-            const service = await this.serviceRepository.findOneBy({ id: serviceId });
-          
-            if (!service) {
-              throw new NotFoundException(`Service with id ${serviceId} not found`);
-            }
-          
-            const location = this.locationRepository.create({
-              name: createLocationDto.name,
-              service: service,
-            });
-          
-            return this.locationRepository.save(location);
-          }
-          
-              
-    
-        async updateLocation(id: string, updatelocationDto: UpdateLocationDto) {
-            const fetchLocation = await this.getLocationById(id);
-            if (!fetchLocation) {
-                throw new BadRequestException(`location with id ${id} not found`);
-            }
-            Object.assign(fetchLocation, updatelocationDto);
-            return this.locationRepository.save(fetchLocation);
+          return location;
+      }
+
+      // methode pour modifier location
+      async updateLocation(id: string, updatelocationDto: UpdateLocationDto) {
+        const fetchLocation = await this.getLocationById(id);
+        if (!fetchLocation) {
+          throw new BadRequestException(`location with id ${id} not found`);
         }
-    
-        async deleteLocation(id: string) {
-            const result = await this.locationRepository.delete(id);
-            if (result.affected === 0) {
-                throw new NotFoundException('location not found');
-            }
-            return { message: 'location deleted successfully' };
+        Object.assign(fetchLocation, updatelocationDto);
+        return this.locationRepository.save(fetchLocation);
+      }
+
+      // methode supprimer location
+      async deleteLocation(id: string) {
+        const result = await this.locationRepository.delete(id);
+        if (result.affected === 0) {
+          throw new NotFoundException('location not found');
         }
+        return { message: 'location deleted successfully' };
+      }
     
 }

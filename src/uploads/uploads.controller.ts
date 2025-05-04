@@ -65,7 +65,4 @@ export class UploadsController {
     return this.uploadsService.getFileById(id);
   }
   
-
-  
-
 }

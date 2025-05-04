@@ -14,6 +14,7 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 export class AssetController {
     constructor(private readonly assetService: AssetsService,  
     ) {}
+
     @Get('all-assets')
     @ApiOperation({ summary: 'get all assets' })
     async getAllAssets() {
@@ -25,14 +26,13 @@ export class AssetController {
       return this.assetService.getAssets(params);
     } 
 
-      
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })
     // @UseGuards(JwtAuthGuard, RolesGuard)  
     // @Roles('admin') 
     async createAssetAndAssignToFile(@Body() createAssetDto: CreateAssetDto) {
     const asset = await this.assetService.createAssetAndAssignToFile(createAssetDto);
-   return {
+    return {
      message: 'Asset successfully created and assigned to file, category, and location',
      asset,
    };
@@ -44,7 +44,7 @@ export class AssetController {
     return this.assetService.getAssetById(id);
     }
 
-   @Patch(':id')
+    @Patch(':id')
     @ApiOperation({ summary: 'edit asset' })
     async updateAsset(@Param('id', new ParseUUIDPipe()) id: string, @Body() updateAssetDto: updateAssetDto) {
         return this.assetService.updateAsset(id, updateAssetDto);

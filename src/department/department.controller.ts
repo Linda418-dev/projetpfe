@@ -28,24 +28,24 @@ export class DepartmentController {
            }
          
            return this.departmentService.createDepartment(createDepartmentDto, siteId);
-         }
+           }
          
          
          @Get(':id')
          @ApiOperation({ summary: 'get department by id' })
          getDepartmentById(@Param('id') id: string) {
              return this.departmentService.getDepartmentById(id);
-         }
+        }
     
          @Patch(':id')
          @ApiOperation({ summary: 'edit department' })
          async updateDepatment(@Param('id', new ParseUUIDPipe()) id: string,@Body() updateDepartmentDto: UpdateDepartmentDto) {
          return this.departmentService.updateDepatment(id, updateDepartmentDto);
-             }
+        }
       
          @Delete(':id')
          @ApiOperation({ summary: 'delete department' })
          deleteDepartment(@Param('id') id: string) {
              return this.departmentService.deleteDepartment(id);
-         }
+        }
 }

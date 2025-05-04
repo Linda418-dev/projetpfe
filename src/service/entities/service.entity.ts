@@ -19,12 +19,10 @@ export class Service implements IService{
     @OneToMany(() => Location, (location) => location.service)
     locations: Location[];
 
-
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  
     
     @UpdateDateColumn({ type: 'timestamp' })
-    updatedAt: Date;
-  
+    updatedAt: Date; 
     
 }

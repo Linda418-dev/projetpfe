@@ -4,7 +4,6 @@ import { Service } from "src/service/entities/service.entity";
 import { Asset } from "src/assets/Entities/Asset.entity";
 import { LocationHistory } from "src/location-history/entities/location-history.entity";
 
-
 @Entity()
 export class Location implements Ilocation{
    

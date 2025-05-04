@@ -9,40 +9,44 @@ export class SupplierService {
      constructor(private readonly supplierRepository:SupplierRepository,
         private readonly assetRepository : AssetRepository
      ){}
-        async getAllSuppliers () {
-            return this.supplierRepository.find();
-        }
-        async getSupplierById(id: string) {
-           const fetchSupplier= await this.supplierRepository.findOneBy({id : id });
+    //  methode pour get All Suppliers
+      async getAllSuppliers () {
+        return this.supplierRepository.find();
+      }
+
+    //  methode pour creation suplier 
+      async  CreateSupplier(createSupplierDto: CreateSupplierDto) {
+        return this.supplierRepository.save(
+          this.supplierRepository.create(createSupplierDto)
+        )
+      }
+
+    //  methode pour get supplier by id 
+      async getSupplierById(id: string) {
+        const fetchSupplier= await this.supplierRepository.findOneBy({id : id });
            if (!fetchSupplier){
             throw new BadRequestException('Supplier with id ${id} not found');
            }
            return fetchSupplier;
-        }
-        async  CreateSupplier(createSupplierDto: CreateSupplierDto) {
-            return this.supplierRepository.save(
-                this.supplierRepository.create(createSupplierDto)
-            )
-        }
-    
-        async deleteSupplier(id: string) {
-           const fetchSupplier = await this.getSupplierById(id);
-           return this.supplierRepository.remove(fetchSupplier);
-        }
-        async updateSupplier(id: string, updateSupplierDto: UpdateSupplierDto) {
-            const fetchSupplier = await this.supplierRepository.findOne({
+      }
+    // methode supprimer supprimer 
+      async deleteSupplier(id: string) {
+        const fetchSupplier = await this.getSupplierById(id);
+        return this.supplierRepository.remove(fetchSupplier);
+      }
+    // methode pour modifier supplier
+      async updateSupplier(id: string, updateSupplierDto: UpdateSupplierDto) {
+        const fetchSupplier = await this.supplierRepository.findOne({
               where: { id },
               relations: ['assets'], 
             });
-          
-            if (!fetchSupplier) {
+          if (!fetchSupplier) {
               throw new BadRequestException(`Supplier with id ${id} not found`);
             }
-          
-            const oldSupplierName = fetchSupplier.name;
-            Object.assign(fetchSupplier, updateSupplierDto);
-            const updatedSupplier = await this.supplierRepository.save(fetchSupplier);
-                const updatedAssets = await this.assetRepository.find({
+          const oldSupplierName = fetchSupplier.name;
+          Object.assign(fetchSupplier, updateSupplierDto);
+          const updatedSupplier = await this.supplierRepository.save(fetchSupplier);
+          const updatedAssets = await this.assetRepository.find({
               where: { supplier: updatedSupplier },
             });
           

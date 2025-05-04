@@ -4,7 +4,7 @@ import { LocationHistoryRepository } from './repositories/location-history.repos
 @Injectable()
 export class LocationHistoryService {
     constructor(private readonly locationHistoryRepository : LocationHistoryRepository){}
-
+    
     async getAllHistories() {
         return this.locationHistoryRepository.find({
           relations: ['asset', 'location'],

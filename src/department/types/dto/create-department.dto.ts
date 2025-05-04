@@ -9,7 +9,6 @@ export class CreateDepartmentDto {
     @IsNotEmpty()
     name: string;
     
-
     @ApiProperty()
     @ValidateNested()
     @Type(() => CreateServiceDto)

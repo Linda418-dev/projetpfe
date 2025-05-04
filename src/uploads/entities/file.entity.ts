@@ -33,12 +33,10 @@ export class File implements IFile {
   @Column({ nullable: true })
   inventoryDetailsId: string;
 
-
   @ManyToOne(() => Anomaly, (anomaly) => anomaly.files, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'anomalyId' })
   anomaly: Anomaly;
 
-  
   @Column({ nullable: true })
   anomalyId: string;
   

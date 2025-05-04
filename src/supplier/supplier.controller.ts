@@ -27,7 +27,7 @@ export class SupplierController {
         return this.supplierService.getSupplierById(id); 
         }
     
-       @Patch(':id')
+        @Patch(':id')
         @ApiOperation({ summary: 'edit supplier' })
         async updateSupplier(@Param('id', new ParseUUIDPipe()) id: string,@Body() updateSuplierDto: UpdateSupplierDto) {
         return this.supplierService.updateSupplier(id, updateSuplierDto);
@@ -38,9 +38,5 @@ export class SupplierController {
         async deleteSupplier(@Param('id',new ParseUUIDPipe()) id : string){
             return this.supplierService.deleteSupplier(id);
         }
-
-
-    
-    
     
 }
