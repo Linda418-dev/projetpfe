@@ -20,6 +20,13 @@ export class InventoryDetailsService {
     private readonly anomalyRepository : AnomalyRepository
 
   ) {}
+  async  getAllInventoryDetails() {
+    return this.inventoryDetailsRepository.find({
+      relations: ['affectation', 'assetStatus', 'locationHistory', 'files'],
+      order: { scannedAt: 'DESC' },
+    });
+  }
+  
   
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
     // verifier le id de l'affectation existe ou non 
@@ -31,12 +38,10 @@ export class InventoryDetailsService {
       throw new NotFoundException('Affectation not found.');
     }
   
-    // Récupérer les fichiers s’ils existent
     const files = dto.fileIds?.length
       ? await this.fileRepository.findByIds(dto.fileIds)
       : [];
   
-    // Injecter assetId dans les fichiers (modification directe des entités)
     for (const file of files) {
       file.assetId = dto.assetId;
     }
@@ -76,12 +81,7 @@ export class InventoryDetailsService {
     return savedInventoryDetail;
   }
   
-  async  getAllInventoryDetails() {
-    return this.inventoryDetailsRepository.find({
-      relations: ['affectation', 'assetStatus', 'locationHistory', 'files'],
-      order: { scannedAt: 'DESC' },
-    });
-  }
+ 
   
   async  getInventorydetailsById(id: string) {
     const detail = await this.inventoryDetailsRepository.findOne({
@@ -99,7 +99,4 @@ export class InventoryDetailsService {
   async getInventoryDetailsByInventoryId(inventoryId: string) {
     return this.inventoryDetailsRepository.findByInventoryId(inventoryId);
   }
-  
-  
-  
 }

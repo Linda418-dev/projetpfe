@@ -18,23 +18,19 @@ export class NotificationService {
         this.ONE_SIGNAL_APP_ID = this.configService.get<string>('ONESIGNAL_APP_ID')!;
         this.ONE_SIGNAL_API_KEY = this.configService.get<string>('ONESIGNAL_API_KEY')!;
       }
+
       async getAllNotifications(user: any) {
         if (user.role?.role === 'operator') {
-          // L'utilisateur est un opérateur : on filtre les notifications qui le concernent
-          return this.notificationRepo
-            .createQueryBuilder('notification')
-            .leftJoinAndSelect('notification.recipients', 'recipient')
-            .where('recipient.id = :userId', { userId: user.id })
-            .orderBy('notification.createdAt', 'DESC')
-            .getMany();
+          // renvoi tous les notification d'un operateur 
+          return this.notificationRepo.findAllByUserId(user.id);
         }
-      
         // Si ce n'est pas un opérateur, on renvoie toutes les notifications
         return this.notificationRepo.find({
           relations: ['recipients'],
           order: { createdAt: 'DESC' },
         });
       }
+
     //   methode pour notifier les operateurs  
     async notifyOperators(playerIds: string[], title: string, message: string) {
       try {
@@ -53,10 +49,10 @@ export class NotificationService {
             },
           },
         );
-           // 2. Récupérer les utilisateurs correspondant aux playerIds
+    //  Récupérer les utilisateurs correspondant aux playerIds
       const users = await this.userRepository.find({ where: { playerId: In(playerIds) } });
-
-      // 3. Créer et enregistrer la notification avec les destinataires
+      
+      // Créer  la notification avec les destinataires
       const notification = this.notificationRepo.create({
         playerIds,
         title,

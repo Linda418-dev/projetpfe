@@ -7,19 +7,22 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
   constructor(private dataSource: DataSource) {
     super(InventoryDetails, dataSource.createEntityManager());
   }
-
-  async findByInventoryId(inventoryId: string){
+  async findByInventoryId(inventoryId: string) {
     return this.createQueryBuilder('inventoryDetails')
       .leftJoinAndSelect('inventoryDetails.affectation', 'affectation')
       .leftJoinAndSelect('affectation.inventory', 'inventory')
+      .leftJoinAndSelect('affectation.operator', 'operator')  // Ajout de la jointure pour récupérer l'opérateur
       .leftJoinAndSelect('inventoryDetails.assetStatus', 'assetStatus')
       .leftJoinAndSelect('assetStatus.asset', 'asset')
+      .leftJoinAndSelect('assetStatus.status', 'status')  // Jointure explicite pour `status`
       .leftJoinAndSelect('inventoryDetails.locationHistory', 'locationHistory')
       .leftJoinAndSelect('inventoryDetails.files', 'files')
       .leftJoinAndSelect('inventoryDetails.anomaly', 'anomaly')
       .where('inventory.id = :inventoryId', { inventoryId })
       .orderBy('inventoryDetails.scannedAt', 'DESC')
+      .addOrderBy('assetStatus.createdAt', 'DESC')  // Pour récupérer le dernier status
       .getMany();
   }
+  
   
 }
