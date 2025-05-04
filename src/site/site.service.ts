@@ -16,10 +16,12 @@ export class SiteService {
         private readonly serviceRepository : ServiceRepository,
         private readonly locationRepository : LocationRepository
      ){}
-
+      //  methode pour get all sites 
         async getAllSites() {
             return this.siteRepository.findAll();
         }
+        
+        // methode pour le creation d'un site
         async createSite(createSiteDto: CreateSiteDto) {
           //créer le site
           const site = await this.siteRepository.save(
@@ -94,7 +96,5 @@ export class SiteService {
             }
             Object.assign(fetchSite, updateSiteDto);
             return this.siteRepository.save(fetchSite);
-          }
-          
-          
+          }          
 }

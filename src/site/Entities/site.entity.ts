@@ -4,7 +4,6 @@ import { Department } from "src/department/entities/department.entity";
 
 @Entity()
 export class Site implements Isite{
-   
     @PrimaryGeneratedColumn('uuid')
     id: string;  
   
@@ -19,6 +18,5 @@ export class Site implements Isite{
     
     @UpdateDateColumn({ type: 'timestamp' })
     updatedAt: Date;
-  
-    
+     
 }

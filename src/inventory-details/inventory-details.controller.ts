@@ -23,5 +23,11 @@ export class InventoryDetailsController {
     getInventorydetailsById(@Param('id') id: string) {
       return this.inventoryDetailsService. getInventorydetailsById(id);
     }
+
+    @Get('/by-inventory/:inventoryId')
+    getInventoryDetailsByInventoryId(@Param('inventoryId') inventoryId: string) {
+      return this.inventoryDetailsService.getInventoryDetailsByInventoryId(inventoryId);
+    }
+
     
 }

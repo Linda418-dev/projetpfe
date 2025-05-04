@@ -3,7 +3,6 @@ import { Type } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString, ValidateNested  } from "class-validator";
 import { CreateDepartmentDto } from "src/department/types/dto/create-department.dto";
 
-
 export class CreateSiteDto {
     @ApiProperty()
     @IsString()
