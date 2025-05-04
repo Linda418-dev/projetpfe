@@ -12,10 +12,12 @@ export class UserService {
     private readonly userRoleRepository: userRoleRepository,
     private readonly bcryptService: BcryptService
   ) {}
+
     // methode get All Users
       async getAllUsers() {
         return this.userRepository.find(); 
       }
+
     // methode get user by id 
       async getUserById(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
@@ -24,6 +26,7 @@ export class UserService {
         }
         return user;
       }
+
     //   methode pour creation user
       async createUser(createUserDto: CreateUserDto) {
       const { email, username, password, role } = createUserDto;
@@ -49,6 +52,7 @@ export class UserService {
     
         return await this.userRepository.save(newUser);
       }
+
     // methode pour update user 
       async updateUser(id: string, updateUserDto: UpdateUserDto) {
       const user = await this.userRepository.findOne({ where: { id } });
@@ -87,8 +91,7 @@ export class UserService {
           return { message: 'User has been deleted successfully because they had no affectations.' };
         }
       }
-      
-
+      // methode pour activer compte d'un user 
       async activateUser(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
       

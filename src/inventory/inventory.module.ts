@@ -10,9 +10,10 @@ import { AffectationRepository } from 'src/affectation/repositories/affectation.
 import { SiteRepository } from 'src/site/Repositories/site.repository';
 import { NotificationService } from 'src/notification/notification.service';
 import { ConfigService } from '@nestjs/config';
+import { NotificationRepository } from 'src/notification/repositories/inventory.repository';
 
 @Module({
-  providers: [InventoryService , InventoryRepository, InventoryGateway,StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository,NotificationService,ConfigService],
+  providers: [InventoryService , InventoryRepository, InventoryGateway,StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository,NotificationService,ConfigService,NotificationRepository],
   controllers: [InventoryController],
   exports: [InventoryService],
 })

@@ -55,6 +55,8 @@ import { AnomalyModule } from './anomaly/anomaly.module';
 import { Anomaly } from './anomaly/Entities/anomaly.entity';
 import { NotificationModule } from './notification/notification.module';
 import { NotificationService } from './notification/notification.service';
+import { NotificationRepository } from './notification/repositories/inventory.repository';
+import { Notification } from './notification/entities/notification.entity';
 
 @Module({
   imports: [
@@ -71,7 +73,7 @@ import { NotificationService } from './notification/notification.service';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
 
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly,Notification], 
         synchronize: true, 
       }),
     }),
@@ -96,6 +98,7 @@ import { NotificationService } from './notification/notification.service';
     AffectationModule,
     AnomalyModule,
     NotificationModule,
+  
   ],
   controllers: [AppController],
   providers: [
@@ -112,6 +115,7 @@ import { NotificationService } from './notification/notification.service';
     SiteRepository,
     NotificationService,
     ConfigService,
+    NotificationRepository,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,
