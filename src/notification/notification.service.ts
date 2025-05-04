@@ -35,8 +35,7 @@ export class NotificationService {
           order: { createdAt: 'DESC' },
         });
       }
-      
-      
+    //   methode pour notifier les operateurs  
     async notifyOperators(playerIds: string[], title: string, message: string) {
       try {
         await axios.post(
@@ -71,7 +70,7 @@ export class NotificationService {
     }
   }
 
-
+// methode pour get  notification by id 
   async getNotificationById(id: string) {
     const notification = await this.notificationRepo.findOne({
       where: { id },

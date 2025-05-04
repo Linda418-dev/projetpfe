@@ -25,11 +25,6 @@ export class AssetController {
       return this.assetService.getAssets(params);
     } 
 
-    @Get('percentage-good-assets')
-    @ApiOperation({ summary: 'get Assets Status Statistics' })
-    async getAssetsStatusStatistics() {
-      return this.assetService.getAssetsStatusStatistics();
-    }
       
     @Post('create-asset')
     @ApiOperation({ summary: 'Create  asset' })

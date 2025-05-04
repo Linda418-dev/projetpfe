@@ -194,55 +194,10 @@ export class AssetsService {
   
     return savedAsset;
   }
-  
-      
-  async getAssetsStatusStatistics() {
-    const allAssets = await this.assetRepository.find({
-      relations: ['status'],
-    });
-  
-    const totalAssets = allAssets.length;
-  
-    if (totalAssets === 0) {
-      return {
-        totalAssets: 0,
-        goodAssets: 0,
-        damagedAssets: 0,
-        inRepairAssets: 0,
-        percentageGood: 0,
-        percentageDamaged: 0,
-        percentageInRepair: 0,
-      };
-    }
-  
-    const goodAssetsCount = allAssets.filter(
-      (asset) => asset.status.name === AssetStatusEnum.GOOD,
-    ).length;
-  
-    const damagedAssetsCount = allAssets.filter(
-      (asset) => asset.status.name === AssetStatusEnum.DAMAGED,
-    ).length;
-  
-    const inRepairAssetsCount = allAssets.filter(
-      (asset) => asset.status.name === AssetStatusEnum.IN_REPAIR,
-    ).length;
-  
-    const percentageGood = (goodAssetsCount / totalAssets) * 100;
-    const percentageDamaged = (damagedAssetsCount / totalAssets) * 100;
-    const percentageInRepair = (inRepairAssetsCount / totalAssets) * 100;
-  
-    return {
-      totalAssets,
-      goodAssets: goodAssetsCount,
-      damagedAssets: damagedAssetsCount,
-      inRepairAssets: inRepairAssetsCount,
-      percentageGood: Math.round(percentageGood * 100) / 100,
-      percentageDamaged: Math.round(percentageDamaged * 100) / 100,
-      percentageInRepair: Math.round(percentageInRepair * 100) / 100,
-    };
-  }
+   
   
   async getHistoryAssetById(assetId: string) {
+    // Récupération de l'asset
     const asset = await this.assetRepository.findOneBy({ id: assetId });
     if (!asset) {
       throw new BadRequestException(`Asset with id ${assetId} not found`);
@@ -279,37 +234,28 @@ export class AssetsService {
       .getOne();
   
     let lastLocation = lastLocationEntry
-      ? {
-          id: lastLocationEntry.location.id,
-          name: lastLocationEntry.location.name,
-        }
+      ? { id: lastLocationEntry.location.id, name: lastLocationEntry.location.name }
       : null;
   
     let lastStatus = lastStatusEntry
-      ? {
-          id: lastStatusEntry.status.id,
-          name: lastStatusEntry.status.name,
-        }
+      ? { id: lastStatusEntry.status.id, name: lastStatusEntry.status.name }
       : null;
   
+    // Combine locationHistory et statusHistory
     const combined = [
       ...locationHistory.map((l) => ({
         assetId,
         date: new Date(l.createdAt),
-        location: {
-          id: l.location.id,
-          name: l.location.name,
-        },
+        location: { id: l.location.id, name: l.location.name },
         status: null,
+        createdAt: l.createdAt,
       })),
       ...statusHistory.map((s) => ({
         assetId,
         date: new Date(s.createdAt),
         location: null,
-        status: {
-          id: s.status.id,
-          name: s.status.name,
-        },
+        status: { id: s.status.id, name: s.status.name },
+        createdAt: s.createdAt,
       })),
     ];
   
@@ -318,6 +264,7 @@ export class AssetsService {
   
     const history: any[] = [];
   
+    // Construction de l'historique
     for (const item of combined) {
       // Mise à jour des dernières valeurs
       if (item.location) lastLocation = item.location;
@@ -328,6 +275,7 @@ export class AssetsService {
         location: lastLocation,
         status: lastStatus,
         date: item.date.toISOString(),
+        createdAt: item.createdAt.toISOString(),
       };
   
       const lastEvent = history[history.length - 1];
@@ -344,7 +292,7 @@ export class AssetsService {
       }
     }
   
-    // Format final avec l'ID et le nom de location et status
+    // Format final avec l'ID et le nom de location et status, ainsi que createdAt
     const formattedHistory = history.map((event) => ({
       asset: asset.id,  // L'ID de l'asset
       location: event.location
@@ -353,6 +301,7 @@ export class AssetsService {
       status: event.status
         ? { id: event.status.id, name: event.status.name }  // ID et nom du statut
         : { id: null, name: 'Unknown' },  // Default to 'Unknown' if no status
+      createdAt: event.createdAt,  // Ajout de la date de création
     }));
   
     return {
@@ -360,8 +309,6 @@ export class AssetsService {
       history: formattedHistory,
     };
   }
-  
-  
   
   
 }
