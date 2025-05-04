@@ -8,19 +8,18 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
     super(InventoryDetails, dataSource.createEntityManager());
   }
 
-  async findDetailsByInventoryId(inventoryId: string) {
-    return this.createQueryBuilder('inventoryDetail')
-      .leftJoinAndSelect('inventoryDetail.affectation', 'affectation')
+  async findByInventoryId(inventoryId: string){
+    return this.createQueryBuilder('inventoryDetails')
+      .leftJoinAndSelect('inventoryDetails.affectation', 'affectation')
       .leftJoinAndSelect('affectation.inventory', 'inventory')
-      .leftJoinAndSelect('inventoryDetail.assetStatus', 'assetStatus')
+      .leftJoinAndSelect('inventoryDetails.assetStatus', 'assetStatus')
       .leftJoinAndSelect('assetStatus.asset', 'asset')
-      .leftJoinAndSelect('asset.status', 'status')
-      .leftJoinAndSelect('asset.location', 'location')
-      .leftJoinAndSelect('inventoryDetail.locationHistory', 'locationHistory')
-      .leftJoinAndSelect('locationHistory.asset', 'locationAsset')
-      .leftJoinAndSelect('locationAsset.status', 'locationStatus')
-      .where('affectation.inventory.id = :inventoryId', { inventoryId })
-      .orderBy('inventoryDetail.scannedAt', 'DESC')
+      .leftJoinAndSelect('inventoryDetails.locationHistory', 'locationHistory')
+      .leftJoinAndSelect('inventoryDetails.files', 'files')
+      .leftJoinAndSelect('inventoryDetails.anomaly', 'anomaly')
+      .where('inventory.id = :inventoryId', { inventoryId })
+      .orderBy('inventoryDetails.scannedAt', 'DESC')
       .getMany();
   }
+  
 }

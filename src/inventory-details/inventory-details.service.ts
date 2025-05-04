@@ -97,19 +97,7 @@ export class InventoryDetailsService {
   }
 
   async getInventoryDetailsByInventoryId(inventoryId: string) {
-    const details = await this.inventoryDetailsRepository.find({
-      where: {
-        affectation: {
-          inventory: {
-            id: inventoryId,
-          },
-        },
-      },
-      relations: ['affectation', 'affectation.inventory', 'assetStatus', 'locationHistory', 'files'],
-      order: { scannedAt: 'DESC' },
-    });
-  
-    return details;
+    return this.inventoryDetailsRepository.findByInventoryId(inventoryId);
   }
   
   
