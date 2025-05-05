@@ -29,8 +29,10 @@ export class InventoryService {
  
   //  methode pou get All inventory selon le role 
   async getAllInventories(user: User) {
+    // si le role admin doit récupère tous les invetaires 
     if (user.role.role === 'admin') {
       return this.inventoryRepository.findAllWithLatestStatus();
+    // si le role opérateur doit récupère leurs inventaires 
     } else if (user.role.role === 'operator') {
       return this.inventoryRepository.findInventoriesByOperatorIdWithStatus(user.id);
     } else {
@@ -48,8 +50,7 @@ export class InventoryService {
       throw new BadRequestException(`Inventory with name "${createinventorydto.name}" already exists`);
     }
 
-     /* Vérification des dates
-  const now = new Date();
+  /* const now = new Date();
   const startDate = new Date(createinventorydto.startDate);
   const endDate = new Date(createinventorydto.endDate);
 
@@ -70,7 +71,7 @@ export class InventoryService {
       throw new BadRequestException(`Site not found`);
     }
   
-    //  Vérifie que le statut "Planned" existe AVANT d'enregistrer l'inventaire
+    // vérifie que le statut Planned
     const plannedStatus = await this.statusRepository.findOne({
       where: { name: 'Planned', type: 'inventory' },
     });
@@ -79,9 +80,8 @@ export class InventoryService {
       throw new BadRequestException(`Default inventory status "Planned" not found`);
     }
   
-    // Récupération des opérateurs
+    // récupération des opérateurs
     let operators: User[] = [];
-  
     if (createinventorydto.allOperators) {
       operators = await this.userRepository.findAllOperators();
   
@@ -111,14 +111,11 @@ export class InventoryService {
     } else {
       throw new BadRequestException(`You must select at least one operator or choose "All Operators".`);
     }
-  
     const newInventory = this.inventoryRepository.create({
       ...createinventorydto,
       site,
     });
-  
     const savedInventory = await this.inventoryRepository.save(newInventory);
-  
     const newStatus = this.inventoryStatusRepository.create({
       inventory: savedInventory,
       status: plannedStatus,
@@ -133,7 +130,6 @@ export class InventoryService {
       }),
     );
     await this.affectationRepository.save(affectations);
-  
     return savedInventory;
   }
 
@@ -157,14 +153,12 @@ export class InventoryService {
       latestStatus, 
     };
   }
-  
-// methode pour lancer inventaire
+  // methode pour lancer inventaire
   async launchInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });
     if (!inventory) {
       throw new BadRequestException(`Inventory not found`);
     }
-  
     // Vérifier s'il y a déjà un inventaire en cours
     const inProgressInventory = await this.inventoryRepository.findOne({
       where: { id: Not(id) }, // Trouver un inventaire qui n'est pas celui en cours
@@ -176,17 +170,16 @@ export class InventoryService {
       const inProgressStatus = inProgressInventory.inventoryStatus.find(
         status => status.status.name === 'In Progress',
       );
-  
       if (inProgressStatus) {
         throw new BadRequestException('There is already an inventory in progress');
       }
     }
   
     // Vérifier la date de début
-    const today = new Date();
-    const startDate = new Date(inventory.startDate);
-  
-    const isBeforeStart = today.setHours(0, 0, 0, 0) < startDate.setHours(0, 0, 0, 0);
+    const today = this.getTodayStart();
+    const startDate = moment(inventory.startDate).startOf('day').toDate();
+    const isBeforeStart = today < startDate;
+
     if (isBeforeStart) {
       throw new BadRequestException(`Cannot launch inventory before its start date`);
     }
@@ -200,7 +193,7 @@ export class InventoryService {
       throw new BadRequestException(`Status "In Progress" not found`);
     }
   
-    // Récupère le dernier statut de l'inventaire
+    // récupère le dernier statut de l'inventaire
     const lastStatus = await this.inventoryStatusRepository.findOne({
       where: { inventory: { id } },
       order: { createdAt: 'DESC' },
@@ -213,91 +206,55 @@ export class InventoryService {
   
     const lastStatusName = lastStatus.status.name;
   
-    // Empêcher  Si le status en cours
+    // empêcher  Si le status en cours
     if (lastStatusName === 'In Progress') {
       throw new BadRequestException(`Inventory is already in progress`);
     }
-  
-    // Empêcher  Si le status terminé
+    
+    // empêcher  Si le status terminé
     if (lastStatusName === 'Completed') {
       throw new BadRequestException(`Cannot launch an inventory that is already completed`);
     }
   
-    // Lancer seulement si le dernier statut est "Planned"
+    // lancer seulement si le dernier statut est "Planned"
     if (lastStatusName !== 'Planned') {
       throw new BadRequestException(`Inventory can only be launched if status is "Planned"`);
-    }
-  
-    // Enregistrement du nouveau statut
+    } 
+    // enregistrer du nouveau statut
     const newInventoryStatus = this.inventoryStatusRepository.create({
       inventory,
       status: inProgressStatus,
     });
-  
     await this.inventoryStatusRepository.save(newInventoryStatus);
-
-    const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id); // à définir
-
+    const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id); 
     await this.notificationService.notifyOperators(
       playerIds,
       'Inventory Launched',
       `The inventory "${inventory.name}" has started.`
     );
-
-  
     return {
       message: `Inventory "${inventory.name}" has been launched`,
       inventoryId: inventory.id,
       status: inProgressStatus.name,
     };
   }
-
-  async getOperatorsPlayerIdsForInventory(inventoryId: string): Promise<string[]> {
+  async getOperatorsPlayerIdsForInventory(inventoryId: string) {
     const affectations = await this.affectationRepository.find({
       where: { inventory: { id: inventoryId } },
       relations: ['operator'],
     });
   
     return affectations
-      .map(a => a.operator?.playerId) // playerId = ID OneSignal
+      .map(a => a.operator?.playerId) 
       .filter(pid => !!pid);
   }
   
-  // Inside InventoryService class
+  /*
   async getActiveInventory() {
     return this.inventoryRepository.findActiveInventory();
 
-  }
+  }*/
   
-  //  methode pour delete Inventory
-  async deleteInventory(id: string) {
-    const inventory = await this.inventoryRepository.findOne({ where: { id } });
-  
-    if (!inventory) {
-      throw new BadRequestException(`Inventory with ID ${id} not found`);
-    }
-  
-    // Vérifie le dernier statut de l'inventaire
-    const lastStatus = await this.inventoryStatusRepository.findOne({
-      where: { inventory: { id } },
-      order: { createdAt: 'DESC' },
-      relations: ['status'],
-    });
-  
-    const statusName = lastStatus?.status.name;
-  
-    if (statusName === 'In Progress' || statusName === 'Completed') {
-      throw new BadRequestException(`Cannot delete inventory in status "${statusName}"`);
-    }
-  
-    await this.inventoryRepository.remove(inventory);
-  
-    return {
-      message: `Inventory "${inventory.name}" has been deleted successfully.`,
-      inventoryId: inventory.id,
-    };
-  }
-
 //  methode pour update inventory 
   async updateInventory(id: string, dto: UpdateInventoryDto) {
     const inventory = await this.inventoryRepository.findOne({
@@ -308,7 +265,6 @@ export class InventoryService {
     if (!inventory) {
       throw new NotFoundException(`Inventory with ID ${id} not found`);
     }
-  
     // Recherche du dernier statut de l'inventaire
     const lastStatus = await this.inventoryStatusRepository.findOne({
       where: { inventory: { id } },
@@ -365,14 +321,12 @@ export class InventoryService {
     if (dto.endDate) inventory.endDate = new Date(dto.endDate);
 
   // Mise à jour de startDate uniquement si le statut est "Planned"
-if (dto.startDate) {
-  if (lastStatusName !== 'Planned') {
-    throw new BadRequestException('startDate can only be updated when the inventory status is "Planned"');
-  }
-  inventory.startDate = new Date(dto.startDate);
-}
-
-  
+    if (dto.startDate) {
+      if (lastStatusName !== 'Planned') {
+        throw new BadRequestException('startDate can only be updated when the inventory status is "Planned"');
+      }
+      inventory.startDate = new Date(dto.startDate);
+    }  
    //  Mise à jour du endDate si statut Planned ou Expired
   if (dto.endDate) {
     if (lastStatusName !== InventoryStatusEnum.Planned && lastStatusName !== InventoryStatusEnum.EXPIRED) {
@@ -414,12 +368,11 @@ if (dto.startDate) {
       throw new InternalServerErrorException('Failed to reload updated inventory');
     }
   
-    // Tri des statuts par date de création
+    // tri les statuts par date de création
     updatedInventory.inventoryStatus.sort((a, b) =>
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
     );
   
-    // Retour des données mises à jour et de l'indication de mise à jour du statut
     return {
       updatedInventory,
       statusUpdated,
@@ -429,98 +382,82 @@ if (dto.startDate) {
   private getTodayStart(): Date {
     return moment().startOf('day').toDate();
   }
-   // CRON  exécuté toutes les minutes pour tester les inventaire dont la date de fin est passée
-   @Cron('*/1 * * * *')
-   async handleExpiredInventories() {
-     const logger = new Logger(InventoryService.name);
-   
-     const today = this.getTodayStart();
-   
-     logger.log('CRON Checking for expired inventories...');
-   
-     const expiredStatus = await this.statusRepository.findOne({
-       where: { name: InventoryStatusEnum.EXPIRED, type: 'inventory' },
-     });
-   
-     if (!expiredStatus) {
-       logger.error('Status "Expired" not found');
-       throw new BadRequestException('Status "Expired" not found');
-     }
-   
-     const expiredInventories = await this.inventoryRepository.find({
-       where: {
-         endDate: LessThan(today),
-       },
-       relations: ['inventoryStatus', 'inventoryStatus.status'],
-     });
-   
-     if (expiredInventories.length === 0) {
-       logger.log('No expired inventories found');
-       return;
-     }
-   
-     let expiredCount = 0;
-   
-     for (const inventory of expiredInventories) {
-       logger.log(`Checking inventory: ${inventory.name} (ID: ${inventory.id})`);
-   
-       const sortedStatuses = inventory.inventoryStatus.sort(
-         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-       );
-   
-       const lastStatus = sortedStatuses[0];
-   
-       if (!lastStatus) {
-         logger.warn(`No status found for inventory ${inventory.name}`);
-         continue;
-       }
-   
-       const alreadyExpired = inventory.inventoryStatus.some(
-         (statusEntry) => statusEntry.status.name === InventoryStatusEnum.EXPIRED
-       );
-   
-       if (alreadyExpired) {
-         logger.log(`Inventory "${inventory.name}" already has an expired status, skipping`);
-         continue;
-       }
-   
-       if (lastStatus.status.name !== InventoryStatusEnum.IN_PROGRESS) {
-         logger.log(`Inventory "${inventory.name}" is not in progress (status: ${lastStatus.status.name}), skipping`);
-         continue;
-       }
-   
-       //  Ajouter le statut "Expired"
-       const expiredEntry = this.inventoryStatusRepository.create({
-         inventory,
-         status: expiredStatus,
-       });
-   
-       const savedEntry = await this.inventoryStatusRepository.save(expiredEntry);
-       logger.log(`Inventory "${inventory.name}" marked as expired`);
-   
-       expiredCount++;
-   
-       // Nettoyage des doublons après insertion
-       const allExpiredStatuses = await this.inventoryStatusRepository.find({
-         where: {
-           inventory: { id: inventory.id },
-           status: { id: expiredStatus.id },
-         },
-         order: { createdAt: 'DESC' },
-       });
-   
-       if (allExpiredStatuses.length > 1) {
-         // On garde le plus récent, on supprime les autres
-         const [latest, ...duplicates] = allExpiredStatuses;
-         const idsToDelete = duplicates.map((d) => d.id);
-         await this.inventoryStatusRepository.delete(idsToDelete);
-         logger.warn(`Duplicate EXPIRED statuses removed for inventory "${inventory.name}"`);
-       }
-     }
-   
-     logger.log(`Done: ${expiredCount} inventory(ies) marked as expired`);
-   }
-   
+
+  @Cron('*/1 * * * *')
+  async handleExpiredInventories() {
+  const expiredStatus = await this.statusRepository.findOne({
+    where: { name: InventoryStatusEnum.EXPIRED, type: 'inventory' },
+  });
+
+  if (!expiredStatus) {
+    throw new BadRequestException('Status "Expired" not found');
+  }
+
+  const today = this.getTodayStart();
+
+  const expiredInventories = await this.inventoryRepository.find({
+    where: {
+      endDate: LessThan(today),
+    },
+    relations: ['inventoryStatus', 'inventoryStatus.status'],
+  });
+
+  if (expiredInventories.length === 0) {
+    return;
+  }
+
+  let expiredCount = 0;
+
+  for (const inventory of expiredInventories) {
+    const sortedStatuses = inventory.inventoryStatus.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    const lastStatus = sortedStatuses[0];
+
+    if (!lastStatus) {
+      continue;
+    }
+
+    const alreadyExpired = inventory.inventoryStatus.some(
+      (statusEntry) => statusEntry.status.name === InventoryStatusEnum.EXPIRED
+    );
+
+    if (alreadyExpired) {
+      continue;
+    }
+
+    if (lastStatus.status.name !== InventoryStatusEnum.IN_PROGRESS) {
+      continue;
+    }
+
+    // Ajouter le statut "Expired"
+    const expiredEntry = this.inventoryStatusRepository.create({
+      inventory,
+      status: expiredStatus,
+    });
+
+    await this.inventoryStatusRepository.save(expiredEntry);
+    expiredCount++;
+
+    // Nettoyage des doublons après insertion
+    const allExpiredStatuses = await this.inventoryStatusRepository.find({
+      where: {
+        inventory: { id: inventory.id },
+        status: { id: expiredStatus.id },
+      },
+      order: { createdAt: 'DESC' },
+    });
+
+    if (allExpiredStatuses.length > 1) {
+      // On garde le plus récent, on supprime les autres
+      const [latest, ...duplicates] = allExpiredStatuses;
+      const idsToDelete = duplicates.map((d) => d.id);
+      await this.inventoryStatusRepository.delete(idsToDelete);
+    }
+  }
+}
+
 }
 
 

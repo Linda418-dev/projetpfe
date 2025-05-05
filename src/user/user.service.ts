@@ -79,9 +79,8 @@ export class UserService {
         if (!user) {
           throw new NotFoundException('User not found');
         }
-      
         if (user.affectations && user.affectations.length > 0) {
-          // si L'utilisateur a des affectations  on le désactive simplement
+          // si L'utilisateur a des affectations  on le désactive 
           user.isActive = false;
           await this.userRepository.save(user);
           return { message: 'User has been deactivated because they have existing affectations.' };

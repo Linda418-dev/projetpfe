@@ -28,9 +28,7 @@ async function bootstrap() {
     in: 'header',
   })
   .build();
-  
-
-  
+   
   app.useGlobalPipes(new ValidationPipe());
 
   const document = SwaggerModule.createDocument(app, config);
@@ -39,8 +37,6 @@ async function bootstrap() {
       persistAuthorization: true,  
     },
   });
-  
-
   await app.listen(process.env.PORT ?? 3000);
 }
 

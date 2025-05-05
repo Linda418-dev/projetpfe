@@ -14,8 +14,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       // récupérer le token depuis le header Authorization
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), 
-      ignoreExpiration: false, // vérifie si le token est expiré
-      secretOrKey: configService.get<string>('JWT_SECRET'), // récupère la clé secrète des variables d’environnement
+      // vérifie si le token est expiré
+      ignoreExpiration: false, 
+      // récupère la clé secrète des variables d’environnement
+      secretOrKey: configService.get<string>('JWT_SECRET'), 
     });
   }
 
@@ -28,9 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-  
-    console.log('Utilisateur authentifié:', user); 
-    return user; 
+      return user; 
   }
   
 }

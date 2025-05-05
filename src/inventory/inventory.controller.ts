@@ -36,16 +36,11 @@ export class InventoryController {
       return this.inventoryService.launchInventory(id);
   }
 
-     @Delete(':id')
-     async delete(@Param('id') id: string) {
-      return this.inventoryService.deleteInventory(id);
-    }
 
-   @BypassInventoryLock()
     @Patch(':id')
     async update(@Param('id') id: string, @Body() dto: UpdateInventoryDto) {
     return this.inventoryService.updateInventory(id, dto);
-}
+  }
 
 
 

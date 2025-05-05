@@ -130,7 +130,7 @@ export class AssetsService {
   return this.assetRepository.save(fetchAsset);
 
     }
-    
+  // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
     const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
   
@@ -208,13 +208,9 @@ export class AssetsService {
     }
     // Récupérer l'historique de localisation
     const locationEvents =  await this.assetRepository.getLocationHistoryByAssetId(assetId);
-  
-    console.log('Événements de localisation:', locationEvents); 
-  
+
     //  Récupérer l'historique de statut
     const statusEvents = await this.assetRepository.getStatusHistoryByAssetId(assetId);
-  
-    console.log('Événements de statut:', statusEvents); 
   
     //  Fusionner les événements
     const allEvents: {
@@ -230,7 +226,7 @@ export class AssetsService {
     const groupedMap = new Map<string, { date: Date; values: { location?: string; status?: string } }>();
   
     for (const event of allEvents) {
-      // Arrondir la date à la seconde (supprimer les millisecondes)
+      // Arrondir la date à la seconde 
       const dateKey = new Date(event.date).setMilliseconds(0);
       const group = groupedMap.get(dateKey.toString());
   
@@ -244,8 +240,7 @@ export class AssetsService {
         });
       }
     }
-  
-    // Créer la timeline finale en respectant l'ordre chronologique
+    // Créer la timeline  en respectant l'ordre chronologique
     const timeline: {
       asset: string;
       assetId: string;
@@ -256,12 +251,12 @@ export class AssetsService {
       date: Date;
     }[] = [];
       
-    // Valeurs initiales
+    //les valeurs initiales
     let currentLocation = asset.location.name;
     let currentStatus = asset.status.name;
   
-    // Ajouter les événements à la timeline en respectant l'ordre
-    for (const group of groupedMap.values()) {
+    // Ajouter les événements à la timeline par ordre
+    for (const group of groupedMap.values()) { 
       // Si l'emplacement ou le statut a changé, les ajouter à la timeline
       if (group.values.location) currentLocation = group.values.location;
       if (group.values.status) currentStatus = group.values.status;
@@ -278,12 +273,10 @@ export class AssetsService {
       
     }
   
-    console.log('Timeline finale:', timeline); 
-  
     return timeline;
   }
 
-
+  
   async getAssetsStatusStatistics() {
     const allAssets = await this.assetRepository.find({
       relations: ['status'],
