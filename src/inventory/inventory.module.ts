@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { InventoryController } from './inventory.controller';
 import { InventoryRepository } from './repositories/inventory.repository';
-import { InventoryGateway } from './inventory.gateway';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { InventoryStatusRepository } from 'src/inventory-status/repositories/inventory-status.repository';
 import { userRepository } from 'src/user/repositories/user.repository';
@@ -13,7 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { NotificationRepository } from 'src/notification/repositories/inventory.repository';
 
 @Module({
-  providers: [InventoryService , InventoryRepository, InventoryGateway,StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository,NotificationService,ConfigService,NotificationRepository],
+  providers: [InventoryService , InventoryRepository, StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository,NotificationService,ConfigService,NotificationRepository],
   controllers: [InventoryController],
   exports: [InventoryService],
 })

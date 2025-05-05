@@ -11,16 +11,16 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
     return this.createQueryBuilder('inventoryDetails')
       .leftJoinAndSelect('inventoryDetails.affectation', 'affectation')
       .leftJoinAndSelect('affectation.inventory', 'inventory')
-      .leftJoinAndSelect('affectation.operator', 'operator')  // Ajout de la jointure pour récupérer l'opérateur
+      .leftJoinAndSelect('affectation.operator', 'operator')  
       .leftJoinAndSelect('inventoryDetails.assetStatus', 'assetStatus')
       .leftJoinAndSelect('assetStatus.asset', 'asset')
-      .leftJoinAndSelect('assetStatus.status', 'status')  // Jointure explicite pour `status`
+      .leftJoinAndSelect('assetStatus.status', 'status')  
       .leftJoinAndSelect('inventoryDetails.locationHistory', 'locationHistory')
       .leftJoinAndSelect('inventoryDetails.files', 'files')
       .leftJoinAndSelect('inventoryDetails.anomaly', 'anomaly')
       .where('inventory.id = :inventoryId', { inventoryId })
       .orderBy('inventoryDetails.scannedAt', 'DESC')
-      .addOrderBy('assetStatus.createdAt', 'DESC')  // Pour récupérer le dernier status
+      .addOrderBy('assetStatus.createdAt', 'DESC')  
       .getMany();
   }
   

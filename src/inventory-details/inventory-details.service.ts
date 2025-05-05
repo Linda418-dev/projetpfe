@@ -27,7 +27,6 @@ export class InventoryDetailsService {
     });
   }
   
-  
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
     // verifier le id de l'affectation existe ou non 
     const affectation = await this.affectationRepository.findOne({
@@ -80,9 +79,7 @@ export class InventoryDetailsService {
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
     return savedInventoryDetail;
   }
-  
- 
-  
+
   async  getInventorydetailsById(id: string) {
     const detail = await this.inventoryDetailsRepository.findOne({
       where: { id },

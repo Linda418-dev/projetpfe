@@ -53,12 +53,10 @@ export class InventoryService {
   const startDate = new Date(createinventorydto.startDate);
   const endDate = new Date(createinventorydto.endDate);
 
-  // Vérifie que la date de début n’est pas dans le passé
   if (startDate < now) {
     throw new BadRequestException('Start date cannot be in the past.');
   }
 
-  //  Vérifie que la date de début est avant ou égale à la date de fin
   if (endDate && startDate > endDate) {
     throw new BadRequestException('Start date must be before or equal to end date.');
   }*/
@@ -271,9 +269,6 @@ export class InventoryService {
 
   }
   
-  
-  
-
   //  methode pour delete Inventory
   async deleteInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });

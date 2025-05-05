@@ -12,7 +12,6 @@ export class CreateAnomalyDto {
     @IsUUID('all', { each: true }) 
     fileIds?: string[];
 
-
     @ApiProperty()
     @IsOptional()
     @IsUUID()

@@ -31,7 +31,6 @@ import { InventoryLockGuard } from './inventory/guards/inventory-lock.guard';
 import { InventoryService } from './inventory/inventory.service';
 import { InventoryRepository } from './inventory/repositories/inventory.repository';
 import { StatusRepository } from './status/repositories/status.repository';
-import { InventoryGateway } from './inventory/inventory.gateway';
 import { userRepository } from './user/repositories/user.repository';
 import { DepartmentRepository } from './department/repositories/department.repository';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -106,7 +105,6 @@ import { Notification } from './notification/entities/notification.entity';
     InventoryService,
     InventoryRepository,
     StatusRepository,
-    InventoryGateway,
     userRepository,
     InventoryStatusRepository,
     DepartmentRepository,

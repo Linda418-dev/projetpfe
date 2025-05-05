@@ -194,9 +194,10 @@ export class AssetsService {
   
     return savedAsset;
   }
-   
+  
+  //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
-    // 1. Récupérer l'asset actuel avec sa localisation et son statut
+    // Récupérer l'asset actuel avec sa localisation et son statut
     const asset = await this.assetRepository.findOne({
       where: { id: assetId },
       relations: ['location', 'status'],
@@ -205,10 +206,7 @@ export class AssetsService {
     if (!asset) {
       throw new NotFoundException('Asset not found');
     }
-  
-    console.log('Asset trouvé:', asset); // Log de l'asset récupéré
-  
-    // 2. Récupérer l'historique de localisation
+    // Récupérer l'historique de localisation
     const locationEvents = await this.locationHistoryRepository
       .createQueryBuilder('lh')
       .leftJoin('lh.location', 'location')
@@ -221,9 +219,9 @@ export class AssetsService {
       ])
       .getRawMany();
   
-    console.log('Événements de localisation:', locationEvents); // Log des événements de localisation
+    console.log('Événements de localisation:', locationEvents); 
   
-    // 3. Récupérer l'historique de statut
+    //  Récupérer l'historique de statut
     const statusEvents = await this.assetStatusRepository
       .createQueryBuilder('astatus')
       .leftJoin('astatus.status', 'status')
@@ -236,19 +234,19 @@ export class AssetsService {
       ])
       .getRawMany();
   
-    console.log('Événements de statut:', statusEvents); // Log des événements de statut
+    console.log('Événements de statut:', statusEvents); 
   
-    // 4. Fusionner les événements
+    //  Fusionner les événements
     const allEvents: {
       date: Date;
       type: 'location' | 'status';
       value: string;
     }[] = [...locationEvents, ...statusEvents];
   
-    // 5. Trier les événements par date avant le regroupement
+    // Trier les événements par date avant le regroupement
     allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-    // 6. Grouper les événements par date exacte arrondie à la seconde
+    // Grouper les événements par date exacte arrondie à la seconde
     const groupedMap = new Map<string, { date: Date; values: { location?: string; status?: string } }>();
   
     for (const event of allEvents) {
@@ -267,7 +265,7 @@ export class AssetsService {
       }
     }
   
-    // 7. Créer la timeline finale en respectant l'ordre chronologique
+    // Créer la timeline finale en respectant l'ordre chronologique
     const timeline: {
       asset: string;
       assetId: string;
@@ -282,7 +280,7 @@ export class AssetsService {
     let currentLocation = asset.location.name;
     let currentStatus = asset.status.name;
   
-    // 8. Ajouter les événements à la timeline en respectant l'ordre
+    // Ajouter les événements à la timeline en respectant l'ordre
     for (const group of groupedMap.values()) {
       // Si l'emplacement ou le statut a changé, les ajouter à la timeline
       if (group.values.location) currentLocation = group.values.location;
@@ -292,17 +290,64 @@ export class AssetsService {
         asset: asset.name,
         assetId: asset.id,
         location: currentLocation,
-        locationId: asset.location.id, // Ajout de l'ID
+        locationId: asset.location.id, 
         status: currentStatus,
-        statusId: asset.status.id,     // Ajout de l'ID
+        statusId: asset.status.id,   
         date: group.date,
       });
       
     }
   
-    console.log('Timeline finale:', timeline); // Log de la timeline
+    console.log('Timeline finale:', timeline); 
   
     return timeline;
+  }
+
+
+  async getAssetsStatusStatistics() {
+    const allAssets = await this.assetRepository.find({
+      relations: ['status'],
+    });
+  
+    const totalAssets = allAssets.length;
+  
+    if (totalAssets === 0) {
+      return {
+        totalAssets: 0,
+        goodAssets: 0,
+        damagedAssets: 0,
+        inRepairAssets: 0,
+        percentageGood: 0,
+        percentageDamaged: 0,
+        percentageInRepair: 0,
+      };
+    }
+  
+    const goodAssetsCount = allAssets.filter(
+      (asset) => asset.status.name === AssetStatusEnum.GOOD,
+    ).length;
+  
+    const damagedAssetsCount = allAssets.filter(
+      (asset) => asset.status.name === AssetStatusEnum.DAMAGED,
+    ).length;
+  
+    const inRepairAssetsCount = allAssets.filter(
+      (asset) => asset.status.name === AssetStatusEnum.IN_REPAIR,
+    ).length;
+  
+    const percentageGood = (goodAssetsCount / totalAssets) * 100;
+    const percentageDamaged = (damagedAssetsCount / totalAssets) * 100;
+    const percentageInRepair = (inRepairAssetsCount / totalAssets) * 100;
+  
+    return {
+      totalAssets,
+      goodAssets: goodAssetsCount,
+      damagedAssets: damagedAssetsCount,
+      inRepairAssets: inRepairAssetsCount,
+      percentageGood: Math.round(percentageGood * 100) / 100,
+      percentageDamaged: Math.round(percentageDamaged * 100) / 100,
+      percentageInRepair: Math.round(percentageInRepair * 100) / 100,
+    };
   }
   
   

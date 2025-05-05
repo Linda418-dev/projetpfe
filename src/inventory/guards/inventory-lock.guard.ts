@@ -15,7 +15,7 @@ export class InventoryLockGuard /*implements CanActivate*/ {
       const user: any = request.user;
       const method = request.method;
       
-      // Check if the method bypasses the inventory lock
+     
       const bypassLock = this.reflector.get<boolean>('bypassInventoryLock', context.getHandler());
       if (bypassLock) {
         return true;
