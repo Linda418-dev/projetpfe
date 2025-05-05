@@ -194,7 +194,7 @@ export class AssetsService {
   
     return savedAsset;
   }
-  
+
   //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
     // Récupérer l'asset actuel avec sa localisation et son statut
@@ -207,32 +207,12 @@ export class AssetsService {
       throw new NotFoundException('Asset not found');
     }
     // Récupérer l'historique de localisation
-    const locationEvents = await this.locationHistoryRepository
-      .createQueryBuilder('lh')
-      .leftJoin('lh.location', 'location')
-      .where('lh.assetId = :assetId', { assetId })
-      .orderBy('lh.createdAt', 'ASC')
-      .select([
-        'lh.createdAt AS date',
-        `'location' AS type`,
-        'location.name AS value',
-      ])
-      .getRawMany();
+    const locationEvents =  await this.assetRepository.getLocationHistoryByAssetId(assetId);
   
     console.log('Événements de localisation:', locationEvents); 
   
     //  Récupérer l'historique de statut
-    const statusEvents = await this.assetStatusRepository
-      .createQueryBuilder('astatus')
-      .leftJoin('astatus.status', 'status')
-      .where('astatus.assetId = :assetId', { assetId })
-      .orderBy('astatus.createdAt', 'ASC')
-      .select([
-        'astatus.createdAt AS date',
-        `'status' AS type`,
-        'status.name AS value',
-      ])
-      .getRawMany();
+    const statusEvents = await this.assetRepository.getStatusHistoryByAssetId(assetId);
   
     console.log('Événements de statut:', statusEvents); 
   

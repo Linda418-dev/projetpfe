@@ -34,6 +34,37 @@ export class AssetRepository extends Repository<Asset> {
     return query.getManyAndCount();
   }
 
+  async getLocationHistoryByAssetId(assetId: string) {
+    return this.dataSource
+      .createQueryBuilder()
+      .select([
+        'lh.createdAt AS date',
+        `'location' AS type`,
+        'location.name AS value',
+      ])
+      .from('location_history', 'lh')
+      .leftJoin('location', 'location', 'location.id = lh.locationId')
+      .where('lh.assetId = :assetId', { assetId })
+      .orderBy('lh.createdAt', 'ASC')
+      .getRawMany();
+  }
+  
+  async getStatusHistoryByAssetId(assetId: string) {
+    return this.dataSource
+      .createQueryBuilder()
+      .select([
+        'astatus.createdAt AS date',
+        `'status' AS type`,
+        'status.name AS value',
+      ])
+      .from('asset_status', 'astatus')
+      .leftJoin('status', 'status', 'status.id = astatus.statusId')
+      .where('astatus.assetId = :assetId', { assetId })
+      .orderBy('astatus.createdAt', 'ASC')
+      .getRawMany();
+  }
+  
+
   
   
 }
