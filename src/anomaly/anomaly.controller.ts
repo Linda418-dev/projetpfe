@@ -8,7 +8,6 @@ import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.
 @Controller('anomalies')
 export class AnomalyController {
     constructor(private readonly anomalyService: AnomalyService) {}
-
     @Get()
     getAllanomalies() {
       return this.anomalyService.getAllanomalies();
@@ -19,7 +18,7 @@ export class AnomalyController {
     createAnomaly(@Body() createAnomalyDto: CreateAnomalyDto) {
       return this.anomalyService.createAnomaly(createAnomalyDto);
     }
-    
+
     @BypassInventoryLock()
     @Get(':id')
     getAnomalyById(@Param('id') id: string) {
@@ -43,5 +42,4 @@ export class AnomalyController {
     refuseAnomaly(@Param('id') id: string){
       return this.anomalyService.refuseAnomaly(id);
     }
- 
 }

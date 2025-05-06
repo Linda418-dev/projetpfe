@@ -3,5 +3,4 @@ export enum AnomalyStatus {
   IN_PROGRESS = 'in_progress',
   ACCEPTED = 'accepted',
   REFUSED = 'refused',
-  
 }

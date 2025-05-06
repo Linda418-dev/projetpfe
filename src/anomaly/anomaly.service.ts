@@ -11,9 +11,7 @@ export class AnomalyService {
         private readonly anomalyRepository : AnomalyRepository,
         private readonly fileRepository : FileRepository,
     ){}
-
-
-    async getAllanomalies() {
+  async getAllanomalies() {
       return await this.anomalyRepository.find({
         relations: ['files'],
       });
@@ -21,35 +19,27 @@ export class AnomalyService {
     
   async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
     const { description, fileIds , assetId } = createAnomalyDto;
-
     let files: File[] = [];
     if (fileIds && fileIds.length > 0) {
       files = await this.fileRepository.findByIds(fileIds);
-  
       if (files.length !== fileIds.length) {
         throw new NotFoundException('One or more fileIds are invalid');
       }
     }
-  
     const anomaly = this.anomalyRepository.create({
       description,
       status: AnomalyStatus.PENDING,
     });
-  
     const savedAnomaly = await this.anomalyRepository.save(anomaly);
-  
     if (files.length > 0) {
       for (const file of files) {
         file.anomaly = savedAnomaly;
-
         if (assetId) {
           file.assetId = assetId;
         }
-
         await this.fileRepository.save(file);
       }
     }
-  
     return savedAnomaly;
   }
   
@@ -62,7 +52,6 @@ export class AnomalyService {
     if (!anomaly) {
       throw new NotFoundException(`Anomaly with ID ${id} not found`);
     }
-
     return anomaly;
   }
 

@@ -67,8 +67,5 @@ export class AssetController {
     async getHistoryAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getHistoryAssetById(id);
     }
-
-   
- 
   }
   

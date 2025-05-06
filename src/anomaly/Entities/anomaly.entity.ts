@@ -2,7 +2,6 @@ import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateCo
 import { AnomalyStatus } from '../types/enums/anomaly-status.enum';
 import { File } from 'src/uploads/entities/file.entity';
 
-
 @Entity()
 export class Anomaly {
   @PrimaryGeneratedColumn('uuid')

@@ -210,7 +210,7 @@ export class InventoryService {
     if (lastStatusName === 'In Progress') {
       throw new BadRequestException(`Inventory is already in progress`);
     }
-    
+
     // empêcher  Si le status terminé
     if (lastStatusName === 'Completed') {
       throw new BadRequestException(`Cannot launch an inventory that is already completed`);
@@ -279,8 +279,8 @@ export class InventoryService {
     const lastStatusName = lastStatus.status.name;
     let statusUpdated = false;
   
-  // Mise à jour vers "Completed"
-  if (dto.statusId) {
+   // Mise à jour vers "Completed"
+    if (dto.statusId) {
     const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
     if (!status) {
       throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
@@ -294,7 +294,6 @@ export class InventoryService {
     if (lastStatusName !== 'In Progress') {
       throw new BadRequestException('Inventory can only be completed if the current status is "In Progress"');
     }
-
     const saveInventory = await this.inventoryRepository.findOne({ where: { id } });
     if (!saveInventory) {
       throw new InternalServerErrorException('Inventory not found');
@@ -328,14 +327,13 @@ export class InventoryService {
       inventory.startDate = new Date(dto.startDate);
     }  
    //  Mise à jour du endDate si statut Planned ou Expired
-  if (dto.endDate) {
+    if (dto.endDate) {
     if (lastStatusName !== InventoryStatusEnum.Planned && lastStatusName !== InventoryStatusEnum.EXPIRED) {
       throw new BadRequestException('endDate can only be updated when the inventory status is "Planned" or "Expired"');
     }
 
     inventory.endDate = new Date(dto.endDate);
-
-    // Si le statut était Expired → repasser à In Progress
+    // Si le statut était Expired  repasser à In Progress
     if (lastStatusName === InventoryStatusEnum.EXPIRED) {
       const inProgressStatus = await this.statusRepository.findOne({
         where: { name: InventoryStatusEnum.IN_PROGRESS, type: 'inventory' },
@@ -349,12 +347,17 @@ export class InventoryService {
         inventory,
         status: inProgressStatus,
       });
+      
+    await this.inventoryRepository.save(inventory); 
+    const newInventoryStatus = await this.inventoryStatusRepository.save(newStatus);
 
-      const  newInventoryStatus =await this.inventoryStatusRepository.save(newStatus);
-      return  newInventoryStatus ;
-    }
+    return {
+      inventory,
+      status: newInventoryStatus,
+      statusUpdated: true,
+    };
   }
-
+  }
      //  Sauvegarder l'inventaire
      const savedInventory = await this.inventoryRepository.save(inventory);
 

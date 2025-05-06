@@ -17,7 +17,6 @@ export class UserService {
       async getAllUsers() {
         return this.userRepository.find(); 
       }
-
     // methode get user by id 
       async getUserById(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
@@ -34,15 +33,12 @@ export class UserService {
         if (userExists) {
           throw new ConflictException('User with this email or username already exists');
         }
-
-    
         const userRole = await this.userRoleRepository.findOne({ where: { role } });
         if (!userRole) {
           throw new ConflictException('Invalid role');
         }
     
         const hashedPassword = await this.bcryptService.hashPassword(password);
-    
         const newUser = this.userRepository.create({
           email,
           username,
@@ -85,11 +81,12 @@ export class UserService {
           await this.userRepository.save(user);
           return { message: 'User has been deactivated because they have existing affectations.' };
         } else {
-          // sinon Aucun  des affectations on peut le supprimer
+          // sinon aucun  des affectations on peut le supprimer
           await this.userRepository.remove(user);
           return { message: 'User has been deleted successfully because they had no affectations.' };
         }
       }
+
       // methode pour activer compte d'un user 
       async activateUser(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
@@ -101,7 +98,6 @@ export class UserService {
         if (user.isActive) {
           return { message: 'User is already active' };
         }
-      
         user.isActive = true;
         await this.userRepository.save(user);
       

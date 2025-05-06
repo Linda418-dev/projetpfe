@@ -171,19 +171,16 @@ export class AssetsService {
     asset.status = defaultStatus; 
   
     const savedAsset = await this.assetRepository.save(asset);
-  
     
     const locationHistory = new LocationHistory();
     locationHistory.asset = savedAsset;
     locationHistory.location = location;
     await this.locationHistoryRepository.save(locationHistory);
   
-  
     const assetStatus = new AssetStatus();
     assetStatus.asset = savedAsset;
     assetStatus.status = defaultStatus;
     await this.assetStatusRepository.save(assetStatus);
-  
    
     if (files.length > 0) {
       for (const file of files) {
@@ -197,7 +194,7 @@ export class AssetsService {
 
   //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
-    // Récupérer l'asset actuel avec sa localisation et son statut
+    // récupérer l'asset actuel avec sa localisation et son statut
     const asset = await this.assetRepository.findOne({
       where: { id: assetId },
       relations: ['location', 'status'],
@@ -206,32 +203,32 @@ export class AssetsService {
     if (!asset) {
       throw new NotFoundException('Asset not found');
     }
-    // Récupérer l'historique de localisation
+    // récupérer l'historique de localisation
     const locationEvents =  await this.assetRepository.getLocationHistoryByAssetId(assetId);
 
-    //  Récupérer l'historique de statut
+    //  récupérer l'historique de statut
     const statusEvents = await this.assetRepository.getStatusHistoryByAssetId(assetId);
   
-    //  Fusionner les événements
+    //  fusionner les événements
     const allEvents: {
       date: Date;
       type: 'location' | 'status';
       value: string;
     }[] = [...locationEvents, ...statusEvents];
   
-    // Trier les événements par date avant le regroupement
+    // trier les événements par date 
     allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-    // Grouper les événements par date exacte arrondie à la seconde
+    // grouper les événements par date exacte arrondie à la seconde
     const groupedMap = new Map<string, { date: Date; values: { location?: string; status?: string } }>();
   
     for (const event of allEvents) {
-      // Arrondir la date à la seconde 
+      // arrondir la date à la seconde 
       const dateKey = new Date(event.date).setMilliseconds(0);
       const group = groupedMap.get(dateKey.toString());
   
       if (group) {
-        // Mettre à jour les valeurs si elles changent
+        // mettre à jour les valeurs si elles changent
         group.values[event.type] = event.value;
       } else {
         groupedMap.set(dateKey.toString(), {
@@ -240,7 +237,7 @@ export class AssetsService {
         });
       }
     }
-    // Créer la timeline  en respectant l'ordre chronologique
+    // créer la timeline  en respectant l'ordre chronologique
     const timeline: {
       asset: string;
       assetId: string;
@@ -255,9 +252,9 @@ export class AssetsService {
     let currentLocation = asset.location.name;
     let currentStatus = asset.status.name;
   
-    // Ajouter les événements à la timeline par ordre
+    // ajouter les événements à la timeline par ordre
     for (const group of groupedMap.values()) { 
-      // Si l'emplacement ou le statut a changé, les ajouter à la timeline
+      // si l'emplacement ou le statut a changé on  les ajouter à la timeline
       if (group.values.location) currentLocation = group.values.location;
       if (group.values.status) currentStatus = group.values.status;
   
@@ -269,10 +266,8 @@ export class AssetsService {
         status: currentStatus,
         statusId: asset.status.id,   
         date: group.date,
-      });
-      
+      }); 
     }
-  
     return timeline;
   }
 
@@ -281,9 +276,7 @@ export class AssetsService {
     const allAssets = await this.assetRepository.find({
       relations: ['status'],
     });
-  
     const totalAssets = allAssets.length;
-  
     if (totalAssets === 0) {
       return {
         totalAssets: 0,
@@ -295,11 +288,10 @@ export class AssetsService {
         percentageInRepair: 0,
       };
     }
-  
     const goodAssetsCount = allAssets.filter(
       (asset) => asset.status.name === AssetStatusEnum.GOOD,
     ).length;
-  
+
     const damagedAssetsCount = allAssets.filter(
       (asset) => asset.status.name === AssetStatusEnum.DAMAGED,
     ).length;
@@ -322,8 +314,7 @@ export class AssetsService {
       percentageInRepair: Math.round(percentageInRepair * 100) / 100,
     };
   }
-  
-  
+
 }
 
     
