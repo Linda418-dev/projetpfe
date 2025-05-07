@@ -154,35 +154,34 @@ export class InventoryService {
       latestStatus, 
     };
   }
-  // methode pour lancer inventaire
   async launchInventory(id: string) {
     const inventory = await this.inventoryRepository.findOne({ where: { id } });
+  
     if (!inventory) {
-      throw new BadRequestException(`Inventory not found`);
+      throw new BadRequestException('Inventory not found');
     }
-    // Vérifier s'il y a déjà un inventaire en cours
-    const inProgressInventory = await this.inventoryRepository.findOne({
-      where: { id: Not(id) }, // Trouver un inventaire qui n'est pas celui en cours
-      relations: ['inventoryStatus'],
+  
+    // Vérifier s'il y a déjà un autre inventaire en cours
+    const otherInventories = await this.inventoryRepository.find({
+      where: { id: Not(id) },
+      relations: ['inventoryStatus', 'inventoryStatus.status'],
     });
   
-    if (inProgressInventory) {
-      // Recherche d'un statut "In Progress" dans les autres inventaires
-      const inProgressStatus = inProgressInventory.inventoryStatus.find(
-        status => status.status.name === 'In Progress',
-      );
-      if (inProgressStatus) {
-        throw new BadRequestException('There is already an inventory in progress');
-      }
+    const isAnotherInventoryInProgress = otherInventories.some(inv =>
+      inv.inventoryStatus.some(status => status.status.name === 'In Progress')
+    );
+  
+    if (isAnotherInventoryInProgress) {
+      throw new BadRequestException('There is already an inventory in progress');
     }
   
     // Vérifier la date de début
-    const today = this.getTodayStart();
-    const startDate = moment(inventory.startDate).startOf('day').toDate();
-    const isBeforeStart = today < startDate;
-
+    const today = new Date();
+    const startDate = new Date(inventory.startDate);
+  
+    const isBeforeStart = today.setHours(0, 0, 0, 0) < startDate.setHours(0, 0, 0, 0);
     if (isBeforeStart) {
-      throw new BadRequestException(`Cannot launch inventory before its start date`);
+      throw new BadRequestException('Cannot launch inventory before its start date');
     }
   
     // Vérifie l'existence du statut "In Progress"
@@ -191,10 +190,10 @@ export class InventoryService {
     });
   
     if (!inProgressStatus) {
-      throw new BadRequestException(`Status "In Progress" not found`);
+      throw new BadRequestException('Status "In Progress" not found');
     }
   
-    // récupère le dernier statut de l'inventaire
+    // Récupère le dernier statut de l'inventaire
     const lastStatus = await this.inventoryStatusRepository.findOne({
       where: { inventory: { id } },
       order: { createdAt: 'DESC' },
@@ -202,43 +201,42 @@ export class InventoryService {
     });
   
     if (!lastStatus) {
-      throw new BadRequestException(`Inventory has no status yet`);
+      throw new BadRequestException('Inventory has no status yet');
     }
   
     const lastStatusName = lastStatus.status.name;
   
-    // empêcher  Si le status en cours
+    // Vérifications du dernier statut
     if (lastStatusName === 'In Progress') {
-      throw new BadRequestException(`Inventory is already in progress`);
-    }
-
-    // empêcher  Si le status terminé
-    if (lastStatusName === 'Completed') {
-      throw new BadRequestException(`Cannot launch an inventory that is already completed`);
+      throw new BadRequestException('Inventory is already in progress');
     }
   
-    // lancer seulement si le dernier statut est "Planned"
+    if (lastStatusName === 'Completed') {
+      throw new BadRequestException('Cannot launch an inventory that is already completed');
+    }
+  
     if (lastStatusName !== 'Planned') {
-      throw new BadRequestException(`Inventory can only be launched if status is "Planned"`);
-    } 
-    // enregistrer du nouveau statut
+      throw new BadRequestException('Inventory can only be launched if status is "Planned"');
+    }
+  
+    // Enregistrement du nouveau statut
     const newInventoryStatus = this.inventoryStatusRepository.create({
       inventory,
       status: inProgressStatus,
     });
+  
     await this.inventoryStatusRepository.save(newInventoryStatus);
-    const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id); 
+  
+    // Notification aux opérateurs
+    const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id);
+  
     await this.notificationService.notifyOperators(
       playerIds,
       'Inventory Launched',
       `The inventory "${inventory.name}" has started.`
     );
-    return {
-      message: `Inventory "${inventory.name}" has been launched`,
-      inventoryId: inventory.id,
-      status: inProgressStatus.name,
-    };
   }
+  
   async getOperatorsPlayerIdsForInventory(inventoryId: string) {
     const affectations = await this.affectationRepository.find({
       where: { inventory: { id: inventoryId } },
