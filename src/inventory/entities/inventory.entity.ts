@@ -4,7 +4,6 @@ import { Affectation } from 'src/affectation/entities/affectation.entity';
 import { Site } from 'src/site/Entities/site.entity';
 import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 
-
 @Entity()
 export class Inventory implements Iinventory {
   @PrimaryGeneratedColumn('uuid')

@@ -23,5 +23,11 @@ export class UpdateInventoryDto {
   @IsUUID()
   @ApiProperty({ required: false })
   statusId?: string
+
+  @IsOptional()
+  @IsUUID()
+  @ApiProperty({ required: false })
+  operatorId?: string;
+
  
 }

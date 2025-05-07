@@ -14,6 +14,7 @@ import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 import * as moment from 'moment';
 import { NotificationService } from 'src/notification/notification.service';
+import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
 
 @Injectable()
 export class InventoryService {
@@ -361,10 +362,50 @@ export class InventoryService {
      //  Sauvegarder l'inventaire
      const savedInventory = await this.inventoryRepository.save(inventory);
 
+     if (dto.operatorId) {
+      if (lastStatusName !== InventoryStatusEnum.IN_PROGRESS) {
+        throw new BadRequestException('Operator can only be assigned when inventory is "In Progress"');
+      }
+    
+      const newOperator = await this.userRepository.findOne({
+        where: { id: dto.operatorId },
+        relations: ['role'], // pour accéder au rôle de l'utilisateur
+      });
+    
+      if (!newOperator) {
+        throw new BadRequestException(`Operator with ID ${dto.operatorId} not found`);
+      }
+    
+      if (newOperator.role.role !== UserRoleEnum.OPERATOR) {
+        throw new BadRequestException('Only users with the "operator" role can be assigned to an inventory');
+      }
+    
+      // Vérifie si l’opérateur est déjà affecté à cet inventaire
+      const existingAffectation = await this.affectationRepository.findOne({
+        where: {
+          inventory: { id },
+          operator: { id: dto.operatorId },
+        },
+      });
+    
+      if (existingAffectation) {
+        throw new BadRequestException('This operator is already assigned to the inventory');
+      }
+    
+      // Crée une nouvelle affectation (sans supprimer les anciennes)
+      const newAffectation = this.affectationRepository.create({
+        inventory,
+        operator: newOperator,
+      });
+    
+      await this.affectationRepository.save(newAffectation);
+    }
+    
     // Recharge complet de l'inventaire avec les statuts et le site
     const updatedInventory = await this.inventoryRepository.findOne({
       where: { id: savedInventory.id },
-      relations: ['inventoryStatus', 'inventoryStatus.status', 'site'],
+      relations: ['inventoryStatus', 'inventoryStatus.status', 'site','affectations',
+    'affectations.operator'],
     });
   
     if (!updatedInventory) {
