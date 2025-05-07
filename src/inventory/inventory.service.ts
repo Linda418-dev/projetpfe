@@ -164,22 +164,25 @@ export class InventoryService {
     // Vérifier s'il y a déjà un autre inventaire en cours
     const otherInventories = await this.inventoryRepository.find({
       where: { id: Not(id) },
-      relations: ['inventoryStatus', 'inventoryStatus.status'],
     });
   
-    const isAnotherInventoryInProgress = otherInventories.some(inv =>
-      inv.inventoryStatus.some(status => status.status.name === 'In Progress')
-    );
+    for (const otherInventory of otherInventories) {
+      const lastStatus = await this.inventoryStatusRepository.findOne({
+        where: { inventory: { id: otherInventory.id } },
+        order: { createdAt: 'DESC' },
+        relations: ['status'],
+      });
   
-    if (isAnotherInventoryInProgress) {
-      throw new BadRequestException('There is already an inventory in progress');
+      if (lastStatus?.status.name === 'In Progress') {
+        throw new BadRequestException('There is already an inventory in progress');
+      }
     }
   
     // Vérifier la date de début
     const today = new Date();
     const startDate = new Date(inventory.startDate);
-  
     const isBeforeStart = today.setHours(0, 0, 0, 0) < startDate.setHours(0, 0, 0, 0);
+  
     if (isBeforeStart) {
       throw new BadRequestException('Cannot launch inventory before its start date');
     }
@@ -206,7 +209,6 @@ export class InventoryService {
   
     const lastStatusName = lastStatus.status.name;
   
-    // Vérifications du dernier statut
     if (lastStatusName === 'In Progress') {
       throw new BadRequestException('Inventory is already in progress');
     }
@@ -235,7 +237,16 @@ export class InventoryService {
       'Inventory Launched',
       `The inventory "${inventory.name}" has started.`
     );
+  
+    // ✅ Retourner l'inventaire mis à jour avec ses statuts
+    const updatedInventory = await this.inventoryRepository.findOne({
+      where: { id },
+      relations: ['inventoryStatus', 'inventoryStatus.status'],
+    });
+  
+    return updatedInventory;
   }
+  
   
   async getOperatorsPlayerIdsForInventory(inventoryId: string) {
     const affectations = await this.affectationRepository.find({
