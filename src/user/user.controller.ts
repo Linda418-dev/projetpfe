@@ -43,10 +43,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deactivateUser(
-  @Param('id') targetUserId: string,
-  @Req() req: any // ou via décorateur @User() si tu as un custom decorator
- ) {
+  async deactivateUser(@Param('id') targetUserId: string,@Req() req: any ) {
   const currentUserId = req.user.id;
   return this.userService.deactivateUser(targetUserId, currentUserId);
 }
