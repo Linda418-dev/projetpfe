@@ -15,7 +15,6 @@ export class Notification {
   @Column()
   message: string;
 
-  
   @ManyToMany(() => User)
   @JoinTable()
   recipients: User[];

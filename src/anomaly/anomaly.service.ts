@@ -72,5 +72,6 @@ export class AnomalyService {
     anomaly.status = AnomalyStatus.REFUSED;
     await this.anomalyRepository.save(anomaly);
   }
+
   
 }

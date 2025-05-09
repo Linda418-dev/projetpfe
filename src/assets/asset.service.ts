@@ -156,8 +156,7 @@ export class AssetsService {
         throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
       }
     }
-  
-    
+     
     const defaultStatus = await this.statusRepository.findOne({
       where: { name: AssetStatusEnum.GOOD, type: 'asset' },
     });
@@ -237,7 +236,7 @@ export class AssetsService {
         });
       }
     }
-    // créer la timeline  en respectant l'ordre chronologique
+    // créer  timeline  
     const timeline: {
       asset: string;
       assetId: string;

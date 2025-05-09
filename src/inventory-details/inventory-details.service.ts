@@ -20,12 +20,18 @@ export class InventoryDetailsService {
     private readonly anomalyRepository : AnomalyRepository
 
   ) {}
-  async  getAllInventoryDetails() {
-    return this.inventoryDetailsRepository.find({
-      relations: ['affectation', 'assetStatus', 'locationHistory', 'files'],
+  async getAllInventoryDetails() {
+    const details = await this.inventoryDetailsRepository.find({
+      relations: ['affectation', 'assetStatus', 'assetStatus.asset', 'locationHistory', 'files'],
       order: { scannedAt: 'DESC' },
     });
+  
+    return details.map((detail) => ({
+      ...detail,
+      assetId: detail.assetStatus?.asset?.id || null,
+    }));
   }
+  
   
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
     // verifier le id de l'affectation existe ou non 
@@ -46,7 +52,7 @@ export class InventoryDetailsService {
     }
     await this.fileRepository.save(files);
   
-    // Récupérer le dernier AssetStatus
+    // récupérer le dernier AssetStatus
     const assetStatus = await this.assetStatusRepository.findOne({
     where: { asset: { id: dto.assetId } },
     order: { createdAt: 'DESC' },
@@ -55,7 +61,7 @@ export class InventoryDetailsService {
       throw new NotFoundException('No AssetStatus found for this asset.');
     }
 
-    // Récupérer la dernière LocationHistory
+    // récupérer la dernière LocationHistory
     const locationHistory = await this.locationHistoryRepository.findOne({
     where: { asset: { id: dto.assetId } },
     order: { createdAt: 'DESC' },
@@ -80,18 +86,22 @@ export class InventoryDetailsService {
     return savedInventoryDetail;
   }
 
-  async  getInventorydetailsById(id: string) {
+  async getInventorydetailsById(id: string) {
     const detail = await this.inventoryDetailsRepository.findOne({
       where: { id },
-      relations: ['affectation', 'assetStatus', 'locationHistory', 'files'],
+      relations: ['affectation', 'assetStatus', 'assetStatus.asset', 'locationHistory', 'files'],
     });
   
     if (!detail) {
       throw new NotFoundException(`InventoryDetail with ID ${id} not found`);
     }
   
-    return detail;
+    return {
+      ...detail,
+      assetId: detail.assetStatus?.asset?.id,
+    };
   }
+  
 
   async getInventoryDetailsByInventoryId(inventoryId: string) {
     return this.inventoryDetailsRepository.findByInventoryId(inventoryId);

@@ -12,6 +12,9 @@ import { FileRepository } from './repositories/file.repository';
 import { Category } from 'src/category/Entities/category.entity';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { Supplier } from 'src/supplier/Entities/Supplier.entity';
+import { ExcelController } from './excel/excel.controller';
+import { ExcelService } from './excel/excel.service';
+import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 
 @Module({
   imports: [
@@ -47,8 +50,8 @@ import { Supplier } from 'src/supplier/Entities/Supplier.entity';
       }),
     }),
   ],
-  controllers: [UploadsController],
-  providers: [UploadsService, FileRepository,CategoryRepository], 
+  controllers: [UploadsController, ExcelController],
+  providers: [UploadsService, FileRepository,CategoryRepository, ExcelService,AssetRepository,ExcelService,ExcelController], 
   exports: [FileRepository, UploadsService], 
 })
 export class UploadsModule {}

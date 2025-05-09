@@ -22,6 +22,7 @@ export class ServiceService {
           },
         });
       }
+      
     // methode pour creation d'un service 
     async createService(createServiceDto: CreateServiceDto, departmentId: string) {
       const department = await this.departmentRepository.findOneBy({ id: departmentId });

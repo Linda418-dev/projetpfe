@@ -31,7 +31,7 @@ export class NotificationService {
         });
       }
 
-    //   methode pour notifier les operateurs  
+    // methode pour notifier les operateurs  
     async notifyOperators(playerIds: string[], title: string, message: string) {
       try {
         await axios.post(
@@ -49,10 +49,9 @@ export class NotificationService {
             },
           },
         );
-    //  Récupérer les utilisateurs correspondant aux playerIds
+    // récupérer les utilisateurs correspondant aux playerIds
       const users = await this.userRepository.find({ where: { playerId: In(playerIds) } });
-      
-      // Créer  la notification avec les destinataires
+      // créer  la notification avec les destinataires
       const notification = this.notificationRepo.create({
         playerIds,
         title,

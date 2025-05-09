@@ -161,7 +161,7 @@ export class InventoryService {
       throw new BadRequestException('Inventory not found');
     }
   
-    // Vérifier s'il y a déjà un autre inventaire en cours
+    // vérifier si à un autre inventaire en cours
     const otherInventories = await this.inventoryRepository.find({
       where: { id: Not(id) },
     });
@@ -178,7 +178,7 @@ export class InventoryService {
       }
     }
   
-    // Vérifier la date de début
+    // vérifier la date de début
     const today = new Date();
     const startDate = new Date(inventory.startDate);
     const isBeforeStart = today.setHours(0, 0, 0, 0) < startDate.setHours(0, 0, 0, 0);
@@ -187,7 +187,7 @@ export class InventoryService {
       throw new BadRequestException('Cannot launch inventory before its start date');
     }
   
-    // Vérifie l'existence du statut "In Progress"
+    // vérifie l'existence du statut "In Progress"
     const inProgressStatus = await this.statusRepository.findOne({
       where: { name: 'In Progress', type: 'inventory' },
     });
@@ -196,7 +196,7 @@ export class InventoryService {
       throw new BadRequestException('Status "In Progress" not found');
     }
   
-    // Récupère le dernier statut de l'inventaire
+    // récupère le dernier statut de l'inventaire
     const lastStatus = await this.inventoryStatusRepository.findOne({
       where: { inventory: { id } },
       order: { createdAt: 'DESC' },
@@ -238,7 +238,6 @@ export class InventoryService {
       `The inventory "${inventory.name}" has started.`
     );
   
-    // ✅ Retourner l'inventaire mis à jour avec ses statuts
     const updatedInventory = await this.inventoryRepository.findOne({
       where: { id },
       relations: ['inventoryStatus', 'inventoryStatus.status'],
@@ -246,7 +245,6 @@ export class InventoryService {
   
     return updatedInventory;
   }
-  
   
   async getOperatorsPlayerIdsForInventory(inventoryId: string) {
     const affectations = await this.affectationRepository.find({
@@ -401,7 +399,7 @@ export class InventoryService {
         throw new BadRequestException('This operator is already assigned to the inventory');
       }
     
-      // Crée une nouvelle affectation (sans supprimer les anciennes)
+      // crée une nouvelle affectation sans supprimer les anciennes
       const newAffectation = this.affectationRepository.create({
         inventory,
         operator: newOperator,
@@ -410,7 +408,7 @@ export class InventoryService {
       await this.affectationRepository.save(newAffectation);
     }
     
-    // Recharge complet de l'inventaire avec les statuts et le site
+    
     const updatedInventory = await this.inventoryRepository.findOne({
       where: { id: savedInventory.id },
       relations: ['inventoryStatus', 'inventoryStatus.status', 'site','affectations',
@@ -484,7 +482,7 @@ export class InventoryService {
       continue;
     }
 
-    // Ajouter le statut "Expired"
+    // ajouter le statut Expired
     const expiredEntry = this.inventoryStatusRepository.create({
       inventory,
       status: expiredStatus,
@@ -493,7 +491,7 @@ export class InventoryService {
     await this.inventoryStatusRepository.save(expiredEntry);
     expiredCount++;
 
-    // Nettoyage des doublons après insertion
+    // nettoyage des doublons après insertion
     const allExpiredStatuses = await this.inventoryStatusRepository.find({
       where: {
         inventory: { id: inventory.id },
@@ -503,7 +501,6 @@ export class InventoryService {
     });
 
     if (allExpiredStatuses.length > 1) {
-      // On garde le plus récent, on supprime les autres
       const [latest, ...duplicates] = allExpiredStatuses;
       const idsToDelete = duplicates.map((d) => d.id);
       await this.inventoryStatusRepository.delete(idsToDelete);
