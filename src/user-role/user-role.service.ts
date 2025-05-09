@@ -1,26 +1,22 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { userRoleRepository } from './repositories/user-role.repository';
-import { UserRoleEnum } from './types/enums/user-role.enum';
 
 @Injectable()
-export class UserRoleService implements OnModuleInit {
+export class UserRoleService  {
     constructor(
       private readonly userRoleRepository: userRoleRepository,
     ) {}
   
-    async onModuleInit() {
-      await this.seedRoles();
+    async getAllRoles() {
+      return this.userRoleRepository.find();
     }
   
-    private async seedRoles() {
-      const count = await this.userRoleRepository.count();
-      if (count === 0) {
-        await this.userRoleRepository.save([
-          { role: UserRoleEnum.ADMIN },
-          { role: UserRoleEnum.OPERATOR },
-        ]);
-        console.log('User roles seeded successfully');
+    async getRoleById(id: string) {
+      const role = await this.userRoleRepository.findOne({ where: { id } });
+      if (!role) {
+        throw new NotFoundException(`UserRole with id ${id} not found`);
       }
+      return role;
     }
 
 }

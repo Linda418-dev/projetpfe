@@ -46,9 +46,8 @@ export class UserController {
   async deactivateUser(@Param('id') targetUserId: string,@Req() req: any ) {
   const currentUserId = req.user.id;
   return this.userService.deactivateUser(targetUserId, currentUserId);
-}
-
-  
+ }
+ 
   @BypassInventoryLock()
   @Patch(':id/activate')
    // @UseGuards(JwtAuthGuard, RolesGuard)
