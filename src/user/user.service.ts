@@ -55,7 +55,6 @@ export class UserService {
         });
       
         const savedUser = await this.userRepository.save(newUser);
-      
         return {
           id: savedUser.id,
           email: savedUser.email,
@@ -66,8 +65,7 @@ export class UserService {
           updatedAt: savedUser.updatedAt,
         };
       }
-      
-    
+       
     
     // methode pour update user 
       async updateUser(id: string, updateUserDto: UpdateUserDto) {
@@ -86,27 +84,30 @@ export class UserService {
       }
 
       // methode poure desactiver or supprimer user
-      async deactivateUser(id: string) {
+      async deactivateUser(targetUserId: string, currentUserId: string) {
+        if (targetUserId === currentUserId) {
+          throw new ConflictException('You cannot deactivate or delete your own account');
+        }
+      
         const user = await this.userRepository.findOne({
-          where: { id },
+          where: { id: targetUserId },
           relations: ['affectations'],
         });
       
         if (!user) {
           throw new NotFoundException('User not found');
         }
+      
         if (user.affectations && user.affectations.length > 0) {
-          // si L'utilisateur a des affectations  on le désactive 
           user.isActive = false;
           await this.userRepository.save(user);
           return { message: 'User has been deactivated because they have existing affectations.' };
         } else {
-          // sinon aucun  des affectations on peut le supprimer
           await this.userRepository.remove(user);
           return { message: 'User has been deleted successfully because they had no affectations.' };
         }
       }
-
+      
       // methode pour activer compte d'un user 
       async activateUser(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });

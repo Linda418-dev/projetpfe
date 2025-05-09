@@ -7,6 +7,7 @@ import { CreateUserDto } from './types/dto/create-user.dto';
 import { RolesGuard } from "src/auth/guards/roles.guard";
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiBearerAuth()
 @ApiTags('user Resource')
@@ -40,13 +41,16 @@ export class UserController {
     return this.userService.updateUser(id, updateUserDto);
   }
 
-  @BypassInventoryLock()
   @Delete(':id')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles('admin') 
-  async deactivateUser(@Param('id') id: string) {
-    return this.userService.deactivateUser(id);
-  }
+  @UseGuards(JwtAuthGuard)
+  async deactivateUser(
+  @Param('id') targetUserId: string,
+  @Req() req: any // ou via décorateur @User() si tu as un custom decorator
+ ) {
+  const currentUserId = req.user.id;
+  return this.userService.deactivateUser(targetUserId, currentUserId);
+}
+
   
   @BypassInventoryLock()
   @Patch(':id/activate')
