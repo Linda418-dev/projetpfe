@@ -6,7 +6,7 @@ import { InventoryDetailsService } from './inventory-details.service';
 import { InventoryDetailsRepository } from './repositories/inventory-details.repository';
 
 import { Inventory } from 'src/inventory/entities/inventory.entity';
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { Asset } from 'src/assets/Entities/asset.entity';
 import { InventoryRepository } from 'src/inventory/repositories/inventory.repository';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { FileRepository } from 'src/uploads/repositories/file.repository';

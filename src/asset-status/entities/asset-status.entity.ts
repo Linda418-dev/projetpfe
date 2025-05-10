@@ -2,7 +2,7 @@
 import { CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { IAssetStatus } from '../types/interfaces/asset-status.interface';
 import { Status } from 'src/status/entities/status.entity';
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { Asset } from 'src/assets/Entities/asset.entity';
 @Entity()
 export class AssetStatus implements IAssetStatus{
   @PrimaryGeneratedColumn('uuid')

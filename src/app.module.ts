@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AssetModule } from './assets/asset.module';
-import { Asset } from './assets/Entities/Asset.entity';
+import { Asset } from './assets/Entities/asset.entity';
 import { CategoryModule } from './category/category.module';
 import { SupplierModule } from './supplier/supplier.module';
 import { UploadsModule } from './uploads/uploads.module';

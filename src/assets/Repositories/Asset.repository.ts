@@ -1,7 +1,7 @@
 import { Brackets, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Asset } from '../Entities/Asset.entity';
+import { Asset } from '../Entities/asset.entity';
 import { PaginateSearchDto } from '../types/dto/paginate-search.dto';
 
 

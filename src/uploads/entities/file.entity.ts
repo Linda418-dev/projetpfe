@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { Asset } from 'src/assets/Entities/asset.entity';
 import { IFile } from '../types/interfaces/file.interface';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 import { Anomaly } from 'src/anomaly/Entities/anomaly.entity';

@@ -37,8 +37,16 @@ export class AuthService {
     }
   
     const token = this.generateJwt(user);
-  
-    return { user, token };
+    // return sans password
+    const userWithoutPassword = {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    isActive: user.isActive,
+    role: user.role,
+  };
+
+  return { user: userWithoutPassword, token };
   }
   
   

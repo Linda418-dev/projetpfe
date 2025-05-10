@@ -91,6 +91,16 @@ export class InventoryRepository extends Repository<Inventory> {
       .getOne();
   }
   
+   // méthode pour vérifier les chevauchements d'inventaire
+   async findOverlappingInventory(siteId: string, startDate: Date, endDate: Date) {
+    return this.createQueryBuilder('inventory')
+      .where('inventory.siteId = :siteId', { siteId })
+      .andWhere('inventory.startDate <= :endDate AND inventory.endDate >= :startDate', {
+        startDate,
+        endDate,
+      })
+      .getOne();
+  }
   
  
 }

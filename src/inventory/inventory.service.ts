@@ -7,14 +7,15 @@ import { userRepository } from 'src/user/repositories/user.repository';
 import { AffectationRepository } from 'src/affectation/repositories/affectation.repository';
 import { SiteRepository } from 'src/site/Repositories/site.repository';
 import { User } from 'src/user/entities/user.entity';
-import { In, LessThan, Not } from 'typeorm';
-import { Cron} from '@nestjs/schedule';
+import { Between, In, LessThan, Not } from 'typeorm';
+import { Cron, CronExpression} from '@nestjs/schedule';
 import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 import * as moment from 'moment';
 import { NotificationService } from 'src/notification/notification.service';
 import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
+
 
 @Injectable()
 export class InventoryService {
@@ -41,89 +42,112 @@ export class InventoryService {
     }
   }
   
-  // methode pour la creation inventaire
+  
   async createInventory(createinventorydto: CreateInventoryDto) {
     const existing = await this.inventoryRepository.findOne({
       where: { name: createinventorydto.name },
     });
-  
+
     if (existing) {
       throw new BadRequestException(`Inventory with name "${createinventorydto.name}" already exists`);
     }
 
-  /* const now = new Date();
-  const startDate = new Date(createinventorydto.startDate);
-  const endDate = new Date(createinventorydto.endDate);
+    // Vérifie les chevauchements avec les inventaires existants du même site en appelant la méthode du repository
+    const startDate = new Date(createinventorydto.startDate);
+    const endDate = new Date(createinventorydto.endDate);
 
-  if (startDate < now) {
-    throw new BadRequestException('Start date cannot be in the past.');
+    // Vérifie que la date de début n'est pas dans le passé
+    const today = this.getTodayStart(); 
+    if (startDate < today) {
+      throw new BadRequestException(`Start date cannot be in the past`);
+    }
+
+    // Vérifie que la date de fin est après la date de début
+   if (endDate < startDate) {
+    throw new BadRequestException(`End date cannot be before start date`);
   }
 
-  if (endDate && startDate > endDate) {
-    throw new BadRequestException('Start date must be before or equal to end date.');
-  }*/
-  
+    const overlappingInventory = await this.inventoryRepository.findOverlappingInventory(
+      createinventorydto.siteId,
+      startDate,
+      endDate,
+    );
+
+    if (overlappingInventory) {
+      const formattedStartDate = new Date(overlappingInventory.startDate).toDateString();
+      const formattedEndDate = new Date(overlappingInventory.endDate).toDateString();
+
+      throw new BadRequestException(
+        `An inventory already exists in the selected date range for the site (from ${formattedStartDate} to ${formattedEndDate}).`,
+      );
+    }
+
     // Vérifie que le site existe
     const site = await this.siteRepository.findOne({
       where: { id: createinventorydto.siteId },
     });
-  
+
     if (!site) {
       throw new BadRequestException(`Site not found`);
     }
-  
-    // vérifie que le statut Planned
+
+    // Vérifie que le statut Planned existe
     const plannedStatus = await this.statusRepository.findOne({
       where: { name: 'Planned', type: 'inventory' },
     });
-  
+
     if (!plannedStatus) {
       throw new BadRequestException(`Default inventory status "Planned" not found`);
     }
-  
-    // récupération des opérateurs
+
+    // Récupération des opérateurs
     let operators: User[] = [];
     if (createinventorydto.allOperators) {
       operators = await this.userRepository.findAllOperators();
-  
+
       if (operators.length === 0) {
         throw new BadRequestException(`No operators found in the system.`);
       }
-  
+
     } else if (createinventorydto.operatorIds?.length > 0) {
       operators = await this.userRepository.find({
         where: { id: In(createinventorydto.operatorIds) },
         relations: ['role'],
       });
-  
+
       if (operators.length !== createinventorydto.operatorIds.length) {
         throw new BadRequestException(`One or more operator IDs are invalid.`);
       }
-  
+
       const invalidUsers = operators.filter(
-        (user) => user.role?.role !== 'operator'
+        (user) => user.role?.role !== 'operator',
       );
-  
+
       if (invalidUsers.length > 0) {
         const invalidIds = invalidUsers.map((u) => u.id).join(', ');
         throw new BadRequestException(`The following users are not operators: ${invalidIds}`);
       }
-  
+
     } else {
       throw new BadRequestException(`You must select at least one operator or choose "All Operators".`);
     }
+
+    // Création de l'inventaire
     const newInventory = this.inventoryRepository.create({
       ...createinventorydto,
       site,
     });
     const savedInventory = await this.inventoryRepository.save(newInventory);
+
+    // Ajoute le statut "Planned"
     const newStatus = this.inventoryStatusRepository.create({
       inventory: savedInventory,
       status: plannedStatus,
     });
-  
+
     await this.inventoryStatusRepository.save(newStatus);
-  
+
+    // Affectation des opérateurs
     const affectations = operators.map((operator) =>
       this.affectationRepository.create({
         inventory: savedInventory,
@@ -131,10 +155,11 @@ export class InventoryService {
       }),
     );
     await this.affectationRepository.save(affectations);
+
     return savedInventory;
   }
 
-  //  methode pour get inventory By Id
+   //  methode pour get inventory By Id
   async getInventoryById(id: string) {
     const inventory = await this.inventoryRepository.findOne({
       where: { id },
@@ -245,6 +270,7 @@ export class InventoryService {
   
     return updatedInventory;
   }
+
   
   async getOperatorsPlayerIdsForInventory(inventoryId: string) {
     const affectations = await this.affectationRepository.find({
@@ -256,6 +282,7 @@ export class InventoryService {
       .map(a => a.operator?.playerId) 
       .filter(pid => !!pid);
   }
+ 
   
   /*
   async getActiveInventory() {
@@ -264,84 +291,59 @@ export class InventoryService {
   }*/
   
 //  methode pour update inventory 
-  async updateInventory(id: string, dto: UpdateInventoryDto) {
-    const inventory = await this.inventoryRepository.findOne({
-      where: { id },
-      relations: ['inventoryStatus'],
-    });
-  
-    if (!inventory) {
-      throw new NotFoundException(`Inventory with ID ${id} not found`);
-    }
-    // Recherche du dernier statut de l'inventaire
-    const lastStatus = await this.inventoryStatusRepository.findOne({
-      where: { inventory: { id } },
-      order: { createdAt: 'DESC' },
-      relations: ['status'],
-    });
-  
-    if (!lastStatus) {
-      throw new BadRequestException(`Inventory has no status yet`);
-    }
-  
-    const lastStatusName = lastStatus.status.name;
-    let statusUpdated = false;
-  
-   // Mise à jour vers "Completed"
-    if (dto.statusId) {
-    const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
-    if (!status) {
-      throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
-    }
+async updateInventory(id: string, dto: UpdateInventoryDto) {
+  const inventory = await this.inventoryRepository.findOne({
+    where: { id },
+    relations: ['inventoryStatus', 'site'],
+  });
 
-    // verifier le status n'est pas Completed
-    if (status.name !== 'Completed') {
-      throw new BadRequestException('Inventory status can only be updated to "Completed"');
-    }
-    // verifier le status n'est pas In Progress
-    if (lastStatusName !== 'In Progress') {
-      throw new BadRequestException('Inventory can only be completed if the current status is "In Progress"');
-    }
-    const saveInventory = await this.inventoryRepository.findOne({ where: { id } });
-    if (!saveInventory) {
-      throw new InternalServerErrorException('Inventory not found');
-    }
-
-    const newInventoryStatus = this.inventoryStatusRepository.create({
-      inventory: saveInventory,
-      status: status,
-    });
-
-    // Sauvegarde du nouveau statut
-    const newInventoryStatusRecord = await this.inventoryStatusRepository.save(newInventoryStatus);
-    statusUpdated = true;
-
-    // Retourner les informations mises à jour
-    return {
-      inventory: saveInventory,
-      status: newInventoryStatusRecord,
-      statusUpdated: statusUpdated,
-    };
+  if (!inventory) {
+    throw new NotFoundException(`Inventory with ID ${id} not found`);
   }
-    // Mise à jour des champs si présents
-    if (dto.name) inventory.name = dto.name;
-    if (dto.endDate) inventory.endDate = new Date(dto.endDate);
 
-  // Mise à jour de startDate uniquement si le statut est "Planned"
-    if (dto.startDate) {
-      if (lastStatusName !== 'Planned') {
-        throw new BadRequestException('startDate can only be updated when the inventory status is "Planned"');
-      }
-      inventory.startDate = new Date(dto.startDate);
-    }  
-   //  Mise à jour du endDate si statut Planned ou Expired
-    if (dto.endDate) {
+  const lastStatus = await this.inventoryStatusRepository.findOne({
+    where: { inventory: { id } },
+    order: { createdAt: 'DESC' },
+    relations: ['status'],
+  });
+
+  if (!lastStatus) {
+    throw new BadRequestException(`Inventory has no status yet`);
+  }
+
+  const lastStatusName = lastStatus.status.name;
+  let statusUpdated = false;
+
+  const now = new Date();
+
+  // Validation de la startDate
+  if (dto.startDate) {
+    const startDate = new Date(dto.startDate);
+    if (startDate < now) {
+      throw new BadRequestException('startDate cannot be in the past');
+    }
+
+    if (lastStatusName !== 'Planned') {
+      throw new BadRequestException('startDate can only be updated when the inventory status is "Planned"');
+    }
+
+    inventory.startDate = startDate;
+  }
+
+  // Validation de l’endDate
+  if (dto.endDate) {
+    const endDate = new Date(dto.endDate);
+    if (inventory.startDate && endDate < inventory.startDate) {
+      throw new BadRequestException('endDate cannot be earlier than startDate');
+    }
+
     if (lastStatusName !== InventoryStatusEnum.Planned && lastStatusName !== InventoryStatusEnum.EXPIRED) {
       throw new BadRequestException('endDate can only be updated when the inventory status is "Planned" or "Expired"');
     }
 
-    inventory.endDate = new Date(dto.endDate);
-    // Si le statut était Expired  repasser à In Progress
+    inventory.endDate = endDate;
+
+    // Si le statut était Expired, repasser à In Progress
     if (lastStatusName === InventoryStatusEnum.EXPIRED) {
       const inProgressStatus = await this.statusRepository.findOne({
         where: { name: InventoryStatusEnum.IN_PROGRESS, type: 'inventory' },
@@ -355,80 +357,128 @@ export class InventoryService {
         inventory,
         status: inProgressStatus,
       });
-      
-    await this.inventoryRepository.save(inventory); 
-    const newInventoryStatus = await this.inventoryStatusRepository.save(newStatus);
+
+      await this.inventoryRepository.save(inventory);
+      const newInventoryStatus = await this.inventoryStatusRepository.save(newStatus);
+
+      return {
+        inventory,
+        status: newInventoryStatus,
+        statusUpdated: true,
+      };
+    }
+  }
+  // Vérification de chevauchement d’un autre inventaire sur le même site
+  const startDateToCheck = dto.startDate ? new Date(dto.startDate) : inventory.startDate;
+  const endDateToCheck = dto.endDate ? new Date(dto.endDate) : inventory.endDate;
+
+  const overlappingInventory = await this.inventoryRepository
+    .createQueryBuilder('inventory')
+    .where('inventory.siteId = :siteId', { siteId: inventory.site.id })
+    .andWhere('inventory.id != :id', { id }) 
+    .andWhere(
+      `(:startDate <= inventory.endDate AND :endDate >= inventory.startDate)`,
+      { startDate: startDateToCheck, endDate: endDateToCheck },
+    )
+    .getOne();
+
+  if (overlappingInventory) {
+    throw new BadRequestException(
+      `Inventory dates overlap with another inventory from ${overlappingInventory.startDate.toISOString().slice(0, 10)} to ${overlappingInventory.endDate.toISOString().slice(0, 10)}`
+    );
+  }
+
+  // Mise à jour du nom
+  if (dto.name) inventory.name = dto.name;
+
+  // Mise à jour du statut vers "Completed"
+  if (dto.statusId) {
+    const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
+    if (!status) {
+      throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
+    }
+
+    if (status.name !== 'Completed') {
+      throw new BadRequestException('Inventory status can only be updated to "Completed"');
+    }
+
+    if (lastStatusName !== 'In Progress') {
+      throw new BadRequestException('Inventory can only be completed if the current status is "In Progress"');
+    }
+
+    const newInventoryStatus = this.inventoryStatusRepository.create({
+      inventory,
+      status,
+    });
+
+    const savedStatus = await this.inventoryStatusRepository.save(newInventoryStatus);
+    statusUpdated = true;
 
     return {
       inventory,
-      status: newInventoryStatus,
-      statusUpdated: true,
-    };
-  }
-  }
-     //  Sauvegarder l'inventaire
-     const savedInventory = await this.inventoryRepository.save(inventory);
-
-     if (dto.operatorId) {
-      if (lastStatusName !== InventoryStatusEnum.IN_PROGRESS) {
-        throw new BadRequestException('Operator can only be assigned when inventory is "In Progress"');
-      }
-    
-      const newOperator = await this.userRepository.findOne({
-        where: { id: dto.operatorId },
-        relations: ['role'], // pour accéder au rôle de l'utilisateur
-      });
-    
-      if (!newOperator) {
-        throw new BadRequestException(`Operator with ID ${dto.operatorId} not found`);
-      }
-    
-      if (newOperator.role.role !== UserRoleEnum.OPERATOR) {
-        throw new BadRequestException('Only users with the "operator" role can be assigned to an inventory');
-      }
-    
-      // Vérifie si l’opérateur est déjà affecté à cet inventaire
-      const existingAffectation = await this.affectationRepository.findOne({
-        where: {
-          inventory: { id },
-          operator: { id: dto.operatorId },
-        },
-      });
-    
-      if (existingAffectation) {
-        throw new BadRequestException('This operator is already assigned to the inventory');
-      }
-    
-      // crée une nouvelle affectation sans supprimer les anciennes
-      const newAffectation = this.affectationRepository.create({
-        inventory,
-        operator: newOperator,
-      });
-    
-      await this.affectationRepository.save(newAffectation);
-    }
-    
-    
-    const updatedInventory = await this.inventoryRepository.findOne({
-      where: { id: savedInventory.id },
-      relations: ['inventoryStatus', 'inventoryStatus.status', 'site','affectations',
-    'affectations.operator'],
-    });
-  
-    if (!updatedInventory) {
-      throw new InternalServerErrorException('Failed to reload updated inventory');
-    }
-  
-    // tri les statuts par date de création
-    updatedInventory.inventoryStatus.sort((a, b) =>
-      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    );
-  
-    return {
-      updatedInventory,
+      status: savedStatus,
       statusUpdated,
     };
   }
+
+  const savedInventory = await this.inventoryRepository.save(inventory);
+
+  // Assignation opérateur
+  if (dto.operatorId) {
+    if (lastStatusName !== InventoryStatusEnum.IN_PROGRESS) {
+      throw new BadRequestException('Operator can only be assigned when inventory is "In Progress"');
+    }
+
+    const newOperator = await this.userRepository.findOne({
+      where: { id: dto.operatorId },
+      relations: ['role'],
+    });
+
+    if (!newOperator) {
+      throw new BadRequestException(`Operator with ID ${dto.operatorId} not found`);
+    }
+
+    if (newOperator.role.role !== UserRoleEnum.OPERATOR) {
+      throw new BadRequestException('Only users with the "operator" role can be assigned to an inventory');
+    }
+
+    const existingAffectation = await this.affectationRepository.findOne({
+      where: {
+        inventory: { id },
+        operator: { id: dto.operatorId },
+      },
+    });
+
+    if (existingAffectation) {
+      throw new BadRequestException('This operator is already assigned to the inventory');
+    }
+
+    const newAffectation = this.affectationRepository.create({
+      inventory,
+      operator: newOperator,
+    });
+
+    await this.affectationRepository.save(newAffectation);
+  }
+
+  const updatedInventory = await this.inventoryRepository.findOne({
+    where: { id: savedInventory.id },
+    relations: ['inventoryStatus', 'inventoryStatus.status', 'site', 'affectations', 'affectations.operator'],
+  });
+
+  if (!updatedInventory) {
+    throw new InternalServerErrorException('Failed to reload updated inventory');
+  }
+
+  updatedInventory.inventoryStatus.sort((a, b) =>
+    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
+
+  return {
+    updatedInventory,
+    statusUpdated,
+  };
+}
 
   private getTodayStart(): Date {
     return moment().startOf('day').toDate();
@@ -507,6 +557,92 @@ export class InventoryService {
     }
   }
 }
+
+
+@Cron('*/1 * * * *') 
+  async handlePlannedInventoriesToLaunch() {
+    const startOfDay = this.getTodayStart();
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Récupère tous les inventaires prévus pour aujourd'hui
+    const plannedInventories = await this.inventoryRepository.find({
+      where: {
+        startDate: Between(startOfDay, endOfDay),
+      },
+      relations: ['inventoryStatus', 'inventoryStatus.status'],
+    });
+
+    if (plannedInventories.length === 0) return;
+
+    // Précharger le statut "In Progress"
+    const inProgressStatus = await this.statusRepository.findOne({
+      where: { name: InventoryStatusEnum.IN_PROGRESS, type: 'inventory' },
+    });
+
+    if (!inProgressStatus) {
+      console.warn('In Progress status not found.');
+      return;
+    }
+
+    let launchedCount = 0;
+
+    for (const inventory of plannedInventories) {
+      // Récupérer le dernier statut de l’inventaire
+      const lastStatus = await this.inventoryStatusRepository.findOne({
+        where: { inventory: { id: inventory.id } },
+        order: { createdAt: 'DESC' },
+        relations: ['status'],
+      });
+
+      // Vérifier que le dernier statut est "Planned"
+      if (!lastStatus || lastStatus.status.name !== InventoryStatusEnum.Planned) {
+        continue;
+      }
+
+      // Vérifie s’il y a déjà un statut "In Progress" enregistré pour cet inventaire
+      const existingInProgress = await this.inventoryStatusRepository
+        .createQueryBuilder('inventoryStatus')
+        .leftJoinAndSelect('inventoryStatus.status', 'status')
+        .where('inventoryStatus.inventoryId = :inventoryId', { inventoryId: inventory.id })
+        .andWhere('status.name = :statusName', { statusName: InventoryStatusEnum.IN_PROGRESS })
+        .getOne();
+
+      if (existingInProgress) {
+        continue; // déjà lancé
+      }
+
+      // Ajouter le nouveau statut "In Progress"
+      const newInventoryStatus = this.inventoryStatusRepository.create({
+        inventory,
+        status: inProgressStatus,
+      });
+
+      await this.inventoryStatusRepository.save(newInventoryStatus);
+      launchedCount++;
+
+      // Notification aux opérateurs
+      const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id);
+      await this.notificationService.notifyOperators(
+        playerIds,
+        'Inventory Launched',
+        `The inventory "${inventory.name}" has started.`,
+      );
+    }
+
+    console.log(`${launchedCount} inventory(ies) have been launched.`);
+  }
+
+  async deleteInventory(id: string): Promise<{ message: string }> {
+    const result = await this.inventoryRepository.delete(id);
+  
+    if (result.affected === 0) {
+      throw new NotFoundException('Inventory not found');
+    }
+  
+    return { message: 'Inventory deleted successfully' };
+  }
+  
 
 }
 

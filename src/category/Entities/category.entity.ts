@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ICategory } from "../types/interface/category.interface";
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { Asset } from 'src/assets/Entities/asset.entity';
 
 @Entity()
 export class Category implements ICategory {

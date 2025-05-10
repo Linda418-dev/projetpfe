@@ -53,10 +53,21 @@ export class CategoryService {
       }
     // methode pour supprimer category 
     async deleteCategory(id: string) {
-        const result = await this.categoryRepository.delete(id);
-        if (result.affected === 0){
-          throw new NotFoundException('Category not found')
-        } 
-        return { message: 'Category deleted successfully' };
+      const category = await this.categoryRepository.findOne({
+        where: { id },
+        relations: ['assets'],
+      });
+    
+      if (!category) {
+        throw new NotFoundException('Category not found');
+      }
+    
+      if (category.assets.length > 0) {
+        throw new BadRequestException('Cannot delete category: it is associated with assets');
+      }
+    
+      await this.categoryRepository.remove(category);
+      return { message: 'Category deleted successfully' };
     }
+    
 }

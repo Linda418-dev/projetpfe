@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { SupplierRepository } from './Repositories/Supplier.repository';
 import { CreateSupplierDto } from './types/dto/create-supplier.dto';
 import { UpdateSupplierDto } from './types/dto/update-supplier.dto';
@@ -30,10 +30,24 @@ export class SupplierService {
            return fetchSupplier;
       }
     // methode supprimer supprimer 
-      async deleteSupplier(id: string) {
-        const fetchSupplier = await this.getSupplierById(id);
-        return this.supplierRepository.remove(fetchSupplier);
+    async deleteSupplier(id: string) {
+      const supplier = await this.supplierRepository.findOne({
+        where: { id },
+        relations: ['assets'],
+      });
+    
+      if (!supplier) {
+        throw new NotFoundException('Supplier not found');
       }
+    
+      if (supplier.assets.length > 0) {
+        throw new BadRequestException('Cannot delete supplier: it is associated with assets');
+      }
+    
+      await this.supplierRepository.remove(supplier);
+      return { message: 'Supplier deleted successfully' };
+    }
+    
     // methode pour modifier supplier
       async updateSupplier(id: string, updateSupplierDto: UpdateSupplierDto) {
         const fetchSupplier = await this.supplierRepository.findOne({

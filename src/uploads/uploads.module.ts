@@ -6,7 +6,7 @@ import * as path from 'path';
 import { diskStorage } from 'multer';
 
 import { TypeOrmModule } from '@nestjs/typeorm'; 
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { Asset } from 'src/assets/Entities/asset.entity';
 import { File } from './entities/file.entity';
 import { FileRepository } from './repositories/file.repository';
 import { Category } from 'src/category/Entities/category.entity';

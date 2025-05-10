@@ -5,7 +5,7 @@ import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { updateAssetDto } from './types/dto/update-asset.dto';
 import { CategoryRepository } from 'src/category/Repositories/category.repository';
 import { SupplierRepository } from 'src/supplier/Repositories/Supplier.repository';
-import { Asset } from './Entities/Asset.entity';
+import { Asset } from './Entities/asset.entity';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 import { LocationRepository } from 'src/location/repositories/location.repository';
 import { File } from 'src/uploads/entities/file.entity';
@@ -57,79 +57,101 @@ export class AssetsService {
       return { message: 'Asset deleted successfully' };
   }
   
-    async updateAsset(id: string, updateAssetDto: updateAssetDto) {
-      const fetchAsset = await this.getAssetById(id);
-      if (!fetchAsset) {
-        throw new BadRequestException(`Asset with id ${id} not found`);
+  async updateAsset(id: string, updateAssetDto: updateAssetDto) {
+    const fetchAsset = await this.getAssetById(id);
+    if (!fetchAsset) {
+      throw new BadRequestException(`Asset with id ${id} not found`);
+    }
+  
+    // Mise à jour de la localisation + historique
+    if (updateAssetDto.locationId && fetchAsset.location.id !== updateAssetDto.locationId) {
+      const newLocation = await this.locationRepository.findOne({
+        where: { id: updateAssetDto.locationId },
+      });
+  
+      if (!newLocation) {
+        throw new BadRequestException(`Location with id ${updateAssetDto.locationId} not found`);
       }
-    
-      if (updateAssetDto.locationId && fetchAsset.location.id !== updateAssetDto.locationId) {
-        const newLocation = await this.locationRepository.findOne({
-          where: { id: updateAssetDto.locationId },
-        });
-    
-        if (!newLocation) {
-          throw new BadRequestException(`Location with id ${updateAssetDto.locationId} not found`);
-        }
-    
-        const history = this.locationHistoryRepository.create({
-          asset: fetchAsset,
-          location: newLocation,
-        });
-        await this.locationHistoryRepository.save(history);
-        fetchAsset.location = newLocation;
+  
+      const history = this.locationHistoryRepository.create({
+        asset: fetchAsset,
+        location: newLocation,
+      });
+      await this.locationHistoryRepository.save(history);
+  
+      fetchAsset.location = newLocation;
+    }
+  
+    // Mise à jour du statut + historique
+    if (updateAssetDto.statusId && fetchAsset.status?.id !== updateAssetDto.statusId) {
+      const newStatus = await this.statusRepository.findOne({
+        where: { id: updateAssetDto.statusId },
+      });
+  
+      if (!newStatus) {
+        throw new BadRequestException(`Status with id ${updateAssetDto.statusId} not found`);
       }
-
-      if (updateAssetDto.statusId && fetchAsset.status?.id !== updateAssetDto.statusId) {
-        const newStatus = await this.statusRepository.findOne({
-          where: { id: updateAssetDto.statusId },
-        });
-    
-        if (!newStatus) {
-          throw new BadRequestException(`Status with id ${updateAssetDto.statusId} not found`);
-        }
-    
-        fetchAsset.status = newStatus;
-    
-        const assetStatus = this.assetStatusRepository.create({
-          asset: fetchAsset,
-          status: newStatus,
-        });
-        await this.assetStatusRepository.save(assetStatus);
-      }
-    
-    // Update Category
+  
+      fetchAsset.status = newStatus;
+  
+      const assetStatus = this.assetStatusRepository.create({
+        asset: fetchAsset,
+        status: newStatus,
+      });
+      await this.assetStatusRepository.save(assetStatus);
+    }
+  
+    // Mise à jour de la catégorie
     if (updateAssetDto.categoryId && fetchAsset.category?.id !== updateAssetDto.categoryId) {
-    const newCategory = await this.categoryRepository.findOne({
-      where: { id: updateAssetDto.categoryId },
-    });
-
-    if (!newCategory) {
-      throw new BadRequestException(`Category with id ${updateAssetDto.categoryId} not found`);
-    }
-
-    fetchAsset.category = newCategory;
-    }
-
-   if (updateAssetDto.supplierId && fetchAsset.supplier?.id !== updateAssetDto.supplierId) {
-    const newSupplier = await this.supplierRepository.findOne({
-      where: { id: updateAssetDto.supplierId },
-    });
+      const newCategory = await this.categoryRepository.findOne({
+        where: { id: updateAssetDto.categoryId },
+      });
   
-    if (!newSupplier) {
-      throw new BadRequestException(`Supplier with id ${updateAssetDto.supplierId} not found`);
+      if (!newCategory) {
+        throw new BadRequestException(`Category with id ${updateAssetDto.categoryId} not found`);
+      }
+  
+      fetchAsset.category = newCategory;
     }
   
-    fetchAsset.supplier = newSupplier;
-  }
-
-  if (updateAssetDto.name) {
-    fetchAsset.name = updateAssetDto.name;
-  }
-
-  return this.assetRepository.save(fetchAsset);
-
+    // Mise à jour du fournisseur
+    if (updateAssetDto.supplierId && fetchAsset.supplier?.id !== updateAssetDto.supplierId) {
+      const newSupplier = await this.supplierRepository.findOne({
+        where: { id: updateAssetDto.supplierId },
+      });
+  
+      if (!newSupplier) {
+        throw new BadRequestException(`Supplier with id ${updateAssetDto.supplierId} not found`);
+      }
+  
+      fetchAsset.supplier = newSupplier;
     }
+  
+    // Mise à jour du nom
+    if (updateAssetDto.name) {
+      fetchAsset.name = updateAssetDto.name;
+    }
+  
+    // 🔽 Mise à jour des fichiers liés (images)
+    if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
+      const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
+  
+      if (files.length !== updateAssetDto.fileIds.length) {
+        throw new BadRequestException('One or more file IDs are invalid.');
+      }
+  
+      // Relier chaque fichier à l'asset et forcer le stockage de assetId
+      for (const file of files) {
+        file.asset = fetchAsset; // Associe l'asset au fichier
+        file.assetId = fetchAsset.id; // Force l'assignation de assetId
+      }
+  
+      // Sauvegarde des fichiers (tous les fichiers mis à jour)
+      await this.fileRepository.save(files);
+    }
+    return this.assetRepository.save(fetchAsset);
+  }
+  
   // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
     const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;

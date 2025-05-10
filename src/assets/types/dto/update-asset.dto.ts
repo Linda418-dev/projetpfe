@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import {  IsOptional, IsString, IsUUID } from "class-validator";
+import {  IsArray, IsOptional, IsString, IsUUID } from "class-validator";
 export class updateAssetDto{
     @ApiProperty()
     @IsString()
@@ -25,6 +25,12 @@ export class updateAssetDto{
     @IsUUID()
     @ApiProperty()
     statusId?: string;
+
+    @ApiProperty({ type: [String], required: false })
+    @IsOptional()
+    @IsArray()
+    @IsUUID("all", { each: true })
+    fileIds?: string[];
 
 
     

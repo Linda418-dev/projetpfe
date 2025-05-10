@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Workbook } from 'exceljs';
-import { Asset } from 'src/assets/Entities/Asset.entity';
+import { Asset } from 'src/assets/Entities/asset.entity';
 
 @Injectable()
 export class ExcelService { 

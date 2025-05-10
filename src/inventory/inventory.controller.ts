@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDto } from './types/dto/create-inventory.dto';
@@ -42,6 +42,11 @@ export class InventoryController {
     return this.inventoryService.updateInventory(id, dto);
   }
 
+
+  @Delete(':id')
+  async deleteInventory(@Param('id', ParseUUIDPipe) id: string) {
+    return this.inventoryService.deleteInventory(id);
+  }
 
 
 }

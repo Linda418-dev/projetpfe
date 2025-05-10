@@ -79,7 +79,16 @@ export class UserService {
        }
 
        Object.assign(user, updateUserDto);
-        return await this.userRepository.save(user);
+        const  savedUser = await this.userRepository.save(user);
+        return {
+          id: savedUser.id,
+          email: savedUser.email,
+          username: savedUser.username,
+          role: savedUser.role,
+          isActive: savedUser.isActive,
+          createdAt: savedUser.createdAt,
+          updatedAt: savedUser.updatedAt,
+        };
       }
 
       // methode poure desactiver or supprimer user

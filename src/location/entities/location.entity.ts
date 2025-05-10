@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Ilocation } from "../types/interfaces/location.interface";
 import { Service } from "src/service/entities/service.entity";
-import { Asset } from "src/assets/Entities/Asset.entity";
+import { Asset } from "src/assets/Entities/asset.entity";
 import { LocationHistory } from "src/location-history/entities/location-history.entity";
 
 @Entity()
