@@ -16,6 +16,5 @@ export class CreateAnomalyDto {
     @IsOptional()
     @IsUUID()
     assetId?: string;
-   
     
 }

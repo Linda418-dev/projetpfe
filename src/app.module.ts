@@ -56,6 +56,8 @@ import { NotificationModule } from './notification/notification.module';
 import { NotificationService } from './notification/notification.service';
 import { NotificationRepository } from './notification/repositories/inventory.repository';
 import { Notification } from './notification/entities/notification.entity';
+import { AnomalyStatusModule } from './anomaly-status/anomaly-status.module';
+import { AnomalyStatus } from './anomaly-status/entities/anomaly-status.entity';
 
 @Module({
   imports: [
@@ -71,7 +73,7 @@ import { Notification } from './notification/entities/notification.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly,Notification], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly,Notification,AnomalyStatus], 
         synchronize: true, 
       }),
     }),
@@ -96,6 +98,7 @@ import { Notification } from './notification/entities/notification.entity';
     AffectationModule,
     AnomalyModule,
     NotificationModule,
+    AnomalyStatusModule,
   
   ],
   controllers: [AppController],

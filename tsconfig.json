@@ -16,10 +16,11 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "types": []
   },
   "include": [
     "src/**/*.ts",
-    "src/express.d.ts"  // Ajoute cette ligne pour inclure le fichier de déclaration
+    "src/express.d.ts"
   ]
 }

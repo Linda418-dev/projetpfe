@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Post,Patch, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from 'src/auth/guards/roles.decorator';
 import { CreateUserDto } from './types/dto/create-user.dto';
@@ -8,6 +8,7 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { ForgotPasswordDto } from './types/dto/Forgot-Password.dto';
 
 @ApiBearerAuth()
 @ApiTags('user Resource')
@@ -62,5 +63,14 @@ export class UserController {
     @Param('playerId') playerId: string, @Req() req,) {
     return this.userService.updatePlayerId(req.user.id, playerId);
   }
+
+  @Post('forgot-password')
+  @ApiBody({ type: ForgotPasswordDto })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.userService.forgotPassword(forgotPasswordDto.email);
+  }
+
+
+  
 
 }

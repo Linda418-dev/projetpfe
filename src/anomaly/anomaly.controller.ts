@@ -10,10 +10,9 @@ export class AnomalyController {
     constructor(private readonly anomalyService: AnomalyService) {}
     @Get()
     getAllanomalies() {
-      return this.anomalyService.getAllanomalies();
+      return this.anomalyService.getAllAnomalies();
     }
 
-    @BypassInventoryLock()
     @Post()
     createAnomaly(@Body() createAnomalyDto: CreateAnomalyDto) {
       return this.anomalyService.createAnomaly(createAnomalyDto);
@@ -25,19 +24,18 @@ export class AnomalyController {
       return this.anomalyService.getAnomalyById(id);
     }
 
-    @BypassInventoryLock()
     @Patch(':id/progress')
-    progressAnomaly(@Param('id') id: string){
+    progressAnomaly(@Param('id') id: string) {
       return this.anomalyService.progressAnomaly(id);
     }
-
-    @BypassInventoryLock()
+     
+ 
     @Patch(':id/accept')
     acceptAnomaly(@Param('id') id: string){
       return this.anomalyService.acceptAnomaly(id);
     }
 
-    @BypassInventoryLock()
+    
     @Patch(':id/refuse')
     refuseAnomaly(@Param('id') id: string){
       return this.anomalyService.refuseAnomaly(id);

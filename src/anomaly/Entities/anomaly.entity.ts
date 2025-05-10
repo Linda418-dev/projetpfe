@@ -1,6 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, OneToOne, JoinColumn } from 'typeorm';
-import { AnomalyStatus } from '../types/enums/anomaly-status.enum';
+import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { File } from 'src/uploads/entities/file.entity';
+import { AnomalyStatus } from 'src/anomaly-status/entities/anomaly-status.entity';
 
 @Entity()
 export class Anomaly {
@@ -10,8 +10,9 @@ export class Anomaly {
   @Column()
   description: string;
 
-  @Column({ type: 'enum', enum: AnomalyStatus })
-  status: AnomalyStatus;
+
+  @OneToMany(() => AnomalyStatus, (anomalyStatus) => anomalyStatus.anomaly, { cascade: true })
+  statusHistory: AnomalyStatus[];
 
   @OneToMany(() => File, (file) => file.anomaly)
   files: File[];

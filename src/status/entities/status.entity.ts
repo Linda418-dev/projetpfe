@@ -10,7 +10,7 @@ export class Status implements Istatus{
   name: string;
 
   @Column()
-  type: 'asset' | 'inventory';
+  type: 'asset' | 'inventory' | 'anomaly';
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
