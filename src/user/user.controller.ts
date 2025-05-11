@@ -16,10 +16,13 @@ import { ForgotPasswordDto } from './types/dto/Forgot-Password.dto';
 export class UserController {
     constructor(private readonly userService : UserService){}
 
-  @Get()
-  async getAllUsers() {
-    return this.userService.getAllUsers(); 
-  }
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    async getAllUsers(@Req() req: any) {
+      const currentUserId = req.user.id;
+      return this.userService.getAllUsers(currentUserId);
+    }
+    
 
   @Get(':id')
   async getUserById(@Param('id') id: string) {
@@ -44,10 +47,18 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deactivateUser(@Param('id') targetUserId: string,@Req() req: any ) {
+  async deleteUser(@Param('id') targetUserId: string,@Req() req: any ) {
   const currentUserId = req.user.id;
-  return this.userService.deactivateUser(targetUserId, currentUserId);
+  return this.userService.deleteUser(targetUserId, currentUserId);
  }
+
+ @Patch(':id/deactivate')
+@UseGuards(JwtAuthGuard)
+async deactivateUser(@Param('id') userId: string, @Req() req: any) {
+  const currentUserId = req.user.id;
+  return this.userService.deactivateUser(userId, currentUserId);
+}
+
  
   @BypassInventoryLock()
   @Patch(':id/activate')

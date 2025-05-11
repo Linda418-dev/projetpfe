@@ -5,6 +5,7 @@ import { BcryptService } from 'src/auth/common/bcrypt.service';
 import { CreateUserDto } from './types/dto/create-user.dto';
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import * as nodemailer from 'nodemailer';
+import { Not } from 'typeorm';
 @Injectable()
 export class UserService {
   constructor(
@@ -14,10 +15,15 @@ export class UserService {
   ) {}
 
     // methode get All Users
-      async getAllUsers() {
-        return this.userRepository.find(); 
-      }
-    // methode get user by id 
+    async getAllUsers(currentUserId: string) {
+      return this.userRepository.find({
+        where: {
+          id: Not(currentUserId),
+        },
+      });
+    }
+    
+    // méthode get user by id 
       async getUserById(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
         if (!user) {
@@ -26,6 +32,7 @@ export class UserService {
         return user;
       }
 
+      // méthode create user 
       async createUser(createUserDto: CreateUserDto) {
         const { email, username, password, roleId } = createUserDto;
       
@@ -91,10 +98,10 @@ export class UserService {
         };
       }
 
-      // methode poure desactiver or supprimer user
-      async deactivateUser(targetUserId: string, currentUserId: string) {
+      // méthode poure  supprimer user  s'il n'a pas d’affectations. 
+      async deleteUser(targetUserId: string, currentUserId: string) {
         if (targetUserId === currentUserId) {
-          throw new ConflictException('You cannot deactivate or delete your own account');
+          throw new ConflictException('You cannot delete your own account');
         }
       
         const user = await this.userRepository.findOne({
@@ -106,17 +113,39 @@ export class UserService {
           throw new NotFoundException('User not found');
         }
       
-        if (user.affectations && user.affectations.length > 0) {
-          user.isActive = false;
-          await this.userRepository.save(user);
-          return { message: 'User has been deactivated because they have existing affectations.' };
-        } else {
-          await this.userRepository.remove(user);
-          return { message: 'User has been deleted successfully because they had no affectations.' };
+        if (user.affectations?.length > 0) {
+          throw new ConflictException('User has affectations and cannot be deleted. Please deactivate them instead');
         }
+      
+        await this.userRepository.remove(user);
+        return { message: 'User deleted successfully' };
+      }
+
+      // méthode pour désactiver compte d'un user 
+      async deactivateUser(userId: string, currentUserId: string) {
+        if (userId === currentUserId) {
+          throw new ConflictException('You cannot deactivate your own account');
+        }
+      
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+      
+        if (!user) {
+          throw new NotFoundException('User not found.');
+        }
+      
+        if (!user.isActive) {
+          return { message: 'User is already deactivated.' };
+        }
+      
+        user.isActive = false;
+        await this.userRepository.save(user);
+      
+        return { message: 'User has been deactivated successfully.' };
       }
       
-      // methode pour activer compte d'un user 
+      
+      
+      // méthode pour activer compte d'un user 
       async activateUser(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
       
