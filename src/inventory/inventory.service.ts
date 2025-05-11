@@ -559,81 +559,85 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
 }
 
 
-@Cron('*/1 * * * *') 
-  async handlePlannedInventoriesToLaunch() {
-    const startOfDay = this.getTodayStart();
-    const endOfDay = new Date(startOfDay);
-    endOfDay.setHours(23, 59, 59, 999);
+@Cron('*/1 * * * *')
+async handlePlannedInventoriesToLaunch() {
+  const startOfDay = this.getTodayStart();
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setHours(23, 59, 59, 999);
 
-    // Récupère tous les inventaires prévus pour aujourd'hui
-    const plannedInventories = await this.inventoryRepository.find({
-      where: {
-        startDate: Between(startOfDay, endOfDay),
-      },
-      relations: ['inventoryStatus', 'inventoryStatus.status'],
-    });
+  const plannedInventories = await this.inventoryRepository.find({
+    where: {
+      startDate: Between(startOfDay, endOfDay),
+    },
+    relations: ['inventoryStatus', 'inventoryStatus.status'],
+  });
 
-    if (plannedInventories.length === 0) return;
+  if (plannedInventories.length === 0) return;
 
-    // Précharger le statut "In Progress"
-    const inProgressStatus = await this.statusRepository.findOne({
-      where: { name: InventoryStatusEnum.IN_PROGRESS, type: 'inventory' },
-    });
+  const inProgressStatus = await this.statusRepository.findOne({
+    where: { name: InventoryStatusEnum.IN_PROGRESS, type: 'inventory' },
+  });
 
-    if (!inProgressStatus) {
-      console.warn('In Progress status not found.');
-      return;
+  if (!inProgressStatus) {
+    console.warn('In Progress status not found.');
+    return;
+  }
+
+  let launchedCount = 0;
+
+  for (const inventory of plannedInventories) {
+    const sortedStatuses = inventory.inventoryStatus.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    const lastStatus = sortedStatuses[0];
+
+    if (!lastStatus || lastStatus.status.name !== InventoryStatusEnum.Planned) {
+      continue;
     }
 
-    let launchedCount = 0;
+    //  Ajouter le statut "IN_PROGRESS"
+    const newStatus = this.inventoryStatusRepository.create({
+      inventory,
+      status: inProgressStatus,
+    });
 
-    for (const inventory of plannedInventories) {
-      // Récupérer le dernier statut de l’inventaire
-      const lastStatus = await this.inventoryStatusRepository.findOne({
-        where: { inventory: { id: inventory.id } },
-        order: { createdAt: 'DESC' },
-        relations: ['status'],
-      });
-
-      // Vérifier que le dernier statut est "Planned"
-      if (!lastStatus || lastStatus.status.name !== InventoryStatusEnum.Planned) {
-        continue;
-      }
-
-      // Vérifie s’il y a déjà un statut "In Progress" enregistré pour cet inventaire
-      const existingInProgress = await this.inventoryStatusRepository
-        .createQueryBuilder('inventoryStatus')
-        .leftJoinAndSelect('inventoryStatus.status', 'status')
-        .where('inventoryStatus.inventoryId = :inventoryId', { inventoryId: inventory.id })
-        .andWhere('status.name = :statusName', { statusName: InventoryStatusEnum.IN_PROGRESS })
-        .getOne();
-
-      if (existingInProgress) {
-        continue; // déjà lancé
-      }
-
-      // Ajouter le nouveau statut "In Progress"
-      const newInventoryStatus = this.inventoryStatusRepository.create({
-        inventory,
-        status: inProgressStatus,
-      });
-
-      await this.inventoryStatusRepository.save(newInventoryStatus);
+    try {
+      await this.inventoryStatusRepository.save(newStatus);
       launchedCount++;
 
-      // Notification aux opérateurs
       const playerIds = await this.getOperatorsPlayerIdsForInventory(inventory.id);
       await this.notificationService.notifyOperators(
         playerIds,
         'Inventory Launched',
         `The inventory "${inventory.name}" has started.`,
       );
-    }
 
-    console.log(`${launchedCount} inventory(ies) have been launched.`);
+      // 🔁 Nettoyage des doublons après insertion
+      const allInProgressStatuses = await this.inventoryStatusRepository.find({
+        where: {
+          inventory: { id: inventory.id },
+          status: { id: inProgressStatus.id },
+        },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (allInProgressStatuses.length > 1) {
+        const [latest, ...duplicates] = allInProgressStatuses;
+        const idsToDelete = duplicates.map((d) => d.id);
+        await this.inventoryStatusRepository.delete(idsToDelete);
+      }
+
+    } catch (error) {
+      console.warn(`Failed to save In Progress status for inventory ${inventory.id}:`, error.message);
+    }
   }
 
-  async deleteInventory(id: string): Promise<{ message: string }> {
+  console.log(`${launchedCount} inventory(ies) have been launched.`);
+}
+
+
+  async deleteInventory(id: string) {
     const result = await this.inventoryRepository.delete(id);
   
     if (result.affected === 0) {

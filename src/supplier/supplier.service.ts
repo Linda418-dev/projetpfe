@@ -41,7 +41,7 @@ export class SupplierService {
       }
     
       if (supplier.assets.length > 0) {
-        throw new BadRequestException('Cannot delete supplier: it is associated with assets');
+        throw new BadRequestException('Cannot delete supplier, it is associated with assets');
       }
     
       await this.supplierRepository.remove(supplier);

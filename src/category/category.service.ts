@@ -63,7 +63,7 @@ export class CategoryService {
       }
     
       if (category.assets.length > 0) {
-        throw new BadRequestException('Cannot delete category: it is associated with assets');
+        throw new BadRequestException('Cannot delete category, it is associated with assets');
       }
     
       await this.categoryRepository.remove(category);

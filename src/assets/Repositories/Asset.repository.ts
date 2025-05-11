@@ -63,5 +63,8 @@ export class AssetRepository extends Repository<Asset> {
       .orderBy('astatus.createdAt', 'ASC')
       .getRawMany();
   }
+
+
+  
  
 }
