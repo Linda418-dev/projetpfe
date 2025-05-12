@@ -15,7 +15,9 @@ export class CreateSupplierDto {
     @ApiProperty()
     @IsString()
     @IsNotEmpty()
-    @Matches(/^\+216\d{8}$/, { message: "Phone number must start with +216 and have 8 digits" })
+    @Matches(/^\+\d{6,15}$/, {
+      message: 'Phone number must start with "+" followed by 6 to 15 digits',
+    })
     phone: string;
     
 }

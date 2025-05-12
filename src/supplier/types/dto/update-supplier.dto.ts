@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsOptional, IsString, Matches } from "class-validator";
+import { IsEmail,  IsOptional, IsString, Matches } from "class-validator";
 
 
 export class UpdateSupplierDto {
@@ -16,7 +16,9 @@ export class UpdateSupplierDto {
     @ApiProperty()
     @IsString()
     @IsOptional()
-    @Matches(/^[0-9]{8}$/, { message: "Phone number must be exactly 8 digits" })
+    @Matches(/^\+\d{6,15}$/, {
+      message: 'Phone number must start with "+" followed by 6 to 15 digits',
+    })
     phone: string;
     
 }

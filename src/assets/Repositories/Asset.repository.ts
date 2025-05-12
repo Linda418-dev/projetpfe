@@ -49,6 +49,7 @@ export class AssetRepository extends Repository<Asset> {
       .getRawMany();
   }
   
+  
   async getStatusHistoryByAssetId(assetId: string) {
     return this.dataSource
       .createQueryBuilder()
@@ -63,7 +64,6 @@ export class AssetRepository extends Repository<Asset> {
       .orderBy('astatus.createdAt', 'ASC')
       .getRawMany();
   }
-
 
   
  

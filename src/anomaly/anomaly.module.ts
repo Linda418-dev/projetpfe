@@ -6,9 +6,10 @@ import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { AnomalyStatusRepository } from 'src/anomaly-status/repositories/anomaly-status.repository';
+import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 
 @Module({
-  providers: [AnomalyService,AnomalyRepository,FileRepository,InventoryDetailsRepository,StatusRepository,AnomalyStatusRepository],
+  providers: [AnomalyService,AnomalyRepository,FileRepository,InventoryDetailsRepository,StatusRepository,AnomalyStatusRepository,AssetRepository],
   controllers: [AnomalyController]
 })
 export class AnomalyModule {}

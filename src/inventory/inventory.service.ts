@@ -613,7 +613,7 @@ async handlePlannedInventoriesToLaunch() {
         `The inventory "${inventory.name}" has started.`,
       );
 
-      // 🔁 Nettoyage des doublons après insertion
+      // supperssion des doublons 
       const allInProgressStatuses = await this.inventoryStatusRepository.find({
         where: {
           inventory: { id: inventory.id },

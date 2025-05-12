@@ -6,6 +6,7 @@ import { File } from 'src/uploads/entities/file.entity';
 import { AnomalyStatusEnum } from 'src/status/types/enums/anomaly-status.enum';
 import { AnomalyStatusRepository } from 'src/anomaly-status/repositories/anomaly-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
+import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 
 
 @Injectable()
@@ -14,7 +15,8 @@ export class AnomalyService {
         private readonly anomalyRepository : AnomalyRepository,
         private readonly fileRepository : FileRepository,
         private readonly statusRepository : StatusRepository,
-        private readonly anomalyStatusRepository : AnomalyStatusRepository
+        private readonly anomalyStatusRepository : AnomalyStatusRepository,
+        private readonly assetRepository : AssetRepository
     ){}
     async getAllAnomalies() {
       const anomalies = await this.anomalyRepository.find({
@@ -64,9 +66,7 @@ export class AnomalyService {
       if (files.length > 0) {
         for (const file of files) {
           file.anomaly = savedAnomaly;
-          if (assetId) {
-            file.assetId = assetId;
-          }
+         
           await this.fileRepository.save(file);
         }
       }

@@ -17,6 +17,8 @@ export class InventoryStatus implements IinventoryStatus  {
   @JoinColumn({ name: 'statusId' })
   status: Status;
 
+  
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  
 

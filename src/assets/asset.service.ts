@@ -144,27 +144,20 @@ export class AssetsService {
       if (updateAssetDto.name) {
         fetchAsset.name = updateAssetDto.name;
       }
-    
-       // Mise à jour des fichiers liés (images)
-  if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
-    // Solution garantie pour mettre à jour assetId
-    await this.fileRepository
-      .createQueryBuilder()
-      .update(File)
-      .set({ 
-        asset: fetchAsset,
-        assetId: fetchAsset.id 
-      })
-      .whereInIds(updateAssetDto.fileIds)
-      .execute();
 
-    // Rafraîchir la relation côté Asset
-    fetchAsset.files = await this.fileRepository.find({
-      where: { assetId: fetchAsset.id }
-    });
+      //  Associer de nouveaux fichiers s
+     if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
+     const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
+     if (files.length !== updateAssetDto.fileIds.length) {
+      throw new NotFoundException('One or more fileIds are invalid');
+    }
+    for (const file of files) {
+    file.asset = fetchAsset;
+    console.log(fetchAsset);
+    await this.fileRepository.save(file); 
   }
-      
-      // Sauvegarder l'asset mis à jour
+}
+    
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
     }

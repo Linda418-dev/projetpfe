@@ -7,6 +7,7 @@ import { AssetStatusRepository } from 'src/asset-status/repositories/asset-statu
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { InventoryDetails } from './entities/inventory-details.entity';
 import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
+import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 
 
 @Injectable()
@@ -17,7 +18,8 @@ export class InventoryDetailsService {
     private readonly inventoryDetailsRepository : InventoryDetailsRepository,
     private readonly assetStatusRepository : AssetStatusRepository,
     private readonly locationHistoryRepository : LocationHistoryRepository,
-    private readonly anomalyRepository : AnomalyRepository
+    private readonly anomalyRepository : AnomalyRepository,
+    private readonly assetRepository : AssetRepository,
 
   ) {}
   async getAllInventoryDetails() {
@@ -34,58 +36,81 @@ export class InventoryDetailsService {
   
   
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
-    // verifier le id de l'affectation existe ou non 
+    // Vérifier si l'affectation existe
     const affectation = await this.affectationRepository.findOne({
       where: { id: dto.affectationId },
     });
-    
     if (!affectation) {
       throw new NotFoundException('Affectation not found.');
     }
   
+    // Vérifier que l'Asset existe
+    const asset = await this.assetRepository.findOne({
+      where: { id: dto.assetId },
+    });
+    if (!asset) {
+      throw new NotFoundException('Asset not found.');
+    }
+  
+    // Récupérer les fichiers si fournis
     const files = dto.fileIds?.length
       ? await this.fileRepository.findByIds(dto.fileIds)
       : [];
   
+    // Récupérer l’anomalie si fournie
+    const anomaly = dto.anomalyId
+      ? await this.anomalyRepository.findOne({ where: { id: dto.anomalyId } })
+      : null;
+  
+    // Associer l’asset (et l’anomalie) à chaque fichier
     for (const file of files) {
-      file.assetId = dto.assetId;
+      file.asset = asset;
+      if (anomaly) {
+        file.anomaly = anomaly;
+      }
     }
     await this.fileRepository.save(files);
   
-    // récupérer le dernier AssetStatus
+    // Récupérer le dernier AssetStatus 
     const assetStatus = await this.assetStatusRepository.findOne({
-    where: { asset: { id: dto.assetId } },
-    order: { createdAt: 'DESC' },
+      where: { asset: { id: dto.assetId } },
+      order: { createdAt: 'DESC' },
     });
     if (!assetStatus) {
       throw new NotFoundException('No AssetStatus found for this asset.');
     }
-
-    // récupérer la dernière LocationHistory
+  
+    // Récupérer la dernière LocationHistory
     const locationHistory = await this.locationHistoryRepository.findOne({
-    where: { asset: { id: dto.assetId } },
-    order: { createdAt: 'DESC' },
+      where: { asset: { id: dto.assetId } },
+      order: { createdAt: 'DESC' },
     });
     if (!locationHistory) {
       throw new NotFoundException('No LocationHistory found for this asset.');
     }
-    
-    const anomaly = dto.anomalyId
-    ? await this.anomalyRepository.findOne({ where: { id: dto.anomalyId } }): null;
-
+  
+    // Créer le détail d’inventaire
     const inventoryDetail = this.inventoryDetailsRepository.create({
       affectation,
       assetStatus,
       locationHistory,
       files,
       scannedAt: new Date(),
-      anomaly,
+      anomaly, // relation directe
     } as Partial<InventoryDetails>);
   
+    // Sauvegarder le détail d’inventaire
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
+  
+    // Ajouter la relation inverse dans l’Anomaly 
+    if (anomaly) {
+      anomaly.inventoryDetails = savedInventoryDetail;
+      await this.anomalyRepository.save(anomaly);
+    }
+  
     return savedInventoryDetail;
   }
-
+  
   async getInventorydetailsById(id: string) {
     const detail = await this.inventoryDetailsRepository.findOne({
       where: { id },
