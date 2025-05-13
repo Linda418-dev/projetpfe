@@ -15,27 +15,29 @@ export class AnomalyService {
         private readonly statusRepository : StatusRepository,
         private readonly anomalyStatusRepository : AnomalyStatusRepository,
     ){}
-   async getAllAnomalies() {
-    const anomalies = await this.anomalyRepository.find({
-    relations: ['files'],
-  });
-  const result: any[] = [];
-  for (const anomaly of anomalies) {
-  const lastStatus = await this.anomalyStatusRepository.findOne({
-    where: { anomaly: { id: anomaly.id } },
-    relations: ['status'],
-    order: { createdAt: 'DESC' },
+  async getAllAnomalies() {
+  const anomalies = await this.anomalyRepository.find({
+    relations: ['files', 'statusHistory', 'statusHistory.status'],
+    order: {
+      statusHistory: {
+        createdAt: 'DESC',
+      },
+    },
   });
 
-  result.push({
-    ...anomaly,
-    latestStatus: lastStatus?.status,
-    assetId: anomaly.assetId,
+  const result = anomalies.map(anomaly => {
+    const latestStatus = anomaly.statusHistory?.[0]?.status ?? null;
+
+    return {
+      ...anomaly,
+      latestStatus,
+      statusHistory: anomaly.statusHistory,
+    };
   });
-}
 
   return result;
 }
+
    
     async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
       const { description, fileIds, assetId } = createAnomalyDto;
@@ -83,28 +85,29 @@ export class AnomalyService {
     
   
     async getAnomalyById(id: string) {
-      const anomaly = await this.anomalyRepository.findOne({
-        where: { id },
-        relations: ['files'],
-      });
-    
-      if (!anomaly) {
-        throw new NotFoundException(`Anomaly with ID ${id} not found`);
-      }
-    
-      // récupérer le dernier statut selon le createdAt
-      const lastStatus = await this.anomalyStatusRepository.findOne({
-        where: { anomaly: { id } },
-        relations: ['status'],
-        order: { createdAt: 'DESC' },
-      });
-    
-      return {
-        ...anomaly,
-        latestStatus: lastStatus?.status,
-        assetId: anomaly.assetId,  
-      };
-    }
+  const anomaly = await this.anomalyRepository.findOne({
+    where: { id },
+    relations: ['files', 'statusHistory', 'statusHistory.status'],
+    order: {
+      statusHistory: {
+        createdAt: 'DESC',
+      },
+    },
+  });
+
+  if (!anomaly) {
+    throw new NotFoundException(`Anomaly with ID ${id} not found`);
+  }
+
+  const latestStatus = anomaly.statusHistory?.[0]?.status ?? null;
+
+  return {
+    ...anomaly,
+    latestStatus,
+    statusHistory: anomaly.statusHistory,
+  };
+}
+
     
 
   async progressAnomaly(anomalyId: string) {

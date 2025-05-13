@@ -39,10 +39,9 @@ export class AssetsService {
       };
     }
     
-  async getAllAssets(): Promise<Asset[]> {
+  async getAllAssets() {
     return this.assetRepository.findAllExcludingInRepair();
   }
-
 
     async getAssetById(id: string) {
         const fetchAsset = await this.assetRepository.findOneBy({ id });
@@ -145,7 +144,7 @@ export class AssetsService {
         fetchAsset.name = updateAssetDto.name;
       }
 
-      //  Associer de nouveaux fichiers sans supprimer les anciens 
+      //  Associer de nouveaux fichiers 
       if (updateAssetDto.fileIds?.length) {
         const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
         if (files.length !== updateAssetDto.fileIds.length) {
