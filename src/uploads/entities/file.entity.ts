@@ -20,24 +20,19 @@ export class File implements IFile {
   typeFile: string;
 
   @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true,onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'assetId' })
-  asset: Asset ;
+  asset: Asset;
  
-
   @ManyToOne(() => InventoryDetails, (inventoryDetails) => inventoryDetails.files, {nullable: true, onDelete: 'CASCADE',})
-  @JoinColumn({ name: 'inventoryDetailsId' })
   inventoryDetails: InventoryDetails;
 
-
   @ManyToOne(() => Anomaly, (anomaly) => anomaly.files, { nullable: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'anomalyId' })
   anomaly: Anomaly;
 
-  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   
   @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
+  
 }
 

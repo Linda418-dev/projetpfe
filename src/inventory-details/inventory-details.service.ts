@@ -18,7 +18,6 @@ export class InventoryDetailsService {
     private readonly inventoryDetailsRepository : InventoryDetailsRepository,
     private readonly assetStatusRepository : AssetStatusRepository,
     private readonly locationHistoryRepository : LocationHistoryRepository,
-    private readonly anomalyRepository : AnomalyRepository,
     private readonly assetRepository : AssetRepository,
 
   ) {}
@@ -57,17 +56,9 @@ export class InventoryDetailsService {
       ? await this.fileRepository.findByIds(dto.fileIds)
       : [];
   
-    // Récupérer l’anomalie si fournie
-    const anomaly = dto.anomalyId
-      ? await this.anomalyRepository.findOne({ where: { id: dto.anomalyId } })
-      : null;
-  
-    // Associer l’asset (et l’anomalie) à chaque fichier
+    // Associer l’asset  à chaque fichier
     for (const file of files) {
       file.asset = asset;
-      if (anomaly) {
-        file.anomaly = anomaly;
-      }
     }
     await this.fileRepository.save(files);
   
@@ -96,17 +87,11 @@ export class InventoryDetailsService {
       locationHistory,
       files,
       scannedAt: new Date(),
-      anomaly, // relation directe
+      
     } as Partial<InventoryDetails>);
   
     // Sauvegarder le détail d’inventaire
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
-  
-    // Ajouter la relation inverse dans l’Anomaly 
-    if (anomaly) {
-      anomaly.inventoryDetails = savedInventoryDetail;
-      await this.anomalyRepository.save(anomaly);
-    }
   
     return savedInventoryDetail;
   }

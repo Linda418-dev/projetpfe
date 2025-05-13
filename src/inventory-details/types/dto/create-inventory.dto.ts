@@ -28,9 +28,5 @@ export class CreateInventoryDetailsDto {
   @IsOptional()
   fileIds?: string[];
 
-  @ApiProperty()
-  @IsUUID()
-  @IsOptional()
-  anomalyId?: string;
 
 }

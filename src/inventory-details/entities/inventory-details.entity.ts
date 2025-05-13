@@ -32,9 +32,6 @@ export class  InventoryDetails implements IInventoryDetails{
   })
   files: File[];
 
-  @ManyToOne(() => Anomaly, { nullable: true, eager: true, onDelete: 'SET NULL' })
-  anomaly?: Anomaly;
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

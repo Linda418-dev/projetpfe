@@ -3,10 +3,8 @@ import { AnomalyRepository } from './Repositories/anomaly.repository';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { File } from 'src/uploads/entities/file.entity';
-import { AnomalyStatusEnum } from 'src/status/types/enums/anomaly-status.enum';
 import { AnomalyStatusRepository } from 'src/anomaly-status/repositories/anomaly-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
-import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 
 
 @Injectable()
@@ -16,31 +14,33 @@ export class AnomalyService {
         private readonly fileRepository : FileRepository,
         private readonly statusRepository : StatusRepository,
         private readonly anomalyStatusRepository : AnomalyStatusRepository,
-        private readonly assetRepository : AssetRepository
     ){}
-    async getAllAnomalies() {
-      const anomalies = await this.anomalyRepository.find({
-        relations: ['files'],
-      });
-    
-      for (const anomaly of anomalies) {
-        const lastStatus = await this.anomalyStatusRepository.findOne({
-          where: { anomaly: { id: anomaly.id } },
-          relations: ['status'],
-          order: { createdAt: 'DESC' },
-        });
-    
-        (anomaly as any).latestStatus = lastStatus?.status;
-      }
-    
-      return anomalies;
-    }
-    
-    
+   async getAllAnomalies() {
+    const anomalies = await this.anomalyRepository.find({
+    relations: ['files'],
+  });
+  const result: any[] = [];
+  for (const anomaly of anomalies) {
+  const lastStatus = await this.anomalyStatusRepository.findOne({
+    where: { anomaly: { id: anomaly.id } },
+    relations: ['status'],
+    order: { createdAt: 'DESC' },
+  });
+
+  result.push({
+    ...anomaly,
+    latestStatus: lastStatus?.status,
+    assetId: anomaly.assetId,
+  });
+}
+
+  return result;
+}
+   
     async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
       const { description, fileIds, assetId } = createAnomalyDto;
     
-      // Étape 1 : Vérifier que le statut 'pending' existe AVANT toute insertion
+      //  Vérifier que le statut 'pending' existe 
       const pendingStatus = await this.statusRepository.findOne({
         where: { name: 'pending', type: 'anomaly' },
       });
@@ -49,7 +49,7 @@ export class AnomalyService {
         throw new NotFoundException("Default 'pending' status not found for anomaly");
       }
     
-      // Étape 2 : Charger les fichiers
+      // Charger les fichiers envoyer 
       let files: File[] = [];
       if (fileIds && fileIds.length > 0) {
         files = await this.fileRepository.findByIds(fileIds);
@@ -58,11 +58,11 @@ export class AnomalyService {
         }
       }
     
-      // Étape 3 : Créer l’anomalie
-      const anomaly = this.anomalyRepository.create({ description });
+      // Créer l’anomalie
+      const anomaly = this.anomalyRepository.create({ description , assetId });
       const savedAnomaly = await this.anomalyRepository.save(anomaly);
     
-      // Étape 4 : Associer les fichiers
+      // Associer les images de l’anomalie
       if (files.length > 0) {
         for (const file of files) {
           file.anomaly = savedAnomaly;
@@ -71,7 +71,7 @@ export class AnomalyService {
         }
       }
     
-      // Étape 5 : Créer l’entrée dans AnomalyStatus
+      // Créer le status par defaut 'pending' dans AnomalyStatus
       const anomalyStatus = this.anomalyStatusRepository.create({
         anomaly: savedAnomaly,
         status: pendingStatus,
@@ -101,7 +101,8 @@ export class AnomalyService {
     
       return {
         ...anomaly,
-        latestStatus: lastStatus?.status, 
+        latestStatus: lastStatus?.status,
+        assetId: anomaly.assetId,  
       };
     }
     

@@ -11,18 +11,14 @@ export class Anomaly {
   @Column()
   description: string;
 
+  @Column({ nullable: true })
+  assetId?: string;
 
   @OneToMany(() => AnomalyStatus, (anomalyStatus) => anomalyStatus.anomaly, { cascade: true })
   statusHistory: AnomalyStatus[];
 
   @OneToMany(() => File, (file) => file.anomaly)
   files: File[];
-
-
-  @ManyToOne(() => InventoryDetails, (details) => details.anomaly, {nullable: true,onDelete: 'SET NULL',eager: false,})
-  @JoinColumn()
-  inventoryDetails: InventoryDetails;
-  
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

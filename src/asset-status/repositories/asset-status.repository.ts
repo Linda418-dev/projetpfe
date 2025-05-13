@@ -8,4 +8,6 @@ export class AssetStatusRepository extends Repository<AssetStatus> {
   constructor(private readonly dataSource: DataSource) {
     super(AssetStatus, dataSource.createEntityManager());
   }
+
+  
 }

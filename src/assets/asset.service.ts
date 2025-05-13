@@ -39,9 +39,10 @@ export class AssetsService {
       };
     }
     
-    async getAllAssets() {
-      return this.assetRepository.find();
-    }
+  async getAllAssets(): Promise<Asset[]> {
+    return this.assetRepository.findAllExcludingInRepair();
+  }
+
 
     async getAssetById(id: string) {
         const fetchAsset = await this.assetRepository.findOneBy({ id });
@@ -68,7 +69,6 @@ export class AssetsService {
       await this.assetRepository.remove(asset);
       return { message: 'Asset deleted successfully' };
     }
-    
     
     async updateAsset(id: string, updateAssetDto: updateAssetDto) {
       const fetchAsset = await this.getAssetById(id);
@@ -145,19 +145,23 @@ export class AssetsService {
         fetchAsset.name = updateAssetDto.name;
       }
 
-      //  Associer de nouveaux fichiers s
-     if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
-     const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
-     if (files.length !== updateAssetDto.fileIds.length) {
-      throw new NotFoundException('One or more fileIds are invalid');
-    }
-    for (const file of files) {
-    file.asset = fetchAsset;
-    console.log(fetchAsset);
-    await this.fileRepository.save(file); 
-  }
-}
-    
+      //  Associer de nouveaux fichiers sans supprimer les anciens 
+      if (updateAssetDto.fileIds?.length) {
+        const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
+        if (files.length !== updateAssetDto.fileIds.length) {
+          throw new NotFoundException('One or more fileIds are invalid');
+        }
+      
+        const fetchAsset = await this.assetRepository.findOneOrFail({ where: { id } });
+      
+        for (const file of files) {
+          file.asset = fetchAsset ;
+        }
+      
+        await this.fileRepository.save(files);
+      }
+      
+      
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
     }
