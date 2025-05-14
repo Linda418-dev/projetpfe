@@ -40,7 +40,7 @@ export class AssetsService {
     }
     
   async getAllAssets() {
-    return this.assetRepository.findAllExcludingInRepair();
+    return this.assetRepository.findAllAssetsNotInRepair();
   }
 
     async getAssetById(id: string) {

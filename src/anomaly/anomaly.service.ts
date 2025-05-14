@@ -108,8 +108,6 @@ export class AnomalyService {
   };
 }
 
-    
-
   async progressAnomaly(anomalyId: string) {
     // vérifier si l'anomalie existe
     const anomaly = await this.anomalyRepository.findOne({ where: { id: anomalyId } });

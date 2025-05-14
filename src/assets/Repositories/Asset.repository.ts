@@ -65,7 +65,7 @@ export class AssetRepository extends Repository<Asset> {
       .getRawMany();
   }
 
-   async findAllExcludingInRepair(): Promise<Asset[]> {
+   async findAllAssetsNotInRepair() {
     return this.createQueryBuilder('asset')
       .leftJoinAndSelect('asset.status', 'status')
       .leftJoinAndSelect('asset.category', 'category')

@@ -43,10 +43,7 @@ export class InventoryController {
   }
 
 
-  @Delete(':id')
-  async deleteInventory(@Param('id', ParseUUIDPipe) id: string) {
-    return this.inventoryService.deleteInventory(id);
-  }
+
 
 
 }

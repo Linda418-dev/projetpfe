@@ -101,6 +101,17 @@ export class InventoryRepository extends Repository<Inventory> {
       })
       .getOne();
   }
+
+  async findOverlappingInventoryexcludeId(siteId: string, startDate: Date, endDate: Date, excludeId: string) {
+    return this.createQueryBuilder('inventory')
+      .where('inventory.siteId = :siteId', { siteId })
+      .andWhere('inventory.id != :excludeId', { excludeId })
+      .andWhere(
+        ':startDate <= inventory.endDate AND :endDate >= inventory.startDate',
+        { startDate, endDate },
+      )
+      .getOne();
+  }
   
  
 }

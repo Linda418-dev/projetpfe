@@ -372,15 +372,13 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   const startDateToCheck = dto.startDate ? new Date(dto.startDate) : inventory.startDate;
   const endDateToCheck = dto.endDate ? new Date(dto.endDate) : inventory.endDate;
 
-  const overlappingInventory = await this.inventoryRepository
-    .createQueryBuilder('inventory')
-    .where('inventory.siteId = :siteId', { siteId: inventory.site.id })
-    .andWhere('inventory.id != :id', { id }) 
-    .andWhere(
-      `(:startDate <= inventory.endDate AND :endDate >= inventory.startDate)`,
-      { startDate: startDateToCheck, endDate: endDateToCheck },
-    )
-    .getOne();
+const overlappingInventory = await this.inventoryRepository.findOverlappingInventoryexcludeId(
+  inventory.site.id,
+  startDateToCheck,
+  endDateToCheck,
+  inventory.id, 
+);
+
 
   if (overlappingInventory) {
     throw new BadRequestException(
@@ -424,42 +422,58 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   const savedInventory = await this.inventoryRepository.save(inventory);
 
   // Assignation opérateur
-  if (dto.operatorId) {
-    if (lastStatusName !== InventoryStatusEnum.IN_PROGRESS) {
-      throw new BadRequestException('Operator can only be assigned when inventory is "In Progress"');
-    }
-
-    const newOperator = await this.userRepository.findOne({
-      where: { id: dto.operatorId },
-      relations: ['role'],
-    });
-
-    if (!newOperator) {
-      throw new BadRequestException(`Operator with ID ${dto.operatorId} not found`);
-    }
-
-    if (newOperator.role.role !== UserRoleEnum.OPERATOR) {
-      throw new BadRequestException('Only users with the "operator" role can be assigned to an inventory');
-    }
-
-    const existingAffectation = await this.affectationRepository.findOne({
-      where: {
-        inventory: { id },
-        operator: { id: dto.operatorId },
-      },
-    });
-
-    if (existingAffectation) {
-      throw new BadRequestException('This operator is already assigned to the inventory');
-    }
-
-    const newAffectation = this.affectationRepository.create({
-      inventory,
-      operator: newOperator,
-    });
-
-    await this.affectationRepository.save(newAffectation);
+if (dto.operatorId) {
+  // Interdire  si le statut est "Completed" ou "Expired"
+  if (
+    lastStatusName === InventoryStatusEnum.COMPLETED ||
+    lastStatusName === InventoryStatusEnum.EXPIRED
+  ) {
+    throw new BadRequestException(
+      'Operator cannot be assigned when inventory is "Completed" or "Expired"',
+    );
   }
+
+  // Autorisé  pour "Planned" ou "In Progress"
+  if (
+    lastStatusName !== InventoryStatusEnum.Planned &&
+    lastStatusName !== InventoryStatusEnum.IN_PROGRESS
+  ) {
+    throw new BadRequestException(
+      'Operator can only be assigned when inventory is "Planned" or "In Progress"',
+    );
+  }
+
+  const newOperator = await this.userRepository.findOne({
+    where: { id: dto.operatorId },
+    relations: ['role'],
+  });
+
+  if (!newOperator) {
+    throw new BadRequestException(`Operator with ID ${dto.operatorId} not found`);
+  }
+
+  if (newOperator.role.role !== UserRoleEnum.OPERATOR) {
+    throw new BadRequestException('Only users with the "operator" role can be assigned to an inventory');
+  }
+
+  const existingAffectation = await this.affectationRepository.findOne({
+    where: {
+      inventory: { id },
+      operator: { id: dto.operatorId },
+    },
+  });
+
+  if (existingAffectation) {
+    throw new BadRequestException('This operator is already assigned to the inventory');
+  }
+
+  const newAffectation = this.affectationRepository.create({
+    inventory,
+    operator: newOperator,
+  });
+
+  await this.affectationRepository.save(newAffectation);
+}
 
   const updatedInventory = await this.inventoryRepository.findOne({
     where: { id: savedInventory.id },
@@ -596,7 +610,6 @@ async handlePlannedInventoriesToLaunch() {
       continue;
     }
 
-    //  Ajouter le statut "IN_PROGRESS"
     const newStatus = this.inventoryStatusRepository.create({
       inventory,
       status: inProgressStatus,
@@ -637,15 +650,7 @@ async handlePlannedInventoriesToLaunch() {
 }
 
 
-  async deleteInventory(id: string) {
-    const result = await this.inventoryRepository.delete(id);
-  
-    if (result.affected === 0) {
-      throw new NotFoundException('Inventory not found');
-    }
-  
-    return { message: 'Inventory deleted successfully' };
-  }
+
   
 
 }
