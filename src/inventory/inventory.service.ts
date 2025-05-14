@@ -156,8 +156,19 @@ export class InventoryService {
     );
     await this.affectationRepository.save(affectations);
 
-    return savedInventory;
-  }
+    // Récupère les playerIds des opérateurs affectés
+    const playerIds = operators
+  .map((op) => op.playerId)
+  .filter((pid) => !!pid); 
+  const start = new Date(savedInventory.startDate);
+  const end = new Date(savedInventory.endDate);
+  await this.notificationService.notifyOperators(
+  playerIds,
+  'Inventory Assigned',
+  `You have been assigned to the inventory "${savedInventory.name}" from ${start.toDateString()} to ${end.toDateString()}.`
+);
+return savedInventory;
+}
 
    //  methode pour get inventory By Id
   async getInventoryById(id: string) {
