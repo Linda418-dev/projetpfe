@@ -2,6 +2,8 @@ import { Column, CreateDateColumn, Entity,  ManyToOne, OneToMany, PrimaryGenerat
 import { IUser } from "../types/interface/user.interface";
 import { UserRole } from "src/user-role/entities/user-role.entity";
 import { Affectation } from "src/affectation/entities/affectation.entity";
+import { IUserRole } from "src/user-role/types/interface/user-role.interface";
+import { Iaffectation } from "src/affectation/types/interfaces/affectation.interface";
 
 @Entity()
 export class User implements IUser {
@@ -24,10 +26,10 @@ export class User implements IUser {
   isActive: boolean;
 
   @ManyToOne(() => UserRole, (role) => role.users, { eager: true })
-  role: UserRole;
+  role: IUserRole|string;
 
   @OneToMany(() => Affectation, (affectation) => affectation.operator)
-  affectations: Affectation[];
+  affectations: Iaffectation[]|string[];
    
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

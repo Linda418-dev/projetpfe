@@ -14,14 +14,12 @@ export class LocationService {
       // methode pour gett All locations
       async getAllLocations() {
         return this.locationRepository.find({
-              relations: {
-                service: {
-                  department: {
-                    site: true
-                  }
-                }
-              }
-            });
+    relations: [
+      'service',
+      'service.department',
+      'service.department.site',
+    ],
+  });
           }
           
       // methode pour creation location
@@ -41,15 +39,13 @@ export class LocationService {
       // methode get locations by id 
       async getLocationById(id: string) {
             const location = await this.locationRepository.findOne({
-              where: { id },
-              relations: {
-                service: {
-                  department: {
-                    site: true
-                  }
-                }
-              }
-            });
+    where: { id },
+    relations: [
+      'service',
+      'service.department',
+      'service.department.site',
+    ],
+  });
             if (!location) {
               throw new BadRequestException(`Location with id ${id} not found`);
             }

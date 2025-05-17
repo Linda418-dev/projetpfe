@@ -33,12 +33,6 @@ export class AssetController {
    };
   }
 
-    @Get('percentage-good-assets')
-    @ApiOperation({ summary: 'get Assets Status Statistics' })
-    async getAssetsStatusStatistics() {
-    return this.assetService.getAssetsStatusStatistics();
-   }
-
     @Get(':id')
     @ApiOperation({ summary: 'get asset by id' })
     async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {

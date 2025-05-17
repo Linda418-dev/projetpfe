@@ -34,7 +34,6 @@ export class AnomalyController {
     acceptAnomaly(@Param('id') id: string){
       return this.anomalyService.acceptAnomaly(id);
     }
-
     
     @Patch(':id/refuse')
     refuseAnomaly(@Param('id') id: string){

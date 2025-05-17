@@ -15,6 +15,10 @@ import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { AssetStatusEnum } from 'src/status/types/enums/asset-status.enum';
+import { ICategory } from 'src/category/types/interface/category.interface';
+import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
+import { Ilocation } from 'src/location/types/interfaces/location.interface';
+import { Istatus } from 'src/status/types/interfaces/status.interface';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -74,9 +78,12 @@ export class AssetsService {
       if (!fetchAsset) {
         throw new BadRequestException(`Asset with id ${id} not found`);
       }
-    
+    let category = fetchAsset.category as ICategory;
+    let supplier = fetchAsset.supplier as ISupplier;
+    let location = fetchAsset.location as Ilocation;
+    let status = fetchAsset.status as Istatus;
       // Mise à jour de la localisation + historique
-      if (updateAssetDto.locationId && fetchAsset.location.id !== updateAssetDto.locationId) {
+      if (updateAssetDto.locationId && location.id !== updateAssetDto.locationId) {
         const newLocation = await this.locationRepository.findOne({
           where: { id: updateAssetDto.locationId },
         });
@@ -95,7 +102,7 @@ export class AssetsService {
       }
     
       // Mise à jour du statut + historique
-      if (updateAssetDto.statusId && fetchAsset.status?.id !== updateAssetDto.statusId) {
+      if (updateAssetDto.statusId && status.id !== updateAssetDto.statusId) {
         const newStatus = await this.statusRepository.findOne({
           where: { id: updateAssetDto.statusId },
         });
@@ -114,7 +121,7 @@ export class AssetsService {
       }
     
       // Mise à jour de la catégorie
-      if (updateAssetDto.categoryId && fetchAsset.category?.id !== updateAssetDto.categoryId) {
+      if (updateAssetDto.categoryId && category.id !== updateAssetDto.categoryId) {
         const newCategory = await this.categoryRepository.findOne({
           where: { id: updateAssetDto.categoryId },
         });
@@ -125,9 +132,9 @@ export class AssetsService {
     
         fetchAsset.category = newCategory;
       }
-    
+      
       // Mise à jour du fournisseur
-      if (updateAssetDto.supplierId && fetchAsset.supplier?.id !== updateAssetDto.supplierId) {
+      if (updateAssetDto.supplierId && supplier?.id !== updateAssetDto.supplierId) {
         const newSupplier = await this.supplierRepository.findOne({
           where: { id: updateAssetDto.supplierId },
         });
@@ -144,23 +151,18 @@ export class AssetsService {
         fetchAsset.name = updateAssetDto.name;
       }
 
-      //  Associer de nouveaux fichiers 
+      //  Associer  fichiers 
       if (updateAssetDto.fileIds?.length) {
         const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
         if (files.length !== updateAssetDto.fileIds.length) {
           throw new NotFoundException('One or more fileIds are invalid');
         }
-      
-        const fetchAsset = await this.assetRepository.findOneOrFail({ where: { id } });
-      
         for (const file of files) {
           file.asset = fetchAsset ;
         }
       
         await this.fileRepository.save(files);
       }
-      
-      
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
     }
@@ -229,6 +231,7 @@ export class AssetsService {
 
   //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
+    
     // récupérer l'asset actuel avec sa localisation et son statut
     const asset = await this.assetRepository.findOne({
       where: { id: assetId },
@@ -238,6 +241,8 @@ export class AssetsService {
     if (!asset) {
       throw new NotFoundException('Asset not found');
     }
+    let location = asset.location as Ilocation;
+    let status = asset.location as Istatus;
     // récupérer l'historique de localisation
     const locationEvents =  await this.assetRepository.getLocationHistoryByAssetId(assetId);
 
@@ -284,8 +289,8 @@ export class AssetsService {
     }[] = [];
       
     //les valeurs initiales
-    let currentLocation = asset.location.name;
-    let currentStatus = asset.status.name;
+    let currentLocation = location.name;
+    let currentStatus = status.name;
   
     // ajouter les événements à la timeline par ordre
     for (const group of groupedMap.values()) { 
@@ -297,58 +302,16 @@ export class AssetsService {
         asset: asset.name,
         assetId: asset.id,
         location: currentLocation,
-        locationId: asset.location.id, 
+        locationId: location.id, 
         status: currentStatus,
-        statusId: asset.status.id,   
+        statusId: status.id,   
         date: group.date,
       }); 
     }
     return timeline;
   }
 
-  
-  async getAssetsStatusStatistics() {
-    const allAssets = await this.assetRepository.find({
-      relations: ['status'],
-    });
-    const totalAssets = allAssets.length;
-    if (totalAssets === 0) {
-      return {
-        totalAssets: 0,
-        goodAssets: 0,
-        damagedAssets: 0,
-        inRepairAssets: 0,
-        percentageGood: 0,
-        percentageDamaged: 0,
-        percentageInRepair: 0,
-      };
-    }
-    const goodAssetsCount = allAssets.filter(
-      (asset) => asset.status.name === AssetStatusEnum.GOOD,
-    ).length;
 
-    const damagedAssetsCount = allAssets.filter(
-      (asset) => asset.status.name === AssetStatusEnum.DAMAGED,
-    ).length;
-  
-    const inRepairAssetsCount = allAssets.filter(
-      (asset) => asset.status.name === AssetStatusEnum.IN_REPAIR,
-    ).length;
-  
-    const percentageGood = (goodAssetsCount / totalAssets) * 100;
-    const percentageDamaged = (damagedAssetsCount / totalAssets) * 100;
-    const percentageInRepair = (inRepairAssetsCount / totalAssets) * 100;
-  
-    return {
-      totalAssets,
-      goodAssets: goodAssetsCount,
-      damagedAssets: damagedAssetsCount,
-      inRepairAssets: inRepairAssetsCount,
-      percentageGood: Math.round(percentageGood * 100) / 100,
-      percentageDamaged: Math.round(percentageDamaged * 100) / 100,
-      percentageInRepair: Math.round(percentageInRepair * 100) / 100,
-    };
-  }
 
 }
 

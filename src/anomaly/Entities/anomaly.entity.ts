@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column,  CreateDateColumn, UpdateDateColumn, OneToMany} from 'typeorm';
 import { File } from 'src/uploads/entities/file.entity';
 import { AnomalyStatus } from 'src/anomaly-status/entities/anomaly-status.entity';
-import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
+import { IAnomalyStatus } from 'src/anomaly-status/types/interfaces/anomaly-status.interface';
+import { IFile } from 'src/uploads/types/interfaces/file.interface';
 
 @Entity()
 export class Anomaly {
@@ -15,10 +16,10 @@ export class Anomaly {
   assetId?: string;
 
   @OneToMany(() => AnomalyStatus, (anomalyStatus) => anomalyStatus.anomaly, { cascade: true })
-  statusHistory: AnomalyStatus[];
+  statusHistory: AnomalyStatus;
 
   @OneToMany(() => File, (file) => file.anomaly)
-  files: File[];
+  files: IFile[]|string[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

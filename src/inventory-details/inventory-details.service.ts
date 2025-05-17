@@ -8,6 +8,7 @@ import { LocationHistoryRepository } from 'src/location-history/repositories/loc
 import { InventoryDetails } from './entities/inventory-details.entity';
 import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
+import { IAsset } from 'src/assets/types/interface/Asset.interface';
 
 
 @Injectable()
@@ -27,10 +28,14 @@ export class InventoryDetailsService {
       order: { scannedAt: 'DESC' },
     });
   
-    return details.map((detail) => ({
+     return details.map((detail) => {
+    const asset = detail.assetStatus as IAsset;
+
+    return {
       ...detail,
-      assetId: detail.assetStatus?.asset?.id || null,
-    }));
+      assetId: asset.id,
+    };
+  });
   }
   
   
@@ -106,9 +111,10 @@ export class InventoryDetailsService {
       throw new NotFoundException(`InventoryDetail with ID ${id} not found`);
     }
   
+   const asset = detail.assetStatus as IAsset;
     return {
       ...detail,
-      assetId: detail.assetStatus?.asset?.id,
+      assetId : asset.id,
     };
   }
   

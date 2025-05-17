@@ -4,4 +4,5 @@ export interface IUser extends Iidentfiable {
     username?: string;
     email?: string;
     password: string;
+    playerId: string;
 }

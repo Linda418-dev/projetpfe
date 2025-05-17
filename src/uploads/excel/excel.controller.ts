@@ -1,4 +1,4 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Param, Res } from '@nestjs/common';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { ExcelService } from './excel.service';
 import { Response } from 'express';
@@ -25,4 +25,13 @@ export class ExcelController {
         // envoyer le fichier Excel au client 
         res.send(buffer);
       }
+        @Get('inventory/:id')
+  async exportInventory(@Param('id') inventoryId: string, @Res() res: Response) {
+    const buffer = await this.excelService.exportInventoryDetailsByInventoryId(inventoryId);
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="inventory-${inventoryId}.xlsx"`);
+
+    res.end(buffer);
+  }
 }

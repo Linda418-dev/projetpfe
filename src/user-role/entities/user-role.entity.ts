@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 import { IUserRole } from "../types/interface/user-role.interface";
 import { User } from "src/user/entities/user.entity";
 import { UserRoleEnum } from "../types/enums/user-role.enum";
+import { IUser } from "src/user/types/interface/user.interface";
 
 
 @Entity()
@@ -14,7 +15,7 @@ export class UserRole  implements IUserRole {
   role: UserRoleEnum;
 
   @OneToMany(() => User, (user) => user.role)
-  users: User[];
+  users: IUser[]|string[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

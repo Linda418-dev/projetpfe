@@ -14,13 +14,10 @@ export class ServiceService {
     ) {}
     // methode pour get All Services 
     async getAllServices() {
-      return this.serviceRepository.find({
-        relations: {
-            department: {
-              site: true, 
-            },
-          },
-        });
+     return this.serviceRepository.find({
+      relations: ['department', 'department.site'],
+    });
+
       }
       
     // methode pour creation d'un service 
@@ -44,14 +41,10 @@ export class ServiceService {
       
     // methode pour le get service by id
     async getServiceById(id: string) {
-      const service = await this.serviceRepository.findOne({
-          where: { id },
-          relations: {
-            department: {
-              site: true,
-            },
-          },
-        });
+     const service = await this.serviceRepository.findOne({
+    where: { id },
+    relations: ['department', 'department.site'],
+  });
       
         if (!service) {
           throw new BadRequestException(`Service with id ${id} not found`);

@@ -15,6 +15,12 @@ import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.
 import * as moment from 'moment';
 import { NotificationService } from 'src/notification/notification.service';
 import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
+import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
+import { IUser } from 'src/user/types/interface/user.interface';
+import { Isite } from 'src/site/Types/interfaces/site.interface';
+import { IinventoryStatus } from 'src/inventory-status/types/interfaces/inventory-status.interface';
+import { Iinventory } from './types/interfaces/inventory.interface';
+import { Istatus } from 'src/status/types/interfaces/status.interface';
 
 
 @Injectable()
@@ -31,11 +37,12 @@ export class InventoryService {
  
   //  methode pou get All inventory selon le role 
   async getAllInventories(user: User) {
+    let role = user.role as IUserRole;
     // si le role admin doit récupère tous les invetaires 
-    if (user.role.role === 'admin') {
+    if (role.role === 'admin') {
       return this.inventoryRepository.findAllWithLatestStatus();
     // si le role opérateur doit récupère leurs inventaires 
-    } else if (user.role.role === 'operator') {
+    } else if (role.role === 'operator') {
       return this.inventoryRepository.findInventoriesByOperatorIdWithStatus(user.id);
     } else {
       return [];
@@ -118,10 +125,11 @@ export class InventoryService {
       if (operators.length !== createinventorydto.operatorIds.length) {
         throw new BadRequestException(`One or more operator IDs are invalid.`);
       }
-
-      const invalidUsers = operators.filter(
-        (user) => user.role?.role !== 'operator',
-      );
+      
+      const invalidUsers = operators.filter((user) => {
+        const role = user.role as IUserRole;
+        return  role.role !== 'operator';
+      });
 
       if (invalidUsers.length > 0) {
         const invalidIds = invalidUsers.map((u) => u.id).join(', ');
@@ -208,8 +216,8 @@ return savedInventory;
         order: { createdAt: 'DESC' },
         relations: ['status'],
       });
-  
-      if (lastStatus?.status.name === 'In Progress') {
+     let status = lastStatus?.status as Istatus;
+      if (status.name === 'In Progress') {
         throw new BadRequestException('There is already an inventory in progress');
       }
     }
@@ -242,8 +250,8 @@ return savedInventory;
     if (!lastStatus) {
       throw new BadRequestException('Inventory has no status yet');
     }
-  
-    const lastStatusName = lastStatus.status.name;
+   let status = lastStatus.status as Istatus;
+    const lastStatusName = status.name;
   
     if (lastStatusName === 'In Progress') {
       throw new BadRequestException('Inventory is already in progress');
@@ -282,17 +290,20 @@ return savedInventory;
     return updatedInventory;
   }
 
-  
   async getOperatorsPlayerIdsForInventory(inventoryId: string) {
-    const affectations = await this.affectationRepository.find({
-      where: { inventory: { id: inventoryId } },
-      relations: ['operator'],
-    });
-  
-    return affectations
-      .map(a => a.operator?.playerId) 
-      .filter(pid => !!pid);
-  }
+  const affectations = await this.affectationRepository.find({
+    where: { inventory: { id: inventoryId } },
+    relations: ['operator'],
+  });
+
+  return affectations
+    .map(a => {
+      let  operator = a.operator as IUser;
+      return operator?.playerId;
+    })
+    .filter((pid): pid is string => !!pid);
+}
+
  
   
   /*
@@ -322,7 +333,8 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
     throw new BadRequestException(`Inventory has no status yet`);
   }
 
-  const lastStatusName = lastStatus.status.name;
+  let status = lastStatus.status as Istatus;
+  const lastStatusName = status.name;
   let statusUpdated = false;
 
   const now = new Date();
@@ -382,18 +394,21 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   // Vérification de chevauchement d’un autre inventaire sur le même site
   const startDateToCheck = dto.startDate ? new Date(dto.startDate) : inventory.startDate;
   const endDateToCheck = dto.endDate ? new Date(dto.endDate) : inventory.endDate;
-
+let site = inventory.site as Isite;
 const overlappingInventory = await this.inventoryRepository.findOverlappingInventoryexcludeId(
-  inventory.site.id,
+  site.id,
   startDateToCheck,
   endDateToCheck,
   inventory.id, 
 );
 
+ if (overlappingInventory) {
+    // Conversion explicite des dates en string ISO (yyyy-mm-dd)
+    const overlapStartDate = new Date(overlappingInventory.startDate).toISOString().slice(0, 10);
+    const overlapEndDate = new Date(overlappingInventory.endDate).toISOString().slice(0, 10);
 
-  if (overlappingInventory) {
     throw new BadRequestException(
-      `Inventory dates overlap with another inventory from ${overlappingInventory.startDate.toISOString().slice(0, 10)} to ${overlappingInventory.endDate.toISOString().slice(0, 10)}`
+      `Inventory dates overlap with another inventory from ${overlapStartDate} to ${overlapEndDate}`
     );
   }
 
@@ -462,8 +477,8 @@ if (dto.operatorId) {
   if (!newOperator) {
     throw new BadRequestException(`Operator with ID ${dto.operatorId} not found`);
   }
-
-  if (newOperator.role.role !== UserRoleEnum.OPERATOR) {
+ let role = newOperator.role as IUserRole;
+  if (role.role !== UserRoleEnum.OPERATOR) {
     throw new BadRequestException('Only users with the "operator" role can be assigned to an inventory');
   }
 
@@ -484,6 +499,14 @@ if (dto.operatorId) {
   });
 
   await this.affectationRepository.save(newAffectation);
+  // Notifier l'opérateur affecté
+if (newOperator.playerId) {
+  await this.notificationService.notifyOperators(
+    [newOperator.playerId],
+    'New Inventory Assignment',
+    `You have been assigned to the inventory "${inventory.name}" from ${inventory.startDate.toDateString()} to ${inventory.endDate.toDateString()}.`,
+  );
+}
 }
 
   const updatedInventory = await this.inventoryRepository.findOne({
@@ -510,7 +533,7 @@ if (dto.operatorId) {
   }
 
   @Cron('*/1 * * * *')
-  async handleExpiredInventories() {
+async handleExpiredInventories() {
   const expiredStatus = await this.statusRepository.findOne({
     where: { name: InventoryStatusEnum.EXPIRED, type: 'inventory' },
   });
@@ -528,36 +551,33 @@ if (dto.operatorId) {
     relations: ['inventoryStatus', 'inventoryStatus.status'],
   });
 
-  if (expiredInventories.length === 0) {
-    return;
-  }
+  if (expiredInventories.length === 0) return;
 
   let expiredCount = 0;
 
   for (const inventory of expiredInventories) {
-    const sortedStatuses = inventory.inventoryStatus.sort(
+    // ⛑️ filtre les strings
+    const statuses = inventory.inventoryStatus.filter(
+      (s): s is IinventoryStatus => typeof s !== 'string'
+    );
+
+    const sortedStatuses = statuses.sort(
       (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
 
     const lastStatus = sortedStatuses[0];
-
-    if (!lastStatus) {
-      continue;
-    }
-
-    const alreadyExpired = inventory.inventoryStatus.some(
-      (statusEntry) => statusEntry.status.name === InventoryStatusEnum.EXPIRED
+    if (!lastStatus) continue;
+    const alreadyExpired = statuses.some(
+      (statusEntry) =>
+        typeof statusEntry.status !== 'string' &&
+      statusEntry.status.name === InventoryStatusEnum.EXPIRED
     );
 
-    if (alreadyExpired) {
-      continue;
-    }
+    if (alreadyExpired) continue;
+    let status=lastStatus.status as Istatus;
 
-    if (lastStatus.status.name !== InventoryStatusEnum.IN_PROGRESS) {
-      continue;
-    }
+    if (status.name !== InventoryStatusEnum.IN_PROGRESS) continue;
 
-    // ajouter le statut Expired
     const expiredEntry = this.inventoryStatusRepository.create({
       inventory,
       status: expiredStatus,
@@ -566,7 +586,7 @@ if (dto.operatorId) {
     await this.inventoryStatusRepository.save(expiredEntry);
     expiredCount++;
 
-    // nettoyage des doublons après insertion
+    // Supprimer les doublons Expired
     const allExpiredStatuses = await this.inventoryStatusRepository.find({
       where: {
         inventory: { id: inventory.id },
@@ -583,8 +603,7 @@ if (dto.operatorId) {
   }
 }
 
-
-@Cron('*/1 * * * *')
+@Cron('*/5 * * * *')
 async handlePlannedInventoriesToLaunch() {
   const startOfDay = this.getTodayStart();
   const endOfDay = new Date(startOfDay);
@@ -594,7 +613,6 @@ async handlePlannedInventoriesToLaunch() {
     where: {
       startDate: Between(startOfDay, endOfDay),
     },
-    relations: ['inventoryStatus', 'inventoryStatus.status'],
   });
 
   if (plannedInventories.length === 0) return;
@@ -611,14 +629,26 @@ async handlePlannedInventoriesToLaunch() {
   let launchedCount = 0;
 
   for (const inventory of plannedInventories) {
-    const sortedStatuses = inventory.inventoryStatus.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
-    const lastStatus = sortedStatuses[0];
-
-    if (!lastStatus || lastStatus.status.name !== InventoryStatusEnum.Planned) {
+    const lastStatus = await this.inventoryStatusRepository.findOne({
+      where: { inventory: { id: inventory.id } },
+      relations: ['status'],
+      order: { createdAt: 'DESC' },
+    });
+    let status = lastStatus?.status as Istatus;
+    if (!lastStatus || status.name !== InventoryStatusEnum.Planned) {
       continue;
+    }
+
+    // Vérification atomique simple via count
+    const inProgressCount = await this.inventoryStatusRepository.count({
+      where: {
+        inventory: { id: inventory.id },
+        status: { name: InventoryStatusEnum.IN_PROGRESS },
+      },
+    });
+
+    if (inProgressCount > 0) {
+      continue; // Statut In Progress déjà présent
     }
 
     const newStatus = this.inventoryStatusRepository.create({
@@ -636,22 +666,6 @@ async handlePlannedInventoriesToLaunch() {
         'Inventory Launched',
         `The inventory "${inventory.name}" has started.`,
       );
-
-      // supperssion des doublons 
-      const allInProgressStatuses = await this.inventoryStatusRepository.find({
-        where: {
-          inventory: { id: inventory.id },
-          status: { id: inProgressStatus.id },
-        },
-        order: { createdAt: 'DESC' },
-      });
-
-      if (allInProgressStatuses.length > 1) {
-        const [latest, ...duplicates] = allInProgressStatuses;
-        const idsToDelete = duplicates.map((d) => d.id);
-        await this.inventoryStatusRepository.delete(idsToDelete);
-      }
-
     } catch (error) {
       console.warn(`Failed to save In Progress status for inventory ${inventory.id}:`, error.message);
     }
@@ -659,17 +673,4 @@ async handlePlannedInventoriesToLaunch() {
 
   console.log(`${launchedCount} inventory(ies) have been launched.`);
 }
-
-
-
-  
-
 }
-
-
-
-
-
-
-
-   

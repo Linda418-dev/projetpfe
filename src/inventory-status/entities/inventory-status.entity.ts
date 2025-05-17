@@ -2,6 +2,8 @@ import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, Man
 import { IinventoryStatus } from '../types/interfaces/inventory-status.interface';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { Status } from 'src/status/entities/status.entity';
+import { Iinventory } from 'src/inventory/types/interfaces/inventory.interface';
+import { Istatus } from 'src/status/types/interfaces/status.interface';
 
 @Entity()
 export class InventoryStatus implements IinventoryStatus  {
@@ -11,13 +13,11 @@ export class InventoryStatus implements IinventoryStatus  {
 
   @ManyToOne(() => Inventory, { eager: true, nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'inventoryId' })
-  inventory: Inventory;
+  inventory: Iinventory|string;
 
   @ManyToOne(() => Status, { eager: true, onDelete: 'CASCADE' ,  nullable: false,})
   @JoinColumn({ name: 'statusId' })
-  status: Status;
-
-  
+  status: Istatus|string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

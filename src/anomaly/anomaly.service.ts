@@ -85,28 +85,25 @@ export class AnomalyService {
     
   
     async getAnomalyById(id: string) {
-  const anomaly = await this.anomalyRepository.findOne({
-    where: { id },
-    relations: ['files', 'statusHistory', 'statusHistory.status'],
-    order: {
-      statusHistory: {
-        createdAt: 'DESC',
-      },
-    },
-  });
-
-  if (!anomaly) {
-    throw new NotFoundException(`Anomaly with ID ${id} not found`);
-  }
-
-  const latestStatus = anomaly.statusHistory?.[0]?.status ?? null;
-
-  return {
-    ...anomaly,
-    latestStatus,
-    statusHistory: anomaly.statusHistory,
-  };
-}
+      const anomaly = await this.anomalyRepository.findOne({
+        where: { id },
+        relations: ['files', 'statusHistory', 'statusHistory.status'],
+        order: {
+          statusHistory: {
+            createdAt: 'DESC',
+          },
+        },
+      });
+      if (!anomaly) {
+        throw new NotFoundException(`Anomaly with ID ${id} not found`);
+      }
+      const latestStatus = anomaly.statusHistory?.[0]?.status ?? null;
+      return {
+        ...anomaly,
+        latestStatus,
+        statusHistory: anomaly.statusHistory,
+      };
+    }
 
   async progressAnomaly(anomalyId: string) {
     // vérifier si l'anomalie existe

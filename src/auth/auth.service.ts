@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { userRepository } from 'src/user/repositories/user.repository';
 import { BcryptService } from 'src/auth/common/bcrypt.service';
 import { LoginUserDto } from 'src/user/types/dto/login-user.dto';
+import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
 
 @Injectable()
 export class AuthService {
@@ -51,7 +52,8 @@ export class AuthService {
   
   
   private generateJwt(user: User): string {
-    const payload = { email: user.email, id: user.id, username: user.username, role: user.role.role };
+    let role = user.role as IUserRole;
+    const payload = { email: user.email, id: user.id, username: user.username, role: role.role };
     return this.jwtService.sign(payload);
   }
 }

@@ -6,6 +6,12 @@ import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { Location } from 'src/location/entities/location.entity';
 import { LocationHistory } from 'src/location-history/entities/location-history.entity';
 import { Status } from 'src/status/entities/status.entity';
+import { ICategory } from 'src/category/types/interface/category.interface';
+import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
+import { Ilocation } from 'src/location/types/interfaces/location.interface';
+import { ILocationHistory } from 'src/location-history/types/interfaces/location-history.interface';
+import { Istatus } from 'src/status/types/interfaces/status.interface';
+import { IFile } from 'src/uploads/types/interfaces/file.interface';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -16,28 +22,26 @@ export class Asset implements IAsset {
   name: string;
 
   @ManyToOne(() => Category, (category) => category.assets, { nullable: true, eager: true, onDelete: "CASCADE" })
-  category: Category;  
+  category:ICategory|string;  
 
   @OneToMany(() => File, (file) => file.asset, { cascade: true, eager: true })
-  files: File[]; 
+  files: IFile[]|string[]; 
 
   @ManyToOne(() => Supplier, (supplier) => supplier.assets, { nullable: true,eager: true,  onDelete: "CASCADE" })
-  supplier: Supplier;  
+  supplier: ISupplier|string;  
 
   @ManyToOne(() => Location, (location) => location.assets, { nullable: false, eager: true, onDelete: "CASCADE" })
-  location: Location;
+  location: Ilocation|string;
 
   @OneToMany(() => LocationHistory, (history) => history.asset, { cascade: true })
-  locationHistory: LocationHistory[];
+  locationHistory: ILocationHistory[]|string[];
 
   @ManyToOne(() => Status, { eager: true, nullable: false, onDelete: 'SET NULL' })
-  status: Status;
+  status: Istatus|string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
-
- 
+  updatedAt: Date; 
 }

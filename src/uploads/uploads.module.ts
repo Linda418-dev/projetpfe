@@ -15,6 +15,7 @@ import { Supplier } from 'src/supplier/Entities/Supplier.entity';
 import { ExcelController } from './excel/excel.controller';
 import { ExcelService } from './excel/excel.service';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
+import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
 
 @Module({
   imports: [
@@ -51,7 +52,7 @@ import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
     }),
   ],
   controllers: [UploadsController, ExcelController],
-  providers: [UploadsService, FileRepository,CategoryRepository, ExcelService,AssetRepository,ExcelService,ExcelController], 
+  providers: [UploadsService, FileRepository,CategoryRepository, ExcelService,AssetRepository,ExcelService,ExcelController,InventoryDetailsRepository], 
   exports: [FileRepository, UploadsService], 
 })
 export class UploadsModule {}

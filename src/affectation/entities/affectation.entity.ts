@@ -4,6 +4,8 @@ import { Iaffectation } from '../types/interfaces/affectation.interface';
 import { User } from 'src/user/entities/user.entity';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
+import { IUser } from 'src/user/types/interface/user.interface';
+import { Iinventory } from 'src/inventory/types/interfaces/inventory.interface';
 
 @Entity()
 export class Affectation implements Iaffectation{
@@ -11,10 +13,10 @@ export class Affectation implements Iaffectation{
   id: string;
 
   @ManyToOne(() => Inventory, { onDelete: 'CASCADE' })
-  inventory: Inventory;
+  inventory: Iinventory|string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  operator: User;
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })!
+  operator: IUser|string;
 
   @OneToMany(() => InventoryDetails, (details) => details.affectation)
   inventoryDetails: InventoryDetails[];

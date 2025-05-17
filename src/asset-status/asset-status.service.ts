@@ -5,12 +5,12 @@ import { AssetStatusRepository } from './repositories/asset-status.repository';
 export class AssetStatusService {
     constructor (private readonly assetStatusRepository : AssetStatusRepository){}
 
-     //Récupérer  tous les historiques du status pour  des biens 
+     // Récupérer  tous les historiques du status pour  des biens 
     async getAllHistoriesAssetStatus() {
         return this.assetStatusRepository.find({ relations: ['asset', 'status'] });
       }
     
-      // Récupérer   les historiques par id de  status 
+      // Récupérer les historiques par id de  status 
       async getHistoryAssetStatusById(id: string) {
         const assetStatus = await this.assetStatusRepository.findOne({
           where: { id },

@@ -1,4 +1,5 @@
 import { User } from 'src/user/entities/user.entity';
+import { IUser } from 'src/user/types/interface/user.interface';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
 
 @Entity()
@@ -17,7 +18,7 @@ export class Notification {
 
   @ManyToMany(() => User)
   @JoinTable()
-  recipients: User[];
+  recipients: IUser[]|string[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

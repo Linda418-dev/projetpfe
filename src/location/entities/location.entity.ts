@@ -3,6 +3,9 @@ import { Ilocation } from "../types/interfaces/location.interface";
 import { Service } from "src/service/entities/service.entity";
 import { Asset } from "src/assets/Entities/asset.entity";
 import { LocationHistory } from "src/location-history/entities/location-history.entity";
+import { IService } from "src/service/types/interfaces/service.interface";
+import { IAsset } from "src/assets/types/interface/Asset.interface";
+import { ILocationHistory } from "src/location-history/types/interfaces/location-history.interface";
 
 @Entity()
 export class Location implements Ilocation{
@@ -14,13 +17,13 @@ export class Location implements Ilocation{
     name: string;
     
     @ManyToOne(() => Service, (service) => service.locations, { onDelete: 'CASCADE' })
-    service: Service;
+    service: IService|string;
 
     @OneToMany(() => Asset, (asset) => asset.location)
-    assets: Asset[];
+    assets: IAsset[]|string[];
 
     @OneToMany(() => LocationHistory, (history) => history.location)
-    locationHistory: LocationHistory[];
+    locationHistory: ILocationHistory[]|LocationHistory[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  

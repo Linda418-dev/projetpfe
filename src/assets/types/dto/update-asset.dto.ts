@@ -26,13 +26,10 @@ export class updateAssetDto{
     @ApiProperty()
     statusId?: string;
 
-    @ApiProperty({ type: [String], required: false })
+    @ApiProperty()
     @IsOptional()
     @IsArray()
     @IsUUID("all", { each: true })
-    fileIds?: string[];
-
-
-    
+    fileIds?: string[];   
 
 }

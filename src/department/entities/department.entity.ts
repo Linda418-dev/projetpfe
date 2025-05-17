@@ -2,6 +2,8 @@ import { Column, CreateDateColumn, Entity, ManyToMany, ManyToOne, OneToMany, Pri
 import { IDepartment } from "../types/interface/department.interface";
 import { Site } from "src/site/Entities/site.entity";
 import { Service } from "src/service/entities/service.entity";
+import { Isite } from "src/site/Types/interfaces/site.interface";
+import { IService } from "src/service/types/interfaces/service.interface";
 
 
 @Entity()
@@ -13,10 +15,10 @@ export class Department implements IDepartment {
   name: string;
 
   @ManyToOne(() => Site, (site) => site.departments, { onDelete: 'CASCADE' })
-  site: Site;
+  site: Isite|string;
 
   @OneToMany(() => Service, (service) => service.department)
-  services: Service[];
+  services: IService[]|string[];
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

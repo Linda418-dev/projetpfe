@@ -17,12 +17,13 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
       .leftJoinAndSelect('assetStatus.status', 'status')  
       .leftJoinAndSelect('inventoryDetails.locationHistory', 'locationHistory')
       .leftJoinAndSelect('inventoryDetails.files', 'files')
-      .leftJoinAndSelect('inventoryDetails.anomaly', 'anomaly')
       .where('inventory.id = :inventoryId', { inventoryId })
       .orderBy('inventoryDetails.scannedAt', 'DESC')
       .addOrderBy('assetStatus.createdAt', 'DESC')  
       .getMany();
   }
+
+  
   
   
 }

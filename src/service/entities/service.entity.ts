@@ -2,6 +2,8 @@ import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGenerate
 import { IService } from "../types/interfaces/service.interface";
 import { Department } from "src/department/entities/department.entity";
 import { Location } from "src/location/entities/location.entity";
+import { IDepartment } from "src/department/types/interface/department.interface";
+import { Ilocation } from "src/location/types/interfaces/location.interface";
 
 
 @Entity()
@@ -14,10 +16,10 @@ export class Service implements IService{
     name: string
 
     @ManyToOne(() => Department, (department) => department.services, { onDelete: 'CASCADE' })
-    department: Department;
+    department: IDepartment|string;
     
     @OneToMany(() => Location, (location) => location.service)
-    locations: Location[];
+    locations: Ilocation[]|string[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  
