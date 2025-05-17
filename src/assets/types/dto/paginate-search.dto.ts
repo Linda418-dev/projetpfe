@@ -19,10 +19,10 @@ export class PaginateSearchDto extends PaginateDto implements SearchKeyword{
     @Type(() => Number)
     take?: number;
   
-    @ApiProperty()
-    @IsOptional()
-    @IsString()
-    keyword?: string;
+   @ApiProperty({ required: false })
+   @IsOptional()
+   @IsString()
+   keyword?: string;
 
     @ApiProperty({ example: 'createdAt' })
     @IsOptional()
