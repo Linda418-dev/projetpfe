@@ -26,7 +26,7 @@ export class File implements IFile {
   asset: IAsset|string;
  
   @ManyToOne(() => InventoryDetails, (inventoryDetails) => inventoryDetails.files, {nullable: true, onDelete: 'CASCADE',})
-  inventoryDetails: IInventoryDetails|string;;
+  inventoryDetails: IInventoryDetails|string;
 
   @ManyToOne(() => Anomaly, (anomaly) => anomaly.files, { nullable: true, onDelete: 'CASCADE' })
   anomaly: IAnomaly|string;

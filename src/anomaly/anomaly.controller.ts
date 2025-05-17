@@ -1,21 +1,26 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, Request, UseGuards } from '@nestjs/common';
 import { AnomalyService } from './anomaly.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
+@ApiBearerAuth()
 @ApiTags('Anomaly Resource')
 @Controller('anomalies')
 export class AnomalyController {
     constructor(private readonly anomalyService: AnomalyService) {}
     @Get()
-    getAllanomalies() {
-      return this.anomalyService.getAllAnomalies();
+    @UseGuards(JwtAuthGuard)
+    getAllAnomalies(@Request() req) {
+      return this.anomalyService.getAllAnomalies(req.user);
     }
 
+
     @Post()
-    createAnomaly(@Body() createAnomalyDto: CreateAnomalyDto) {
-      return this.anomalyService.createAnomaly(createAnomalyDto);
+    @UseGuards(JwtAuthGuard)
+    createAnomaly(@Body() createAnomalyDto: CreateAnomalyDto, @Request() req) {
+      return this.anomalyService.createAnomaly(createAnomalyDto, req.user);
     }
 
     @BypassInventoryLock()

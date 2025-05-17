@@ -1,10 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { AnomalyRepository } from './Repositories/anomaly.repository';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
 import { File } from 'src/uploads/entities/file.entity';
 import { AnomalyStatusRepository } from 'src/anomaly-status/repositories/anomaly-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
+import { User } from 'src/user/entities/user.entity';
+import { IUser } from 'src/user/types/interface/user.interface';
+import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
+import { Asset } from 'src/assets/Entities/asset.entity';
 
 
 @Injectable()
@@ -14,96 +18,158 @@ export class AnomalyService {
         private readonly fileRepository : FileRepository,
         private readonly statusRepository : StatusRepository,
         private readonly anomalyStatusRepository : AnomalyStatusRepository,
+        private readonly assetRepository: AssetRepository,
     ){}
-  async getAllAnomalies() {
-  const anomalies = await this.anomalyRepository.find({
-    relations: ['files', 'statusHistory', 'statusHistory.status'],
-    order: {
-      statusHistory: {
+ async getAllAnomalies(currentUser: User) {
+  let anomalies;
+
+  const userRole = typeof currentUser.role === 'string'
+    ? currentUser.role
+    : currentUser.role?.role;
+
+  if (userRole === 'admin') {
+    anomalies = await this.anomalyRepository.find({
+relations: [
+  'files',
+  'statusHistory',
+  'statusHistory.status',
+  'operator',
+  'asset',
+  'asset.location',
+  'asset.location.service',
+  'asset.location.service.department',
+  'asset.location.service.department.site',
+],
+      order: {
         createdAt: 'DESC',
       },
-    },
-  });
+    });
+  } else if (userRole === 'operator') {
+    anomalies = await this.anomalyRepository.find({
+      where: { operator: { id: currentUser.id } },
+relations: [
+  'files',
+  'statusHistory',
+  'statusHistory.status',
+  'operator',
+  'asset',
+  'asset.location',
+  'asset.location.service',
+  'asset.location.service.department',
+  'asset.location.service.department.site',
+],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  } else {
+    throw new UnauthorizedException('Rôle non autorisé');
+  }
 
-  const result = anomalies.map(anomaly => {
-    const latestStatus = anomaly.statusHistory?.[0]?.status ?? null;
+  return anomalies.map(anomaly => {
+    const latestStatus = Array.isArray(anomaly.statusHistory)
+      ? anomaly.statusHistory[0]?.status ?? null
+      : null;
+
+    const site = anomaly.asset?.location?.['service']?.['department']?.['site'];
+  
 
     return {
       ...anomaly,
       latestStatus,
-      statusHistory: anomaly.statusHistory,
+      siteName: site?.name,
     };
   });
-
-  return result;
 }
 
    
-    async createAnomaly(createAnomalyDto: CreateAnomalyDto) {
-      const { description, fileIds, assetId } = createAnomalyDto;
-    
-      //  Vérifier que le statut 'pending' existe 
-      const pendingStatus = await this.statusRepository.findOne({
-        where: { name: 'pending', type: 'anomaly' },
-      });
-    
-      if (!pendingStatus) {
-        throw new NotFoundException("Default 'pending' status not found for anomaly");
-      }
-    
-      // Charger les fichiers envoyer 
-      let files: File[] = [];
-      if (fileIds && fileIds.length > 0) {
-        files = await this.fileRepository.findByIds(fileIds);
-        if (files.length !== fileIds.length) {
-          throw new NotFoundException('One or more fileIds are invalid');
-        }
-      }
-    
-      // Créer l’anomalie
-      const anomaly = this.anomalyRepository.create({ description , assetId });
-      const savedAnomaly = await this.anomalyRepository.save(anomaly);
-    
-      // Associer les images de l’anomalie
-      if (files.length > 0) {
-        for (const file of files) {
-          file.anomaly = savedAnomaly;
-         
-          await this.fileRepository.save(file);
-        }
-      }
-    
-      // Créer le status par defaut 'pending' dans AnomalyStatus
-      const anomalyStatus = this.anomalyStatusRepository.create({
-        anomaly: savedAnomaly,
-        status: pendingStatus,
-      });
-      await this.anomalyStatusRepository.save(anomalyStatus);
-    
-      return savedAnomaly;
+   async createAnomaly(createAnomalyDto: CreateAnomalyDto, operator: User) {
+  const { description, fileIds, assetId } = createAnomalyDto;
+
+  const pendingStatus = await this.statusRepository.findOne({
+    where: { name: 'pending', type: 'anomaly' },
+  });
+
+  if (!pendingStatus) {
+    throw new NotFoundException("Default 'pending' status not found for anomaly");
+  }
+
+  const asset = await this.assetRepository.findOne({ where: { id: assetId } });
+  if (!asset) {
+    throw new NotFoundException('Asset with the given ID not found');
+  }
+
+  let files: File[] = [];
+  if (fileIds && fileIds.length > 0) {
+    files = await this.fileRepository.findByIds(fileIds);
+    if (files.length !== fileIds.length) {
+      throw new NotFoundException('One or more fileIds are invalid');
     }
-    
+  }
+
+  const anomaly = this.anomalyRepository.create({
+    description,
+    asset,
+    operator,
+  });
+
+  const savedAnomaly = await this.anomalyRepository.save(anomaly);
+
+  for (const file of files) {
+    file.anomaly = savedAnomaly;
+    await this.fileRepository.save(file);
+  }
+
+  const anomalyStatus = this.anomalyStatusRepository.create({
+    anomaly: savedAnomaly,
+    status: pendingStatus,
+  });
+
+  await this.anomalyStatusRepository.save(anomalyStatus);
+
+  return savedAnomaly;
+}
+
   
-    async getAnomalyById(id: string) {
-      const anomaly = await this.anomalyRepository.findOne({
-        where: { id },
-        relations: ['files', 'statusHistory', 'statusHistory.status'],
-        order: {
-          statusHistory: {
-            createdAt: 'DESC',
-          },
-        },
-      });
-      if (!anomaly) {
-        throw new NotFoundException(`Anomaly with ID ${id} not found`);
-      }
-      const latestStatus = anomaly.statusHistory?.[0]?.status ?? null;
-      return {
-        ...anomaly,
-        latestStatus,
-        statusHistory: anomaly.statusHistory,
-      };
-    }
+   async getAnomalyById(id: string) {
+  const anomaly = await this.anomalyRepository.findOne({
+    where: { id },
+relations: [
+  'files',
+  'statusHistory',
+  'statusHistory.status',
+  'operator',
+  'asset',
+  'asset.location',
+  'asset.location.service',
+  'asset.location.service.department',
+  'asset.location.service.department.site',
+],
+  });
+
+  if (!anomaly) {
+    throw new NotFoundException(`Anomaly with ID ${id} not found`);
+  }
+
+  // S'assurer que statusHistory est trié par createdAt DESC
+  const sortedStatusHistory = Array.isArray(anomaly.statusHistory)
+    ? [...anomaly.statusHistory].sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )
+    : [];
+
+  const latestStatus = sortedStatusHistory[0]?.status ?? null;
+  const site = (anomaly.asset as Asset)
+  ?.location?.['service']?.['department']?.['site'];
+
+  return {
+    ...anomaly,
+    latestStatus,
+    statusHistory: sortedStatusHistory,
+    site: site,
+  };
+}
+
 
   async progressAnomaly(anomalyId: string) {
     // vérifier si l'anomalie existe

@@ -4,6 +4,8 @@ import { UserRole } from "src/user-role/entities/user-role.entity";
 import { Affectation } from "src/affectation/entities/affectation.entity";
 import { IUserRole } from "src/user-role/types/interface/user-role.interface";
 import { Iaffectation } from "src/affectation/types/interfaces/affectation.interface";
+import { Anomaly } from "src/anomaly/Entities/anomaly.entity";
+import { IAnomaly } from "src/anomaly/types/interface/anomaly.interface";
 
 @Entity()
 export class User implements IUser {
@@ -30,6 +32,9 @@ export class User implements IUser {
 
   @OneToMany(() => Affectation, (affectation) => affectation.operator)
   affectations: Iaffectation[]|string[];
+
+  @OneToMany(() => Anomaly, (anomaly) => anomaly.operator)
+  anomalies: IAnomaly[]|string[];
    
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
