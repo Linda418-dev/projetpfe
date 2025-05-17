@@ -19,6 +19,7 @@ import { ICategory } from 'src/category/types/interface/category.interface';
 import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
 import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
+import { In } from 'typeorm';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -151,22 +152,25 @@ export class AssetsService {
         fetchAsset.name = updateAssetDto.name;
       }
 
-      //  Associer  fichiers 
-      if (updateAssetDto.fileIds?.length) {
-        const files = await this.fileRepository.findByIds(updateAssetDto.fileIds);
-        if (files.length !== updateAssetDto.fileIds.length) {
-          throw new NotFoundException('One or more fileIds are invalid');
-        }
-        for (const file of files) {
-          file.asset = fetchAsset ;
-        }
-      
-        await this.fileRepository.save(files);
-      }
+      if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
+  // Vérifie si tous les fichiers existent
+  const relatedFiles = await this.fileRepository.find({
+    where: { id: In(updateAssetDto.fileIds) },
+  });
+
+  if (relatedFiles.length !== updateAssetDto.fileIds.length) {
+    const foundIds = relatedFiles.map((file) => file.id);
+    const missingIds = updateAssetDto.fileIds.filter(id => !foundIds.includes(id));
+    throw new BadRequestException(`Les fichiers suivants sont introuvables : ${missingIds.join(', ')}`);
+  }
+
+  // Remplace complètement les anciens fichiers
+  fetchAsset.files = relatedFiles;
+
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
     }
-  
+    }
     
   // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {

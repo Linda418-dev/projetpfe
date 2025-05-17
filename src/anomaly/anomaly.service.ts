@@ -134,17 +134,17 @@ relations: [
    async getAnomalyById(id: string) {
   const anomaly = await this.anomalyRepository.findOne({
     where: { id },
-relations: [
-  'files',
-  'statusHistory',
-  'statusHistory.status',
-  'operator',
-  'asset',
-  'asset.location',
-  'asset.location.service',
-  'asset.location.service.department',
-  'asset.location.service.department.site',
-],
+    relations: [
+      'files',
+      'statusHistory',
+      'statusHistory.status',
+      'operator',
+      'asset',
+      'asset.location',
+      'asset.location.service',
+      'asset.location.service.department',
+      'asset.location.service.department.site',
+    ],
   });
 
   if (!anomaly) {
