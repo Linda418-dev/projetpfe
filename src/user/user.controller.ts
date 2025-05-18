@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post,Patch, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post,Patch, UseGuards, Req, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -9,6 +9,7 @@ import { UpdateUserDto } from './types/dto/update-user.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { ForgotPasswordDto } from './types/dto/Forgot-Password.dto';
+import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 
 @ApiBearerAuth()
 @ApiTags('user Resource')
@@ -16,13 +17,15 @@ import { ForgotPasswordDto } from './types/dto/Forgot-Password.dto';
 export class UserController {
     constructor(private readonly userService : UserService){}
 
-    @Get()
-    @UseGuards(JwtAuthGuard)
-    async getAllUsers(@Req() req: any) {
-      const currentUserId = req.user.id;
-      return this.userService.getAllUsers(currentUserId);
-    }
-    
+   @Get()
+  @UseGuards(JwtAuthGuard)
+  async getAllUsers(
+  @Query() params: PaginateSearchDto,
+  @Req() req: any
+) {
+  return this.userService.getAllUsers(params, req.user.id);
+}
+
 
   @Get(':id')
   async getUserById(@Param('id') id: string) {

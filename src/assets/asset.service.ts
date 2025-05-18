@@ -36,32 +36,33 @@ export class AssetsService {
        
     ) {}
         
-    async getAssets(params: PaginateSearchDto) {
+    
+  async getAssets(params: PaginateSearchDto) {
       const [assets, total] = await this.assetRepository.getAllAssetWithPaginate(params);
       return {
         data: assets,
         total,
         skip: params.skip ,
         take: params.take ,
-      };
-    }
+    };
+  }
     
   async getAllAssets() {
     return this.assetRepository.findAllAssetsNotInRepair();
   }
 
-    async getAssetById(id: string) {
-        const fetchAsset = await this.assetRepository.findOneBy({ id });
-        if (!fetchAsset) {
-            throw new BadRequestException(`Asset with id ${id} not found`);
-        }
-        return fetchAsset;
+  async getAssetById(id: string) {
+    const fetchAsset = await this.assetRepository.findOneBy({ id });
+    if (!fetchAsset) {
+      throw new BadRequestException(`Asset with id ${id} not found`);
+    }
+    return fetchAsset;
     }
 
-    async deleteAsset(id: string) {
-      const asset = await this.assetRepository.findOne({
-        where: { id },
-        relations: ['locationHistory'],
+  async deleteAsset(id: string) {
+    const asset = await this.assetRepository.findOne({
+      where: { id },
+      relations: ['locationHistory'],
       });
     
       if (!asset) {
@@ -168,7 +169,7 @@ export class AssetsService {
 
   // Remplace complètement les anciens fichiers
   fetchAsset.files = relatedFiles;
-}
+  }
 
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
@@ -319,7 +320,7 @@ export class AssetsService {
   }
 
 
- async assignMultipleAssetsToUser(assetIds: string[], userId: string) {
+  async assignMultipleAssetsToUser(assetIds: string[], userId: string) {
   const user = await this.userRepository.findOneBy({ id: userId });
   if (!user) throw new NotFoundException('User not found');
 
@@ -327,9 +328,7 @@ export class AssetsService {
     where: { id: In(assetIds) },
     relations: ['user'],
   });
-
   if (assets.length === 0) throw new NotFoundException('No assets found for provided IDs');
-
   const conflictedAssets = assets.filter(asset => {
     if (!asset.user) return false;
     if (typeof asset.user === 'string') return asset.user !== userId;

@@ -5,7 +5,8 @@ import { BcryptService } from 'src/auth/common/bcrypt.service';
 import { CreateUserDto } from './types/dto/create-user.dto';
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import * as nodemailer from 'nodemailer';
-import { Not } from 'typeorm';
+import { PaginateSearchDto } from './types/dto/paginate-search.dto';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -15,13 +16,17 @@ export class UserService {
   ) {}
 
     // methode get All Users
-    async getAllUsers(currentUserId: string) {
-      return this.userRepository.find({
-        where: {
-          id: Not(currentUserId),
-        },
-      });
-    }
+   async getAllUsers(params: PaginateSearchDto, currentUserId: string) {
+  const [users, total] = await this.userRepository.getAllUsersWithPaginate(params, currentUserId);
+
+  return {
+    data: users,
+    total,
+    skip: params.skip,
+    take: params.take,
+  };
+}
+
     
     // méthode get user by id 
       async getUserById(id: string) {

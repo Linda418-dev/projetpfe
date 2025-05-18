@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Asset } from 'src/assets/Entities/asset.entity';
 import { IFile } from '../types/interfaces/file.interface';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';

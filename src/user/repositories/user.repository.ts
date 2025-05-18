@@ -2,6 +2,7 @@ import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { PaginateSearchDto } from '../types/dto/paginate-search.dto';
 
 
 @Injectable()
@@ -16,4 +17,36 @@ export class userRepository extends Repository<User> {
       .where('role.role = :role', { role: 'operator' })
       .getMany();
   }
+
+
+  async getAllUsersWithPaginate(params: PaginateSearchDto, currentUserId: string) {
+   const query = this.createQueryBuilder("user")
+    .leftJoinAndSelect("user.role", "role")
+    .where("user.id != :currentUserId", { currentUserId });
+
+  if (params.keyword) {
+    query.andWhere(
+      "(user.username ILIKE :keyword OR user.email ILIKE :keyword)",
+      { keyword: `%${params.keyword}%` }
+    );
+  }
+
+  if (params.orderField && params.orderDirection) {
+    query.orderBy(`user.${params.orderField}`, params.orderDirection.toUpperCase() as 'ASC' | 'DESC');
+  } else {
+    query.orderBy("user.createdAt", "DESC");
+  }
+
+  if (params.skip) {
+    query.skip(params.skip);
+  }
+
+  if (params.take) {
+    query.take(params.take);
+  }
+
+  return query.getManyAndCount();
+}
+
+
 }
