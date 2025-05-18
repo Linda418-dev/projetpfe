@@ -21,9 +21,6 @@ import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { In } from 'typeorm';
 import { userRepository } from 'src/user/repositories/user.repository';
-import { dirname, join } from 'path';
-import * as QRCode from 'qrcode';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -178,88 +175,67 @@ export class AssetsService {
     
     }
     
- async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
-  const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
-
-  const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
-  if (!category) throw new Error('Category not found');
-
-  const supplier = await this.supplierRepository.findOne({ where: { id: supplierId } });
-  if (!supplier) throw new Error('Supplier not found');
-
-  const location = await this.locationRepository.findOne({
-    where: { id: locationId },
-    relations: ['service'],
-  });
-  if (!location) throw new Error('Location not found');
-
-  let files: File[] = [];
-  if (fileIds?.length) {
-    files = await this.fileRepository.findByIds(fileIds);
-    const foundIds = files.map((f) => f.id);
-    const missingIds = fileIds.filter((id) => !foundIds.includes(id));
-    if (missingIds.length > 0) {
-      throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
+  // methode pour creation asset 
+  async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
+    const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
+  
+    const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+    if (!category) throw new Error('Category not found');
+  
+    const supplier = await this.supplierRepository.findOne({ where: { id: supplierId } });
+    if (!supplier) throw new Error('Supplier not found');
+  
+    const location = await this.locationRepository.findOne({
+      where: { id: locationId },
+      relations: ['service'],
+    });
+    if (!location) throw new Error('Location not found');
+  
+    let files: File[] = [];
+    if (fileIds?.length) {
+      files = await this.fileRepository.findByIds(fileIds);
+      const foundIds = files.map((f) => f.id);
+      const missingIds = fileIds.filter((id) => !foundIds.includes(id));
+  
+      if (missingIds.length > 0) {
+        throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
+      }
     }
-  }
-
-  const defaultStatus = await this.statusRepository.findOne({
-    where: { name: AssetStatusEnum.GOOD, type: 'asset' },
-  });
-  if (!defaultStatus) throw new Error('Default status "Good" not found');
-
-  const asset = new Asset();
-  asset.name = name;
-  asset.category = category;
-  asset.supplier = supplier;
-  asset.location = location;
-  asset.status = defaultStatus;
-
-  const savedAsset = await this.assetRepository.save(asset);
-
-  // ✅ Génération du QR Code avec chemin correct
-  const qrData = `asset:${savedAsset.id}`;
-  const qrCodeDir = join(process.cwd(), 'uploads', 'qrcodes');
-  const qrCodePath = join(qrCodeDir, `${savedAsset.id}.png`);
-
-  if (!existsSync(qrCodeDir)) {
-    mkdirSync(qrCodeDir, { recursive: true });
-  }
-
-  await QRCode.toFile(qrCodePath, qrData);
-
-  // ✅ Enregistrement du fichier QR Code dans la base de données
-  const qrFile = new File();
-  qrFile.name = `QR Code ${savedAsset.name}`;
-  qrFile.urlFile = `http://localhost:3000/uploads/qrcodes/${savedAsset.id}.png`;
-  qrFile.typeFile = 'image/png';
-  qrFile.filePath = `uploads/qrcodes/${savedAsset.id}.png`;
-  qrFile.originalName = `qr-${savedAsset.id}.png`;
-  qrFile.asset = savedAsset;
-  await this.fileRepository.save(qrFile);
-
-  // Historique de localisation
-  const locationHistory = new LocationHistory();
-  locationHistory.asset = savedAsset;
-  locationHistory.location = location;
-  await this.locationHistoryRepository.save(locationHistory);
-
-  // Historique du statut
-  const assetStatus = new AssetStatus();
-  assetStatus.asset = savedAsset;
-  assetStatus.status = defaultStatus;
-  await this.assetStatusRepository.save(assetStatus);
-
-  // Association fichiers supplémentaires
-  if (files.length > 0) {
-    for (const file of files) {
-      file.asset = savedAsset;
+     
+    const defaultStatus = await this.statusRepository.findOne({
+      where: { name: AssetStatusEnum.GOOD, type: 'asset' },
+    });
+    if (!defaultStatus) throw new Error('Default status "Good" not found');
+  
+    const asset = new Asset();
+    asset.name = name;
+    asset.category = category;
+    asset.supplier = supplier;
+    asset.location = location;
+    asset.status = defaultStatus; 
+  
+    const savedAsset = await this.assetRepository.save(asset);
+    
+    const locationHistory = new LocationHistory();
+    locationHistory.asset = savedAsset;
+    locationHistory.location = location;
+    await this.locationHistoryRepository.save(locationHistory);
+  
+    const assetStatus = new AssetStatus();
+    assetStatus.asset = savedAsset;
+    assetStatus.status = defaultStatus;
+    await this.assetStatusRepository.save(assetStatus);
+   
+    if (files.length > 0) {
+      for (const file of files) {
+        file.asset = savedAsset;
+      }
+      await this.fileRepository.save(files);
     }
-    await this.fileRepository.save(files);
+  
+    return savedAsset;
   }
 
-  return savedAsset;
-}
   //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
     

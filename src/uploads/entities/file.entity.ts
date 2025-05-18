@@ -22,11 +22,6 @@ export class File implements IFile {
   @Column()
   typeFile: string;
 
-  @Column()
-  filePath: string; // ✅ Chemin du fichier sur le serveur
-
-  @Column()
-  originalName: string;
 
   @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true,onDelete: 'CASCADE' })
   asset: IAsset|string;
