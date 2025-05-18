@@ -8,6 +8,7 @@ import { IUser } from 'src/user/types/interface/user.interface';
 import { IAnomalyStatus } from 'src/anomaly-status/types/interfaces/anomaly-status.interface';
 import { IAsset } from 'src/assets/types/interface/Asset.interface';
 import { Asset } from 'src/assets/Entities/asset.entity';
+import { AnomalySeverity } from '../types/enums/anomaly-severity.enum';
 
 @Entity()
 export class Anomaly implements IAnomaly{
@@ -24,7 +25,14 @@ export class Anomaly implements IAnomaly{
   statusHistory: IAnomalyStatus[]|string;
   
   @ManyToOne(() => User, (user) => user.anomalies, { eager: true, onDelete: 'SET NULL', nullable: true })
-  operator: IUser|string;
+  reportedBy: IUser|string;
+
+  @Column({
+    type: 'enum',
+    enum: AnomalySeverity,
+    default: AnomalySeverity.MEDIUM,
+  })
+  severity: AnomalySeverity;
 
   @OneToMany(() => File, (file) => file.anomaly)
   files: IFile[]|string[];

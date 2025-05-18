@@ -16,6 +16,7 @@ import { LocationRepository } from 'src/location/repositories/location.repositor
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
+import { userRepository } from 'src/user/repositories/user.repository';
 
 
 @Module({
@@ -25,7 +26,7 @@ import { StatusRepository } from 'src/status/repositories/status.repository';
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService ,SupplierRepository, LocationRepository,LocationHistoryRepository
-    ,AssetStatusRepository,StatusRepository,JwtService],
+    ,AssetStatusRepository,StatusRepository,JwtService,userRepository],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

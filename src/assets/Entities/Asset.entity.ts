@@ -12,6 +12,8 @@ import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { ILocationHistory } from 'src/location-history/types/interfaces/location-history.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { IFile } from 'src/uploads/types/interfaces/file.interface';
+import { IUser } from 'src/user/types/interface/user.interface';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -38,6 +40,10 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => Status, { eager: true, nullable: false, onDelete: 'SET NULL' })
   status: Istatus|string;
+
+  @ManyToOne(() => User, (user) => user.assets, { nullable: true, eager: true, onDelete: 'SET NULL' })
+  user: IUser | string;
+  
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

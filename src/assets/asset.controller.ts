@@ -4,6 +4,7 @@ import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
+import { AssignMultipleAssetsDto } from "./types/dto/Assign-Multiple-Assets.dto";
 
 @ApiBearerAuth()
 @ApiTags('Asset Resource')
@@ -33,6 +34,13 @@ export class AssetController {
    };
   }
 
+    @Patch('assign-multiple')
+  async assignMultipleAssetsToUser(
+    @Body() assignDto: AssignMultipleAssetsDto,
+  ) {
+    return this.assetService.assignMultipleAssetsToUser(assignDto.assetIds, assignDto.userId);
+  }
+
     @Get(':id')
     @ApiOperation({ summary: 'get asset by id' })
     async getAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
@@ -56,5 +64,7 @@ export class AssetController {
     async getHistoryAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getHistoryAssetById(id);
     }
+
+  
   }
   

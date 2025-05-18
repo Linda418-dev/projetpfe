@@ -20,6 +20,7 @@ import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
 import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { In } from 'typeorm';
+import { userRepository } from 'src/user/repositories/user.repository';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -29,7 +30,8 @@ export class AssetsService {
         private readonly locationRepository : LocationRepository,
         private readonly locationHistoryRepository : LocationHistoryRepository,
         private readonly assetStatusRepository : AssetStatusRepository,
-        private readonly statusRepository : StatusRepository
+        private readonly statusRepository : StatusRepository,
+        private readonly userRepository : userRepository
     
        
     ) {}
@@ -166,10 +168,11 @@ export class AssetsService {
 
   // Remplace complètement les anciens fichiers
   fetchAsset.files = relatedFiles;
+}
 
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
-    }
+    
     }
     
   // methode pour creation asset 
@@ -316,6 +319,35 @@ export class AssetsService {
   }
 
 
+ async assignMultipleAssetsToUser(assetIds: string[], userId: string) {
+  const user = await this.userRepository.findOneBy({ id: userId });
+  if (!user) throw new NotFoundException('User not found');
+
+  const assets = await this.assetRepository.find({
+    where: { id: In(assetIds) },
+    relations: ['user'],
+  });
+
+  if (assets.length === 0) throw new NotFoundException('No assets found for provided IDs');
+
+  const conflictedAssets = assets.filter(asset => {
+    if (!asset.user) return false;
+    if (typeof asset.user === 'string') return asset.user !== userId;
+    return asset.user.id !== userId;
+  });
+
+  if (conflictedAssets.length > 0) {
+    const conflictedIds = conflictedAssets.map(a => a.id).join(', ');
+    throw new BadRequestException(`Assets already assigned to another user: ${conflictedIds}`);
+  }
+
+  assets.forEach(asset => {
+    asset.user = user;
+  });
+
+  await this.assetRepository.save(assets);
+  return assets;
+}
 
 }
 

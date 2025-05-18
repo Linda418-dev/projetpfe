@@ -12,10 +12,11 @@ import { LocationRepository } from 'src/location/repositories/location.repositor
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
+import { userRepository } from 'src/user/repositories/user.repository';
 
 @Module({
   providers: [ServiceService,ServiceRepository, DepartmentRepository,LocationRepository, AssetRepository,AssetsService,FileRepository,CategoryRepository,SupplierRepository
-    ,LocationHistoryRepository,AssetStatusRepository,StatusRepository
+    ,LocationHistoryRepository,AssetStatusRepository,StatusRepository,userRepository
   ],
   controllers: [ServiceController]
 })

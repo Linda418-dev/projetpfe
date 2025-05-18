@@ -9,6 +9,7 @@ import { User } from 'src/user/entities/user.entity';
 import { IUser } from 'src/user/types/interface/user.interface';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { Asset } from 'src/assets/Entities/asset.entity';
+import { AnomalySeverity } from './types/enums/anomaly-severity.enum';
 
 
 @Injectable()
@@ -33,7 +34,7 @@ relations: [
   'files',
   'statusHistory',
   'statusHistory.status',
-  'operator',
+  'reportedBy',
   'asset',
   'asset.location',
   'asset.location.service',
@@ -44,14 +45,14 @@ relations: [
         createdAt: 'DESC',
       },
     });
-  } else if (userRole === 'operator') {
+  } else if (userRole === 'operator'|| userRole === 'employee') {
     anomalies = await this.anomalyRepository.find({
-      where: { operator: { id: currentUser.id } },
+      where: { reportedBy: { id: currentUser.id } },
 relations: [
   'files',
   'statusHistory',
   'statusHistory.status',
-  'operator',
+  'reportedBy',
   'asset',
   'asset.location',
   'asset.location.service',
@@ -83,8 +84,8 @@ relations: [
 }
 
    
-   async createAnomaly(createAnomalyDto: CreateAnomalyDto, operator: User) {
-  const { description, fileIds, assetId } = createAnomalyDto;
+   async createAnomaly(createAnomalyDto: CreateAnomalyDto, reportedBy: User) {
+  const { description, fileIds, assetId ,severity  } = createAnomalyDto;
 
   const pendingStatus = await this.statusRepository.findOne({
     where: { name: 'pending', type: 'anomaly' },
@@ -110,7 +111,8 @@ relations: [
   const anomaly = this.anomalyRepository.create({
     description,
     asset,
-    operator,
+    reportedBy,
+    severity: severity ?? AnomalySeverity.MEDIUM, 
   });
 
   const savedAnomaly = await this.anomalyRepository.save(anomaly);
@@ -138,7 +140,7 @@ relations: [
       'files',
       'statusHistory',
       'statusHistory.status',
-      'operator',
+      'reportedBy',
       'asset',
       'asset.location',
       'asset.location.service',

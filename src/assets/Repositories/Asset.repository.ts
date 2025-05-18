@@ -11,28 +11,38 @@ export class AssetRepository extends Repository<Asset> {
     super(Asset, dataSource.createEntityManager());
   }
 
-  async getAllAssetWithPaginate(params: PaginateSearchDto) {
-    const query = this.createQueryBuilder("asset");
+ async getAllAssetWithPaginate(params: PaginateSearchDto) {
+  const query = this.createQueryBuilder("asset")
+    .leftJoinAndSelect("asset.status", "status")
+    .leftJoinAndSelect("asset.category", "category")
+    .leftJoinAndSelect("asset.supplier", "supplier")
+    .leftJoinAndSelect("asset.location", "location")
+    .leftJoinAndSelect("asset.files", "files")
+    .leftJoinAndSelect("asset.user", "user");
 
-    if (params.keyword) {
-      query.where("asset.name ILIKE :keyword", {
-        keyword: `%${params.keyword}%`,
-      });
-    }
-    if (params.skip) {
-      query.skip(params.skip);
-    }
-  
-    if (params.take) {
-      query.take(params.take);
-    }
-
-    if (params.orderField && params.orderDirection) {
-      query.orderBy(`asset.${params.orderField}`, params.orderDirection);
-    }
-
-    return query.getManyAndCount();
+  if (params.keyword) {
+    query.andWhere("asset.name ILIKE :keyword", {
+      keyword: `%${params.keyword}%`,
+    });
   }
+
+  if (params.orderField && params.orderDirection) {
+    query.orderBy(`asset.${params.orderField}`, params.orderDirection.toUpperCase() as 'ASC' | 'DESC');
+  } else {
+    query.orderBy("asset.createdAt", "DESC");
+  }
+
+  if (params.skip ) {
+    query.skip(params.skip);
+  }
+
+  if (params.take ) {
+    query.take(params.take);
+  }
+
+  return query.getManyAndCount();
+}
+
 
   async getLocationHistoryByAssetId(assetId: string) {
     return this.dataSource
