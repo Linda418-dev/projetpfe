@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { Workbook } from 'exceljs';
 import * as ExcelJS from 'exceljs';
-import { Iaffectation } from 'src/affectation/types/interfaces/affectation.interface';
-import { IAssetStatus } from 'src/asset-status/types/interfaces/asset-status.interface';
+import { Affectation } from 'src/affectation/entities/affectation.entity';
+import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
 import { Asset } from 'src/assets/Entities/asset.entity';
-import { IAsset } from 'src/assets/types/interface/Asset.interface';
 import { ICategory } from 'src/category/types/interface/category.interface';
 import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
-import { Iinventory } from 'src/inventory/types/interfaces/inventory.interface';
-import { ILocationHistory } from 'src/location-history/types/interfaces/location-history.interface';
+import { Inventory } from 'src/inventory/entities/inventory.entity';
+import { LocationHistory } from 'src/location-history/entities/location-history.entity';
+import { Location } from 'src/location/entities/location.entity';
 import { Ilocation } from 'src/location/types/interfaces/location.interface';
+import { Status } from 'src/status/entities/status.entity';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
-import { IUser } from 'src/user/types/interface/user.interface';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class ExcelService { 
@@ -56,48 +57,44 @@ export class ExcelService {
     return buffer;
   }
 
-  async exportInventoryDetailsByInventoryId(inventoryId: string) {
-    const details = await this.inventoryDetailsRepository
-    .createQueryBuilder('details')
-    .leftJoinAndSelect('details.affectation', 'affectation')
-    .leftJoinAndSelect('affectation.operator', 'operator')
-    .leftJoinAndSelect('affectation.inventory', 'inventory')
-    .leftJoinAndSelect('details.locationHistory', 'locationHistory')
-    .leftJoinAndSelect('locationHistory.location', 'location')
-    .leftJoinAndSelect('locationHistory.asset', 'asset')
-    .leftJoinAndSelect('asset.status', 'assetStatusFromAsset')
-    .leftJoinAndSelect('details.assetStatus', 'assetStatus')
-    .leftJoinAndSelect('assetStatus.status', 'status')
-    .where('inventory.id = :inventoryId', { inventoryId })
-    .getMany();
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet('Biens Scannés');
+ async exportInventoryDetailsByInventoryId(inventoryId: string) {
+   const details = await this.inventoryDetailsRepository.findDetailsByInventoryId(inventoryId);
 
-    worksheet.columns = [
-      { header: 'Nom Inventaire', key: 'inventory', width: 20 },
-      { header: 'Opérateur', key: 'operator', width: 20 },
-      { header: 'Date Scan', key: 'scannedAt', width: 20 },
-      { header: 'Nom Bien', key: 'assetName', width: 20 },
-      { header: 'Emplacement', key: 'locationName', width: 20 },
-      { header: 'Statut', key: 'statusName', width: 15 },
-    ];
 
-    for (const detail of details) {
-      let operator = detail.affectation as IUser;
-      let inventory = detail.affectation as Iinventory;
-      let locationHistory = detail.locationHistory as Ilocation;
-      let assetName = detail.locationHistory as IAsset;
-      let statusName = detail.assetStatus as IAsset;
-      worksheet.addRow({
-        inventory: inventory.name,
-        operator: operator.email ?? 'Non défini',
-        scannedAt: detail.scannedAt.toISOString().split('T')[0],
-        assetName: assetName.name ?? 'N/A',
-        locationName: locationHistory.name ?? 'N/A',
-        statusName: statusName.name ?? 'N/A',
-      });
-    }
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet('Biens Scannés');
 
-    return await workbook.xlsx.writeBuffer();
+  worksheet.columns = [
+    { header: 'Nom Inventaire', key: 'inventory', width: 20 },
+    { header: 'Opérateur', key: 'operator', width: 20 },
+    { header: 'Date Scan', key: 'scannedAt', width: 20 },
+    { header: 'Nom Bien', key: 'assetName', width: 20 },
+    { header: 'Emplacement', key: 'locationName', width: 20 },
+    { header: 'Statut', key: 'statusName', width: 15 },
+  ];
+
+  for (const detail of details) {
+    const affectation = detail.affectation as Affectation;
+    const operator = affectation.operator as User;
+    const inventory = affectation.inventory as Inventory;
+    const locationHistory = detail.locationHistory as LocationHistory;
+    const location = locationHistory?.location as Location;
+    const asset = locationHistory?.asset as Asset;
+    const assetStatus = detail.assetStatus as AssetStatus;
+    const status = assetStatus?.status as Status;
+
+    worksheet.addRow({
+      inventory: inventory?.name ?? 'Non défini',
+      operator: operator?.email ?? 'Non défini',
+      scannedAt: detail.scannedAt?.toISOString().split('T')[0] ?? 'Non défini',
+      assetName: asset?.name ?? 'N/A',
+      locationName: location?.name ?? 'N/A',
+      statusName: status?.name ?? 'N/A',
+    });
   }
+
+  return await workbook.xlsx.writeBuffer();
+}
+
+
 }

@@ -12,26 +12,44 @@ export class ExcelController {
         private readonly excelService: ExcelService,
       ) {}
     
-      @Get('assets')
-      async downloadAssetsExcel(@Res() res: Response) {
-        // récupère tous les assets 
-        const assets = await this.assetRepository.find();
-        const buffer = await this.excelService.exportAssetsToExcel(assets);
-        res.set({
-          'Content-Type':
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // informer le navigateur qu'il sagit d'un fichier excel
-          'Content-Disposition': 'attachment; filename=assets.xlsx', // le navigateur doit téléchager le fichier excel avec un nom 
-        });
-        // envoyer le fichier Excel au client 
-        res.send(buffer);
-      }
-        @Get('inventory/:id')
-  async exportInventory(@Param('id') inventoryId: string, @Res() res: Response) {
-    const buffer = await this.excelService.exportInventoryDetailsByInventoryId(inventoryId);
+      
+@Get('assets')
+async downloadAssetsExcel(@Res() res: Response) {
+  const assets = await this.assetRepository.find();
+  const buffer = await this.excelService.exportAssetsToExcel(assets);
 
-    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    res.setHeader('Content-Disposition', `attachment; filename="inventory-${inventoryId}.xlsx"`);
+  // Obtenir la date système au format AAAA-MM-JJ
+  const dateStr = new Date().toISOString().split('T')[0]; // exemple: '2025-05-18'
+  // ou avec dayjs (si installé) : const dateStr = dayjs().format('YYYY-MM-DD');
 
-    res.end(buffer);
-  }
+  res.set({
+    'Content-Type':
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'Content-Disposition': `attachment; filename=${dateStr}.xlsx`,
+  });
+
+  res.send(buffer);
+}
+  @Get('inventory/:id')
+async exportInventory(
+  @Param('id') inventoryId: string,
+  @Res() res: Response,
+) {
+  const buffer = await this.excelService.exportInventoryDetailsByInventoryId(inventoryId);
+
+  // Obtenir la date système au format AAAA-MM-JJ
+  const dateStr = new Date().toISOString().split('T')[0];
+
+  res.setHeader(
+    'Content-Type',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  );
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename=inventory-${inventoryId}-${dateStr}.xlsx`,
+  );
+
+  res.end(buffer);
+}
+
 }

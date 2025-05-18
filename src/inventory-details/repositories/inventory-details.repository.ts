@@ -22,6 +22,20 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
       .addOrderBy('assetStatus.createdAt', 'DESC')  
       .getMany();
   }
+   async findDetailsByInventoryId(inventoryId: string){
+    return this.createQueryBuilder('details')
+      .leftJoinAndSelect('details.affectation', 'affectation')
+      .leftJoinAndSelect('affectation.operator', 'operator')
+      .leftJoinAndSelect('affectation.inventory', 'inventory')
+      .leftJoinAndSelect('details.locationHistory', 'locationHistory')
+      .leftJoinAndSelect('locationHistory.location', 'location')
+      .leftJoinAndSelect('locationHistory.asset', 'asset')
+      .leftJoinAndSelect('asset.status', 'assetStatusFromAsset')
+      .leftJoinAndSelect('details.assetStatus', 'assetStatus')
+      .leftJoinAndSelect('assetStatus.status', 'status')
+      .where('inventory.id = :inventoryId', { inventoryId })
+      .getMany();
+  }
 
   
   
