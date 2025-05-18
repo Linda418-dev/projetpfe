@@ -22,7 +22,7 @@ export class Anomaly implements IAnomaly{
   asset: IAsset | string;
 
   @OneToMany(() => AnomalyStatus, (anomalyStatus) => anomalyStatus.anomaly, { cascade: true })
-  statusHistory: IAnomalyStatus[]|string;
+  statusHistory: IAnomalyStatus[];
   
   @ManyToOne(() => User, (user) => user.anomalies, { eager: true, onDelete: 'SET NULL', nullable: true })
   reportedBy: IUser|string;
@@ -36,6 +36,9 @@ export class Anomaly implements IAnomaly{
 
   @OneToMany(() => File, (file) => file.anomaly)
   files: IFile[]|string[];
+
+  @ManyToOne(() => User, { eager: true, nullable: true, onDelete: 'SET NULL' })
+  technician: IUser | string;
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

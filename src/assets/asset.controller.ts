@@ -4,7 +4,7 @@ import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
-import { AssignMultipleAssetsDto } from "./types/dto/Assign-Multiple-Assets.dto";
+import { AssignMultipleAssetsDto } from "./types/dto/assign-multiple-assets.dto";
 
 @ApiBearerAuth()
 @ApiTags('Asset Resource')

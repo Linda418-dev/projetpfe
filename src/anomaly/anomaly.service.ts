@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { AnomalyRepository } from './Repositories/anomaly.repository';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { FileRepository } from 'src/uploads/repositories/file.repository';
@@ -10,6 +10,10 @@ import { IUser } from 'src/user/types/interface/user.interface';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { Asset } from 'src/assets/Entities/asset.entity';
 import { AnomalySeverity } from './types/enums/anomaly-severity.enum';
+import { AssetStatusEnum } from 'src/status/types/enums/asset-status.enum';
+import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
+import { userRepository } from 'src/user/repositories/user.repository';
+import { AnomalyStatusEnum } from 'src/status/types/enums/anomaly-status.enum';
 
 
 @Injectable()
@@ -20,6 +24,8 @@ export class AnomalyService {
         private readonly statusRepository : StatusRepository,
         private readonly anomalyStatusRepository : AnomalyStatusRepository,
         private readonly assetRepository: AssetRepository,
+        private readonly assetStatusHistoryRepository : AssetStatusRepository,
+        private readonly userRepository : userRepository
     ){}
  async getAllAnomalies(currentUser: User) {
   let anomalies;
@@ -30,7 +36,7 @@ export class AnomalyService {
 
   if (userRole === 'admin') {
     anomalies = await this.anomalyRepository.find({
-relations: [
+   relations: [
   'files',
   'statusHistory',
   'statusHistory.status',
@@ -206,35 +212,55 @@ relations: [
   
 
   async acceptAnomaly(anomalyId: string) {
-    // vérifier si l'anomalie existe
-    const anomaly = await this.anomalyRepository.findOne({ where: { id: anomalyId } });
-    if (!anomaly) {
-      throw new NotFoundException('Anomaly not found');
-    }
-  
-    // Chercher le statut 'accepted' de type 'anomaly'
-    const acceptedStatus = await this.statusRepository.findOne({
-      where: { name: 'accepted', type: 'anomaly' },
-    });
-  
-    if (!acceptedStatus) {
-      throw new NotFoundException("Status 'accepted' not found for anomaly");
-    }
-  
-   // Créer le nouveau  status dans  AnomalyStatus
-    const anomalyStatus = this.anomalyStatusRepository.create({
-      anomaly,
-      status: acceptedStatus,
-    });
-  
-    await this.anomalyStatusRepository.save(anomalyStatus);
-  
-    return {
-      message: 'Anomaly status updated to accepted',
-      status: acceptedStatus,
-      anomaly,
-    };
+  const anomaly = await this.anomalyRepository.findOne({
+    where: { id: anomalyId },
+    relations: ['asset'],
+  });
+
+  if (!anomaly) {
+    throw new NotFoundException('Anomaly not found');
   }
+
+  //  Trouver le status "accepted" pour les anomalies
+  const acceptedStatus = await this.statusRepository.findOne({
+    where: { name: 'accepted', type: 'anomaly' },
+  });
+
+  if (!acceptedStatus) {
+    throw new NotFoundException("Status 'accepted' not found for anomaly");
+  }
+
+  // Enregistrer le nouveau status de l’anomalie
+  const anomalyStatus = this.anomalyStatusRepository.create({
+    anomaly,
+    status: acceptedStatus,
+  });
+  await this.anomalyStatusRepository.save(anomalyStatus);
+
+  //  Trouver le status "IN_REPAIR" pour les assets
+  const inRepairStatus = await this.statusRepository.findOne({
+    where: { name: AssetStatusEnum.IN_REPAIR, type: 'asset' },
+  });
+
+  if (!inRepairStatus) {
+    throw new NotFoundException("Status 'In Repair' not found for asset");
+  }
+
+  //  Historiser le changement de statut du bien
+  const assetStatusRecord = this.assetStatusHistoryRepository.create({
+    asset: anomaly.asset,
+    status: inRepairStatus,
+  });
+
+  await this.assetStatusHistoryRepository.save(assetStatusRecord);
+
+  return {
+    message: 'Anomaly accepted and asset marked as In Repair',
+    status: acceptedStatus,
+    anomaly,
+  };
+}
+
   
 
   async refuseAnomaly(anomalyId: string) {
@@ -267,6 +293,56 @@ relations: [
       anomaly,
     };
   }
+
+async assignTechnician(anomalyId: string, technicianId: string) {
+  const anomaly = await this.anomalyRepository.findOne({
+    where: { id: anomalyId },
+    relations: ['technician', 'statusHistory'],
+  });
+
+  if (!anomaly) {
+    throw new NotFoundException('Anomaly not found');
+  }
+
+  // Vérifier que le dernier statut est "accepted"
+  const lastStatus = anomaly.statusHistory
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+
+  if (
+    !lastStatus ||
+    typeof lastStatus.status !== 'object' ||
+    lastStatus.status.name !== AnomalyStatusEnum.ACCEPTED
+  ) {
+    throw new BadRequestException('Technician can only be assigned if anomaly status is accepted');
+  }
+
+  // Vérifier si un technicien est déjà assigné
+  if (anomaly.technician) {
+    throw new BadRequestException('A technician has already been assigned to this anomaly');
+  }
+
+  const technician = await this.userRepository.findOne({
+    where: { id: technicianId },
+    relations: ['role'],
+  });
+
+  if (!technician || (typeof technician.role !== 'string' && technician.role?.role !== 'technician')) {
+    throw new NotFoundException('Technician not found or invalid role');
+  }
+
+  // Assigner le technicien
+  anomaly.technician = technician;
+
+  const updated = await this.anomalyRepository.save(anomaly);
+
+  return {
+    message: 'Technician assigned to anomaly',
+    anomaly: updated,
+  };
+}
+
+
+
   
 
   

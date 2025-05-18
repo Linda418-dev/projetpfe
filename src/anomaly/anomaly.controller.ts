@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AssignTechnicianDto } from './types/dto/assign-technician.dto';
 
 @ApiBearerAuth()
 @ApiTags('Anomaly Resource')
@@ -33,6 +34,15 @@ export class AnomalyController {
     progressAnomaly(@Param('id') id: string) {
       return this.anomalyService.progressAnomaly(id);
     }
+
+    @Post(':id/assign-technician')
+async assignTechnician(
+  @Param('id') id: string,
+  @Body() assignDto: AssignTechnicianDto,
+) {
+  return this.anomalyService.assignTechnician(id, assignDto.technicianId);
+}
+
      
  
     @Patch(':id/accept')
