@@ -19,9 +19,9 @@ export class NotificationRepository extends Repository<Notification> {
       .getMany();
   }
 
-   async countAllUnread(): Promise<number> {
+   async countAllUnread() {
     return this.createQueryBuilder('notification')
-      .where('notification.read = false')
+      .where('notification.seen = false')
       .getCount();
   }
  

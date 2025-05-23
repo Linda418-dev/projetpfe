@@ -19,15 +19,14 @@ export class UserService {
   ) {}
 
 
-async getUsers(){
+  async getUsers(){
   return this.userRepository.find({
-      relations: ['role', 'affectations', 'anomalies', 'assets'],
+      relations: ['role', 'affectations', 'anomalies'],
     });
-}
-    // methode get All Users
-   async getAllUsers(params: PaginateSearchDto) {
+  }
+  // methode get All Users
+  async getAllUsers(params: PaginateSearchDto) {
   const [users, total] = await this.userRepository.getAllUsersWithPaginate(params);
-
   return {
     data: users,
     total,
@@ -36,60 +35,50 @@ async getUsers(){
   };
 }
 
- 
+  // méthode get user by id 
+  async getUserById(id: string) {
+  const user = await this.userRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+  return user;
+}
 
-    
-    // méthode get user by id 
-      async getUserById(id: string) {
-        const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) {
-          throw new NotFoundException('User not found');
-        }
-        return user;
-      }
-
-      // méthode create user 
-      async createUser(createUserDto: CreateUserDto) {
-        const { email, username, password, roleId } = createUserDto;
-      
-        const userExists = await this.userRepository.findOne({
-          where: [{ email }, { username }],
-        });
-      
-        if (userExists) {
-          throw new ConflictException('User with this email or username already exists');
-        }
-      
-        const userRole = await this.userRoleRepository.findOne({
-          where: { id: roleId },
-        });
-      
-        if (!userRole) {
-          throw new ConflictException('Invalid role ID');
-        }
-      
-        const hashedPassword = await this.bcryptService.hashPassword(password);
-      
-        const newUser = this.userRepository.create({
-          email,
-          username,
-          password: hashedPassword,
-          role: userRole,
-        });
-      
-        const savedUser = await this.userRepository.save(newUser);
-        return {
-          id: savedUser.id,
-          email: savedUser.email,
-          username: savedUser.username,
-          role: savedUser.role,
-          isActive: savedUser.isActive,
-          createdAt: savedUser.createdAt,
-          updatedAt: savedUser.updatedAt,
-        };
-      }
+  // méthode create user 
+  async createUser(createUserDto: CreateUserDto) {
+    const { email, username, password, roleId } = createUserDto;
+    const userExists = await this.userRepository.findOne({
+      where: [{ email }, { username }],
+    });
+    if (userExists) {
+      throw new ConflictException('User with this email or username already exists');
+    }
+    const userRole = await this.userRoleRepository.findOne({
+      where: { id: roleId },
+    });
+    if (!userRole) {
+      throw new ConflictException('Invalid role ID');
+    }
+    const hashedPassword = await this.bcryptService.hashPassword(password);
+    const newUser = this.userRepository.create({
+      email,
+      username,
+      password: hashedPassword,
+      role: userRole,
+    });
+    const savedUser = await this.userRepository.save(newUser);
+    return {
+      id: savedUser.id,
+      email: savedUser.email,
+      username: savedUser.username,
+      role: savedUser.role,
+      isActive: savedUser.isActive,
+      createdAt: savedUser.createdAt,
+      updatedAt: savedUser.updatedAt,
+    };
+  }
        
-    // methode pour update user 
+   // methode pour update user 
   async updateUser(id: string, updateUserDto: UpdateUserDto) {
   const user = await this.userRepository.findOne({ where: { id }, relations: ['role'] });
 
