@@ -90,29 +90,47 @@ async getUsers(){
       }
        
     // methode pour update user 
-      async updateUser(id: string, updateUserDto: UpdateUserDto) {
-      const user = await this.userRepository.findOne({ where: { id } });
+    async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  const user = await this.userRepository.findOne({ where: { id }, relations: ['role'] });
 
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
 
-      if (updateUserDto.password) {
-        updateUserDto.password = await this.bcryptService.hashPassword(updateUserDto.password);
-       }
+  if (updateUserDto.password) {
+    updateUserDto.password = await this.bcryptService.hashPassword(updateUserDto.password);
+  }
 
-       Object.assign(user, updateUserDto);
-        const  savedUser = await this.userRepository.save(user);
-        return {
-          id: savedUser.id,
-          email: savedUser.email,
-          username: savedUser.username,
-          role: savedUser.role,
-          isActive: savedUser.isActive,
-          createdAt: savedUser.createdAt,
-          updatedAt: savedUser.updatedAt,
-        };
-      }
+  // Mise à jour du rôle si roleId est fourni
+  if (updateUserDto.roleId) {
+    const newRole = await this.userRoleRepository.findOne({
+      where: { id: updateUserDto.roleId },
+    });
+
+    if (!newRole) {
+      throw new ConflictException('Invalid role ID');
+    }
+
+    user.role = newRole;
+  }
+
+  // Supprimer roleId du DTO pour éviter de l'assigner directement
+  const { roleId, ...otherUpdates } = updateUserDto;
+  Object.assign(user, otherUpdates);
+
+  const savedUser = await this.userRepository.save(user);
+
+  return {
+    id: savedUser.id,
+    email: savedUser.email,
+    username: savedUser.username,
+    role: savedUser.role,
+    isActive: savedUser.isActive,
+    createdAt: savedUser.createdAt,
+    updatedAt: savedUser.updatedAt,
+  };
+}
+
 
       // méthode poure  supprimer user  s'il n'a pas d’affectations. 
       async deleteUser(targetUserId: string, currentUserId: string) {
