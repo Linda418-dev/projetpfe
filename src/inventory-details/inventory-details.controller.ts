@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Res  } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { InventoryDetailsService } from './inventory-details.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
@@ -7,11 +7,12 @@ import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
 @ApiTags('inventory-details Resource')
 @Controller('inventory-details')
 export class InventoryDetailsController {
-    constructor(private readonly inventoryDetailsService: InventoryDetailsService) {}
+    constructor(private readonly inventoryDetailsService: InventoryDetailsService
+    ) {}
   
     @Get()
     getAllInventoryDetails() {
-      return this.inventoryDetailsService. getAllInventoryDetails();
+      return this.inventoryDetailsService.getAllInventoryDetails();
     }
 
     @Post()
@@ -21,13 +22,15 @@ export class InventoryDetailsController {
     
     @Get(':id')
     getInventorydetailsById(@Param('id') id: string) {
-      return this.inventoryDetailsService. getInventorydetailsById(id);
+      return this.inventoryDetailsService.getInventorydetailsById(id);
     }
 
     @Get('/by-inventory/:inventoryId')
     getInventoryDetailsByInventoryId(@Param('inventoryId') inventoryId: string) {
       return this.inventoryDetailsService.getInventoryDetailsByInventoryId(inventoryId);
     }
+
+    
 
     
 }

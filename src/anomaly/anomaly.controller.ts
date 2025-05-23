@@ -24,6 +24,11 @@ export class AnomalyController {
       return this.anomalyService.createAnomaly(createAnomalyDto, req.user);
     }
 
+    @Get('statistics/by-month')
+    getAnomaliesByMonth() {
+      return this.anomalyService.getAnomaliesByMonth();
+    }
+
     @BypassInventoryLock()
     @Get(':id')
     getAnomalyById(@Param('id') id: string) {
@@ -36,12 +41,12 @@ export class AnomalyController {
     }
 
     @Post(':id/assign-technician')
-async assignTechnician(
-  @Param('id') id: string,
-  @Body() assignDto: AssignTechnicianDto,
-) {
-  return this.anomalyService.assignTechnician(id, assignDto.technicianId);
-}
+    async assignTechnician(
+      @Param('id') id: string,
+      @Body() assignDto: AssignTechnicianDto,
+    ) {
+      return this.anomalyService.assignTechnician(id, assignDto.technicianId);
+    }
 
      
  

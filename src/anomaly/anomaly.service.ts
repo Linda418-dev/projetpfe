@@ -138,6 +138,16 @@ relations: [
   return savedAnomaly;
 }
 
+
+
+async getAnomaliesByMonth() {
+  const result = await this.anomalyRepository.getAnomaliesByMonthRaw();
+  return result.map(item => ({
+    month: item.month,
+    count: parseInt(item.count, 10),
+  }));
+}
+
   
    async getAnomalyById(id: string) {
   const anomaly = await this.anomalyRepository.findOne({

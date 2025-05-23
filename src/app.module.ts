@@ -54,7 +54,7 @@ import { AnomalyModule } from './anomaly/anomaly.module';
 import { Anomaly } from './anomaly/Entities/anomaly.entity';
 import { NotificationModule } from './notification/notification.module';
 import { NotificationService } from './notification/notification.service';
-import { NotificationRepository } from './notification/repositories/inventory.repository';
+import { NotificationRepository } from './notification/repositories/notification.repository';
 import { Notification } from './notification/entities/notification.entity';
 import { AnomalyStatusModule } from './anomaly-status/anomaly-status.module';
 import { AnomalyStatus } from './anomaly-status/entities/anomaly-status.entity';

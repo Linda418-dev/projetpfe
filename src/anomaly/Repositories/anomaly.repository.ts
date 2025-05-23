@@ -9,4 +9,14 @@ export class AnomalyRepository extends Repository<Anomaly> {
     super(Anomaly, dataSource.createEntityManager());
   }
 
+  async getAnomaliesByMonthRaw(){
+  return this.createQueryBuilder('anomaly')
+    .select("TO_CHAR(anomaly.createdAt, 'YYYY-MM')", 'month')
+    .addSelect('COUNT(*)', 'count')
+    .groupBy('month')
+    .orderBy('month', 'ASC')
+    .getRawMany();
+}
+
+
 }

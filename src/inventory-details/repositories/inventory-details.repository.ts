@@ -37,6 +37,9 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
       .getMany();
   }
 
+
+  
+
   
   
   

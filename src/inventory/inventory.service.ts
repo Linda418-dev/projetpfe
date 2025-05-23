@@ -673,4 +673,5 @@ async handlePlannedInventoriesToLaunch() {
 
   console.log(`${launchedCount} inventory(ies) have been launched.`);
 }
+
 }

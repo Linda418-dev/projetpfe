@@ -22,6 +22,10 @@ export class Asset implements IAsset {
 
   @Column()
   name: string;
+  
+  @Column({ nullable: true })
+  qrCode: string;
+
 
   @ManyToOne(() => Category, (category) => category.assets, { nullable: true, eager: true, onDelete: "CASCADE" })
   category:ICategory|string;  

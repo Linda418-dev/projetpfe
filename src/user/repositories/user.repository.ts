@@ -19,10 +19,9 @@ export class userRepository extends Repository<User> {
   }
 
 
-  async getAllUsersWithPaginate(params: PaginateSearchDto, currentUserId: string) {
+  async getAllUsersWithPaginate(params: PaginateSearchDto) {
    const query = this.createQueryBuilder("user")
     .leftJoinAndSelect("user.role", "role")
-    .where("user.id != :currentUserId", { currentUserId });
 
   if (params.keyword) {
     query.andWhere(

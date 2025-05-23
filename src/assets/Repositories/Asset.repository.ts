@@ -86,6 +86,42 @@ export class AssetRepository extends Repository<Asset> {
       .getMany();
   }
 
+   async countAll() {
+    return this.count();
+  }
+
+  async countByStatus() {
+    const results = await this.createQueryBuilder('asset')
+      .leftJoin('asset.status', 'status')
+      .select('status.name', 'status')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('status.name')
+      .getRawMany();
+
+    const formatted = {};
+    results.forEach(row => {
+      formatted[row.status] = parseInt(row.count);
+    });
+
+    return formatted;
+  }
+
+  async countByCategory() {
+    const results = await this.createQueryBuilder('asset')
+      .leftJoin('asset.category', 'category')
+      .select('category.name', 'category')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('category.name')
+      .getRawMany();
+
+    const formatted = {};
+    results.forEach(row => {
+      formatted[row.category] = parseInt(row.count);
+    });
+
+    return formatted;
+  }
+
 
 
   

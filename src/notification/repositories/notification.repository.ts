@@ -18,6 +18,12 @@ export class NotificationRepository extends Repository<Notification> {
       .orderBy('notification.createdAt', 'DESC')
       .getMany();
   }
+
+   async countAllUnread(): Promise<number> {
+    return this.createQueryBuilder('notification')
+      .where('notification.read = false')
+      .getCount();
+  }
  
  
 }

@@ -10,22 +10,34 @@ import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.
 import { AuthGuard } from '@nestjs/passport';
 import { ForgotPasswordDto } from './types/dto/Forgot-Password.dto';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
+import { NotificationService } from 'src/notification/notification.service';
 
 @ApiBearerAuth()
 @ApiTags('user Resource')
 @Controller('users')
 export class UserController {
-    constructor(private readonly userService : UserService){}
+    constructor(private readonly userService : UserService,
+      private readonly notificationService : NotificationService
+    ){}
 
-   @Get()
+
+
+ @Get('all-users')
+@UseGuards(JwtAuthGuard)
+async getUsers() {
+  return this.userService.getUsers();
+}
+
+
+
+  @Get()
   @UseGuards(JwtAuthGuard)
   async getAllUsers(
   @Query() params: PaginateSearchDto,
   @Req() req: any
 ) {
-  return this.userService.getAllUsers(params, req.user.id);
+  return this.userService.getAllUsers(params);
 }
-
 
   @Get(':id')
   async getUserById(@Param('id') id: string) {
@@ -78,13 +90,10 @@ async deactivateUser(@Param('id') userId: string, @Req() req: any) {
     return this.userService.updatePlayerId(req.user.id, playerId);
   }
 
-  @Post('forgot-password')
-  @ApiBody({ type: ForgotPasswordDto })
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
-    return this.userService.forgotPassword(forgotPasswordDto.email);
-  }
 
 
+
+  
   
 
 }

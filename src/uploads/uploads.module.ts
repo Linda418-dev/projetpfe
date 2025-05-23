@@ -18,6 +18,7 @@ import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
 import { CsvController } from './csv/csv.controller';
 import { CsvService } from './csv/csv.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -54,7 +55,7 @@ import { CsvService } from './csv/csv.service';
     }),
   ],
   controllers: [UploadsController, ExcelController, CsvController],
-  providers: [UploadsService, FileRepository,CategoryRepository, ExcelService,AssetRepository,ExcelService,ExcelController,InventoryDetailsRepository, CsvService,CsvController], 
+  providers: [UploadsService, FileRepository,CategoryRepository, ExcelService,AssetRepository,ExcelService,ExcelController,InventoryDetailsRepository, CsvService,CsvController,ConfigService ], 
   exports: [FileRepository, UploadsService], 
 })
 export class UploadsModule {}

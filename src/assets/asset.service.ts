@@ -21,6 +21,9 @@ import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { In } from 'typeorm';
 import { userRepository } from 'src/user/repositories/user.repository';
+import * as QRCode from 'qrcode';
+import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import axios from 'axios';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -31,7 +34,8 @@ export class AssetsService {
         private readonly locationHistoryRepository : LocationHistoryRepository,
         private readonly assetStatusRepository : AssetStatusRepository,
         private readonly statusRepository : StatusRepository,
-        private readonly userRepository : userRepository
+        private readonly userRepository : userRepository,
+         
     
        
     ) {}
@@ -156,15 +160,15 @@ export class AssetsService {
       }
 
       if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
-  // Vérifie si tous les fichiers existent
-  const relatedFiles = await this.fileRepository.find({
+     // Vérifie si tous les fichiers existent
+    const relatedFiles = await this.fileRepository.find({
     where: { id: In(updateAssetDto.fileIds) },
   });
 
   if (relatedFiles.length !== updateAssetDto.fileIds.length) {
     const foundIds = relatedFiles.map((file) => file.id);
     const missingIds = updateAssetDto.fileIds.filter(id => !foundIds.includes(id));
-    throw new BadRequestException(`Les fichiers suivants sont introuvables : ${missingIds.join(', ')}`);
+    throw new BadRequestException(`The following files could not be found : ${missingIds.join(', ')}`);
   }
 
   // Remplace complètement les anciens fichiers
@@ -178,64 +182,84 @@ export class AssetsService {
     
   // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
-    const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
-  
-    const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
-    if (!category) throw new Error('Category not found');
-  
-    const supplier = await this.supplierRepository.findOne({ where: { id: supplierId } });
-    if (!supplier) throw new Error('Supplier not found');
-  
-    const location = await this.locationRepository.findOne({
-      where: { id: locationId },
-      relations: ['service'],
-    });
-    if (!location) throw new Error('Location not found');
-  
-    let files: File[] = [];
-    if (fileIds?.length) {
-      files = await this.fileRepository.findByIds(fileIds);
-      const foundIds = files.map((f) => f.id);
-      const missingIds = fileIds.filter((id) => !foundIds.includes(id));
-  
-      if (missingIds.length > 0) {
-        throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
-      }
+  const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
+
+  const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+  if (!category) throw new Error('Category not found');
+
+  const supplier = await this.supplierRepository.findOne({ where: { id: supplierId } });
+  if (!supplier) throw new Error('Supplier not found');
+
+  const location = await this.locationRepository.findOne({
+    where: { id: locationId },
+    relations: ['service'],
+  });
+  if (!location) throw new Error('Location not found');
+
+  let files: File[] = [];
+  if (fileIds?.length) {
+    files = await this.fileRepository.findByIds(fileIds);
+    const foundIds = files.map((f) => f.id);
+    const missingIds = fileIds.filter((id) => !foundIds.includes(id));
+    if (missingIds.length > 0) {
+      throw new Error(`Files not found for IDs: ${missingIds.join(', ')}`);
     }
-     
-    const defaultStatus = await this.statusRepository.findOne({
-      where: { name: AssetStatusEnum.GOOD, type: 'asset' },
-    });
-    if (!defaultStatus) throw new Error('Default status "Good" not found');
-  
-    const asset = new Asset();
-    asset.name = name;
-    asset.category = category;
-    asset.supplier = supplier;
-    asset.location = location;
-    asset.status = defaultStatus; 
-  
-    const savedAsset = await this.assetRepository.save(asset);
-    
+  }
+
+  const defaultStatus = await this.statusRepository.findOne({
+    where: { name: AssetStatusEnum.GOOD, type: 'asset' },
+  });
+  if (!defaultStatus) throw new Error('Default status "Good" not found');
+
+  //  Créer l’asset sans QR code
+  const asset = new Asset();
+  asset.name = name;
+  asset.category = category;
+  asset.supplier = supplier;
+  asset.location = location;
+  asset.status = defaultStatus;
+
+  const savedAsset = await this.assetRepository.save(asset);
+
+  try {
+    // Générer le QR code et  stocker dans l’asset
+    await this.generateQrCodeAndAttachToAsset(savedAsset); 
+
+    // Enregistrer l’historique de localisation
     const locationHistory = new LocationHistory();
     locationHistory.asset = savedAsset;
     locationHistory.location = location;
     await this.locationHistoryRepository.save(locationHistory);
-  
+
+    //  Enregistrer le statut de l’asset
     const assetStatus = new AssetStatus();
     assetStatus.asset = savedAsset;
     assetStatus.status = defaultStatus;
     await this.assetStatusRepository.save(assetStatus);
-   
+
+    //  Lier les fichiers à l’asset
     if (files.length > 0) {
       for (const file of files) {
         file.asset = savedAsset;
       }
       await this.fileRepository.save(files);
     }
-  
+
     return savedAsset;
+  } catch (error) {
+    await this.assetRepository.remove(savedAsset); 
+    throw new Error(`Unregistered asset. Problem during QR Code generation : ${error.message}`);
   }
+}
+
+async generateQrCodeAndAttachToAsset(asset: Asset) {
+  const qrData = `${asset.id}`;
+  const dataUrl = await QRCode.toDataURL(qrData); 
+  const base64 = dataUrl.split(',')[1]; 
+
+  asset.qrCode = base64; 
+  await this.assetRepository.save(asset);
+}
 
   //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
@@ -348,6 +372,26 @@ export class AssetsService {
   return assets;
 }
 
+
+async findOne(id: string) {
+    return this.assetRepository.findOne({
+      where: { id },
+      relations: ['category', 'supplier', 'location', 'status'],
+    });
+  }
+
+ 
+    async getStatistics() {
+    const total = await this.assetRepository.countAll();
+    const byStatus = await this.assetRepository.countByStatus();
+    const byCategory = await this.assetRepository.countByCategory();
+
+    return {
+      total,
+      byStatus,
+      byCategory,
+    };
+  }
 }
 
     

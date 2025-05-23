@@ -122,4 +122,7 @@ export class InventoryDetailsService {
   async getInventoryDetailsByInventoryId(inventoryId: string) {
     return this.inventoryDetailsRepository.findByInventoryId(inventoryId);
   }
+
+
+  
 }

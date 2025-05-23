@@ -17,6 +17,7 @@ import { LocationHistoryRepository } from 'src/location-history/repositories/loc
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { userRepository } from 'src/user/repositories/user.repository';
+import { ConfigService } from '@nestjs/config';
 
 
 @Module({
@@ -26,7 +27,7 @@ import { userRepository } from 'src/user/repositories/user.repository';
   ],
   controllers: [AssetController],
   providers: [AssetsService, AssetRepository, FileRepository, CategoryRepository, CategoryService ,SupplierRepository, LocationRepository,LocationHistoryRepository
-    ,AssetStatusRepository,StatusRepository,JwtService,userRepository],
+    ,AssetStatusRepository,StatusRepository,JwtService,userRepository,ConfigService],
   exports: [AssetsService, AssetRepository], 
 })
 export class AssetModule {}

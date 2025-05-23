@@ -52,7 +52,7 @@ export class CsvService {
     });
   }
 
- async exportInventoryDetailsToCSV(inventoryId: string): Promise<Buffer> {
+ async exportInventoryDetailsToCSV(inventoryId: string){
   const details = await this.inventoryDetailsRepository.findDetailsByInventoryId(inventoryId);
 
   const rows = details.map((detail) => {

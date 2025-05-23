@@ -13,10 +13,11 @@ import { LocationHistoryRepository } from 'src/location-history/repositories/loc
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { StatusRepository } from 'src/status/repositories/status.repository';
 import { userRepository } from 'src/user/repositories/user.repository';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   providers: [ServiceService,ServiceRepository, DepartmentRepository,LocationRepository, AssetRepository,AssetsService,FileRepository,CategoryRepository,SupplierRepository
-    ,LocationHistoryRepository,AssetStatusRepository,StatusRepository,userRepository
+    ,LocationHistoryRepository,AssetStatusRepository,StatusRepository,userRepository,ConfigService 
   ],
   controllers: [ServiceController]
 })
