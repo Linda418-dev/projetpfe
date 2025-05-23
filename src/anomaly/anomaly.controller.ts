@@ -40,19 +40,19 @@ export class AnomalyController {
       return this.anomalyService.progressAnomaly(id);
     }
 
-    @Post(':id/assign-technician')
-    async assignTechnician(
-      @Param('id') id: string,
-      @Body() assignDto: AssignTechnicianDto,
-    ) {
-      return this.anomalyService.assignTechnician(id, assignDto.technicianId);
-    }
+    // @Post(':id/assign-technician')
+    // async assignTechnician(
+    //   @Param('id') id: string,
+    //   @Body() assignDto: AssignTechnicianDto,
+    // ) {
+    //   return this.anomalyService.assignTechnician(id, assignDto.technicianId);
+    // }
 
      
  
-    @Patch(':id/accept')
-    acceptAnomaly(@Param('id') id: string){
-      return this.anomalyService.acceptAnomaly(id);
+    @Patch(':id/resolve')
+    resolveAnomaly(@Param('id') id: string){
+      return this.anomalyService.resolveAnomaly(id);
     }
     
     @Patch(':id/refuse')

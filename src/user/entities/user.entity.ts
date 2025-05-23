@@ -38,8 +38,7 @@ export class User implements IUser {
   @OneToMany(() => Anomaly, (anomaly) => anomaly.reportedBy)
   anomalies: IAnomaly[]|string[];
   
-  @OneToMany(() => Asset, (asset) => asset.user)
-  assets: IAsset[] | string[];
+ 
    
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

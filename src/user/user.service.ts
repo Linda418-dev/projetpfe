@@ -90,7 +90,7 @@ async getUsers(){
       }
        
     // methode pour update user 
-    async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
   const user = await this.userRepository.findOne({ where: { id }, relations: ['role'] });
 
   if (!user) {

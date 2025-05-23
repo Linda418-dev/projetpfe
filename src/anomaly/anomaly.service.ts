@@ -9,11 +9,8 @@ import { User } from 'src/user/entities/user.entity';
 import { IUser } from 'src/user/types/interface/user.interface';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { Asset } from 'src/assets/Entities/asset.entity';
-import { AnomalySeverity } from './types/enums/anomaly-severity.enum';
 import { AssetStatusEnum } from 'src/status/types/enums/asset-status.enum';
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
-import { userRepository } from 'src/user/repositories/user.repository';
-import { AnomalyStatusEnum } from 'src/status/types/enums/anomaly-status.enum';
 
 
 @Injectable()
@@ -25,7 +22,6 @@ export class AnomalyService {
         private readonly anomalyStatusRepository : AnomalyStatusRepository,
         private readonly assetRepository: AssetRepository,
         private readonly assetStatusHistoryRepository : AssetStatusRepository,
-        private readonly userRepository : userRepository
     ){}
  async getAllAnomalies(currentUser: User) {
   let anomalies;
@@ -74,9 +70,10 @@ relations: [
   }
 
   return anomalies.map(anomaly => {
-    const latestStatus = Array.isArray(anomaly.statusHistory)
-      ? anomaly.statusHistory[0]?.status ?? null
-      : null;
+  const latestStatus = Array.isArray(anomaly.statusHistory)
+  ? [...anomaly.statusHistory]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]?.status ?? null
+  : null;
 
     const site = anomaly.asset?.location?.['service']?.['department']?.['site'];
   
@@ -91,7 +88,7 @@ relations: [
 
    
    async createAnomaly(createAnomalyDto: CreateAnomalyDto, reportedBy: User) {
-  const { description, fileIds, assetId ,severity  } = createAnomalyDto;
+  const { description, fileIds, assetId } = createAnomalyDto;
 
   const pendingStatus = await this.statusRepository.findOne({
     where: { name: 'pending', type: 'anomaly' },
@@ -118,7 +115,7 @@ relations: [
     description,
     asset,
     reportedBy,
-    severity: severity ?? AnomalySeverity.MEDIUM, 
+   
   });
 
   const savedAnomaly = await this.anomalyRepository.save(anomaly);
@@ -189,39 +186,68 @@ async getAnomaliesByMonth() {
 }
 
 
-  async progressAnomaly(anomalyId: string) {
-    // vérifier si l'anomalie existe
-    const anomaly = await this.anomalyRepository.findOne({ where: { id: anomalyId } });
-    if (!anomaly) {
-      throw new NotFoundException('Anomaly not found');
-    }
-  
-    // Chercher le statut 'in_progress' de type 'anomaly'
-    const inProgressStatus = await this.statusRepository.findOne({
-      where: { name: 'in_progress', type: 'anomaly' },
-    });
-  
-    if (!inProgressStatus) {
-      throw new NotFoundException("Status 'in_progress' not found for anomaly");
-    }
-  
-    // Créer le nouveau  status dans  AnomalyStatus
-    const anomalyStatus = this.anomalyStatusRepository.create({
-      anomaly,
-      status: inProgressStatus,
-    });
-  
-    await this.anomalyStatusRepository.save(anomalyStatus);
-  
-    return {
-      message: 'Anomaly status updated to in_progress',
-      status: inProgressStatus,
-      anomaly,
-    };
+ async progressAnomaly(anomalyId: string) {
+  // Vérifier si l'anomalie existe
+  const anomaly = await this.anomalyRepository.findOne({ where: { id: anomalyId } });
+  if (!anomaly) {
+    throw new NotFoundException('Anomaly not found');
   }
-  
 
-  async acceptAnomaly(anomalyId: string) {
+  // Chercher le statut 'in_progress'
+  const inProgressStatus = await this.statusRepository.findOne({
+    where: { name: 'in_progress', type: 'anomaly' },
+  });
+
+  if (!inProgressStatus) {
+    throw new NotFoundException("Status 'in_progress' not found for anomaly");
+  }
+
+  // Vérifier si ce statut a déjà été appliqué à cette anomalie
+  const existing = await this.anomalyStatusRepository.findOne({
+    where: {
+      anomaly: { id: anomalyId },
+      status: { id: inProgressStatus.id },
+    },
+    relations: ['status'],
+  });
+
+  if (existing) {
+    throw new BadRequestException("This anomaly has already been marked as 'in_progress'");
+  }
+
+  // Récupérer le dernier statut de l’anomalie
+  const lastStatus = await this.anomalyStatusRepository.findOne({
+    where: { anomaly: { id: anomalyId } },
+    order: { createdAt: 'DESC' },
+    relations: ['status'],
+  });
+
+  if (!lastStatus) {
+    throw new NotFoundException("No previous status found for this anomaly");
+  }
+
+  if (typeof lastStatus.status !== 'object' || lastStatus.status.name !== 'pending') {
+  throw new BadRequestException("Anomaly must be in 'pending' status to progress to 'in_progress'");
+}
+
+
+  // Créer et sauvegarder le nouveau statut
+  const anomalyStatus = this.anomalyStatusRepository.create({
+    anomaly,
+    status: inProgressStatus,
+  });
+
+  await this.anomalyStatusRepository.save(anomalyStatus);
+
+  return {
+    message: 'Anomaly status updated to in_progress',
+    status: inProgressStatus,
+    anomaly,
+  };
+}
+
+  
+async resolveAnomaly(anomalyId: string) {
   const anomaly = await this.anomalyRepository.findOne({
     where: { id: anomalyId },
     relations: ['asset'],
@@ -231,23 +257,53 @@ async getAnomaliesByMonth() {
     throw new NotFoundException('Anomaly not found');
   }
 
-  //  Trouver le status "accepted" pour les anomalies
-  const acceptedStatus = await this.statusRepository.findOne({
-    where: { name: 'accepted', type: 'anomaly' },
+  // Récupérer le dernier statut de l’anomalie
+  const lastStatus = await this.anomalyStatusRepository.findOne({
+    where: { anomaly: { id: anomalyId } },
+    order: { createdAt: 'DESC' },
+    relations: ['status'],
   });
 
-  if (!acceptedStatus) {
-    throw new NotFoundException("Status 'accepted' not found for anomaly");
+  if (!lastStatus) {
+    throw new NotFoundException("No previous status found for this anomaly");
   }
 
-  // Enregistrer le nouveau status de l’anomalie
-  const anomalyStatus = this.anomalyStatusRepository.create({
-    anomaly,
-    status: acceptedStatus,
-  });
-  await this.anomalyStatusRepository.save(anomalyStatus);
+ if (
+  typeof lastStatus.status !== 'string' &&
+  (lastStatus.status.name === 'resolved' || lastStatus.status.name === 'refused')
+) {
+  throw new BadRequestException("This anomaly is already resolved or has been refused");
+}
 
-  //  Trouver le status "IN_REPAIR" pour les assets
+  // Statuts nécessaires
+  const [resolvedStatus, inProgressStatus] = await Promise.all([
+    this.statusRepository.findOne({ where: { name: 'resolved', type: 'anomaly' } }),
+    this.statusRepository.findOne({ where: { name: 'in_progress', type: 'anomaly' } }),
+  ]);
+
+  if (!resolvedStatus || !inProgressStatus) {
+    throw new NotFoundException("Required anomaly statuses not found (resolved/in_progress)");
+  }
+
+  if (
+  typeof lastStatus.status !== 'string' &&
+  lastStatus.status.name === 'pending'
+) {
+  const inProgress = this.anomalyStatusRepository.create({
+    anomaly,
+    status: inProgressStatus,
+  });
+  await this.anomalyStatusRepository.save(inProgress);
+}
+
+  // Enregistrer le statut 'resolved'
+  const resolved = this.anomalyStatusRepository.create({
+    anomaly,
+    status: resolvedStatus,
+  });
+  await this.anomalyStatusRepository.save(resolved);
+
+  // Mettre à jour l’état de l’asset à 'IN_REPAIR'
   const inRepairStatus = await this.statusRepository.findOne({
     where: { name: AssetStatusEnum.IN_REPAIR, type: 'asset' },
   });
@@ -256,7 +312,6 @@ async getAnomaliesByMonth() {
     throw new NotFoundException("Status 'In Repair' not found for asset");
   }
 
-  //  Historiser le changement de statut du bien
   const assetStatusRecord = this.assetStatusHistoryRepository.create({
     asset: anomaly.asset,
     status: inRepairStatus,
@@ -265,91 +320,123 @@ async getAnomaliesByMonth() {
   await this.assetStatusHistoryRepository.save(assetStatusRecord);
 
   return {
-    message: 'Anomaly accepted and asset marked as In Repair',
-    status: acceptedStatus,
+    message: 'Anomaly marked as resolved and asset marked as In Repair',
     anomaly,
+    status: resolvedStatus,
   };
 }
 
-  
 
-  async refuseAnomaly(anomalyId: string) {
-    // vérifier si l'anomalie existe
-    const anomaly = await this.anomalyRepository.findOne({ where: { id: anomalyId } });
-    if (!anomaly) {
-      throw new NotFoundException('Anomaly not found');
-    }
-  
-    // Chercher le statut 'refused' de type 'anomaly'
-    const refusedStatus = await this.statusRepository.findOne({
-      where: { name: 'refused', type: 'anomaly' },
-    });
-  
-    if (!refusedStatus) {
-      throw new NotFoundException("Status 'refused' not found for anomaly");
-    }
-  
-    // Créer le nouveau  status dans  AnomalyStatus
-    const anomalyStatus = this.anomalyStatusRepository.create({
-      anomaly,
-      status: refusedStatus,
-    });
-  
-    await this.anomalyStatusRepository.save(anomalyStatus);
-  
-    return {
-      message: 'Anomaly status updated to refused',
-      status: refusedStatus,
-      anomaly,
-    };
-  }
-
-async assignTechnician(anomalyId: string, technicianId: string) {
+ async refuseAnomaly(anomalyId: string) {
+  // Vérifier si l'anomalie existe
   const anomaly = await this.anomalyRepository.findOne({
     where: { id: anomalyId },
-    relations: ['technician', 'statusHistory'],
   });
 
   if (!anomaly) {
     throw new NotFoundException('Anomaly not found');
   }
 
-  // Vérifier que le dernier statut est "accepted"
-  const lastStatus = anomaly.statusHistory
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-
-  if (
-    !lastStatus ||
-    typeof lastStatus.status !== 'object' ||
-    lastStatus.status.name !== AnomalyStatusEnum.ACCEPTED
-  ) {
-    throw new BadRequestException('Technician can only be assigned if anomaly status is accepted');
-  }
-
-  // Vérifier si un technicien est déjà assigné
-  if (anomaly.technician) {
-    throw new BadRequestException('A technician has already been assigned to this anomaly');
-  }
-
-  const technician = await this.userRepository.findOne({
-    where: { id: technicianId },
-    relations: ['role'],
+  // Récupérer le dernier statut de l’anomalie
+  const lastStatus = await this.anomalyStatusRepository.findOne({
+    where: { anomaly: { id: anomalyId } },
+    order: { createdAt: 'DESC' },
+    relations: ['status'],
   });
 
-  if (!technician || (typeof technician.role !== 'string' && technician.role?.role !== 'technician')) {
-    throw new NotFoundException('Technician not found or invalid role');
+  if (!lastStatus) {
+    throw new NotFoundException("No previous status found for this anomaly");
   }
 
-  // Assigner le technicien
-  anomaly.technician = technician;
+  const lastStatusName = typeof lastStatus.status === 'string'
+    ? lastStatus.status
+    : lastStatus.status.name;
 
-  const updated = await this.anomalyRepository.save(anomaly);
+  // Empêcher le refus si le dernier statut est 'refused' ou 'resolved'
+  if (lastStatusName === 'refused' || lastStatusName === 'resolved') {
+    throw new BadRequestException(`This anomaly is already ${lastStatusName}`);
+  }
+
+  // Récupérer les statuts nécessaires
+  const [refusedStatus, inProgressStatus] = await Promise.all([
+    this.statusRepository.findOne({ where: { name: 'refused', type: 'anomaly' } }),
+    this.statusRepository.findOne({ where: { name: 'in_progress', type: 'anomaly' } }),
+  ]);
+
+  if (!refusedStatus || !inProgressStatus) {
+    throw new NotFoundException("Required statuses 'refused' or 'in_progress' not found");
+  }
+
+  // Si le dernier statut est 'pending', enregistrer d'abord 'in_progress'
+  if (lastStatusName === 'pending') {
+    const inProgress = this.anomalyStatusRepository.create({
+      anomaly,
+      status: inProgressStatus,
+    });
+    await this.anomalyStatusRepository.save(inProgress);
+  }
+
+  // Ajouter le statut 'refused'
+  const refused = this.anomalyStatusRepository.create({
+    anomaly,
+    status: refusedStatus,
+  });
+
+  await this.anomalyStatusRepository.save(refused);
 
   return {
-    message: 'Technician assigned to anomaly',
-    anomaly: updated,
+    message: 'Anomaly status updated to refused',
+    anomaly,
+    status: refusedStatus,
   };
 }
+
+// async assignTechnician(anomalyId: string, technicianId: string) {
+//   const anomaly = await this.anomalyRepository.findOne({
+//     where: { id: anomalyId },
+//     relations: ['technician', 'statusHistory'],
+//   });
+
+//   if (!anomaly) {
+//     throw new NotFoundException('Anomaly not found');
+//   }
+
+//   // Vérifier que le dernier statut est "accepted"
+//   const lastStatus = anomaly.statusHistory
+//     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
+
+//   if (
+//     !lastStatus ||
+//     typeof lastStatus.status !== 'object' ||
+//     lastStatus.status.name !== AnomalyStatusEnum.RESOLVED
+//   ) {
+//     throw new BadRequestException('Technician can only be assigned if anomaly status is accepted');
+//   }
+
+//   // Vérifier si un technicien est déjà assigné
+//   if (anomaly.technician) {
+//     throw new BadRequestException('A technician has already been assigned to this anomaly');
+//   }
+
+//   const technician = await this.userRepository.findOne({
+//     where: { id: technicianId },
+//     relations: ['role'],
+//   });
+
+//   if (!technician || (typeof technician.role !== 'string' && technician.role?.role !== 'technician')) {
+//     throw new NotFoundException('Technician not found or invalid role');
+//   }
+
+//   // Assigner le technicien
+//   anomaly.technician = technician;
+
+//   const updated = await this.anomalyRepository.save(anomaly);
+
+//   return {
+//     message: 'Technician assigned to anomaly',
+//     anomaly: updated,
+//   };
+// }
 
 
 

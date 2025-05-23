@@ -4,7 +4,6 @@ import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
-import { AssignMultipleAssetsDto } from "./types/dto/assign-multiple-assets.dto";
 import { Response } from 'express';
 
 
@@ -37,10 +36,10 @@ export class AssetController {
    };
   }
 
-  @Patch('assign-multiple')
-  async assignMultipleAssetsToUser(@Body() assignDto: AssignMultipleAssetsDto) {
-    return this.assetService.assignMultipleAssetsToUser(assignDto.assetIds, assignDto.userId);
-  }
+  // @Patch('assign-multiple')
+  // async assignMultipleAssetsToUser(@Body() assignDto: AssignMultipleAssetsDto) {
+  //   return this.assetService.assignMultipleAssetsToUser(assignDto.assetIds, assignDto.userId);
+  // }
 
   @Get('statistics')
   async getStatistics() {

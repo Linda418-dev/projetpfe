@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsEnum,  IsOptional, IsString, IsUUID } from "class-validator";
-import { AnomalySeverity } from "../enums/anomaly-severity.enum";
 
 export class CreateAnomalyDto {
     @ApiProperty()
@@ -18,13 +17,5 @@ export class CreateAnomalyDto {
     @IsUUID()
     assetId?: string;
 
-    @ApiPropertyOptional({
-    enum: AnomalySeverity,
-    default: AnomalySeverity.MEDIUM,
-    description: 'Niveau de gravité',
-  })
-  @IsOptional()
-  @IsEnum(AnomalySeverity)
-  severity?: AnomalySeverity;
     
 }

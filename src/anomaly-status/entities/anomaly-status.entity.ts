@@ -11,11 +11,9 @@ export class AnomalyStatus implements IAnomalyStatus{
   id: string;
 
   @ManyToOne(() => Anomaly, (anomaly) => anomaly.statusHistory, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'anomalyId' })
   anomaly: IAnomaly|string;
 
   @ManyToOne(() => Status, { eager: true, onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'statusId' })
   status: Istatus|string;
 
   @CreateDateColumn({ type: 'timestamp' })

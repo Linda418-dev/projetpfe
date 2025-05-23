@@ -44,9 +44,6 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => Status, { eager: true, nullable: false, onDelete: 'SET NULL' })
   status: Istatus|string;
-
-  @ManyToOne(() => User, (user) => user.assets, { nullable: true, eager: true, onDelete: 'SET NULL' })
-  user: IUser | string;
   
 
   @CreateDateColumn({ type: 'timestamp' })
