@@ -6,8 +6,6 @@ import { IUserRole } from "src/user-role/types/interface/user-role.interface";
 import { Iaffectation } from "src/affectation/types/interfaces/affectation.interface";
 import { Anomaly } from "src/anomaly/Entities/anomaly.entity";
 import { IAnomaly } from "src/anomaly/types/interface/anomaly.interface";
-import { IAsset } from "src/assets/types/interface/Asset.interface";
-import { Asset } from "src/assets/Entities/asset.entity";
 
 @Entity()
 export class User implements IUser {
@@ -38,8 +36,6 @@ export class User implements IUser {
   @OneToMany(() => Anomaly, (anomaly) => anomaly.reportedBy)
   anomalies: IAnomaly[]|string[];
   
- 
-   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
   

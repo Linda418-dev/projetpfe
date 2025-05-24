@@ -21,28 +21,6 @@ export class NotificationService {
         this.ONE_SIGNAL_API_KEY = this.configService.get<string>('ONESIGNAL_API_KEY')!;
       }
 
-      async getAllNotifications(user: any) {
-        if (user.role?.role === 'operator') {
-          // renvoi tous les notification d'un operateur 
-          return this.notificationRepo.findAllByUserId(user.id);
-        }
-        // Si ce n'est pas un opérateur, on renvoie toutes les notifications
-        const notifications=await  this.notificationRepo.find({
-          relations: ['recipients'],
-          order: { createdAt: 'DESC' },
-        });
-
-         // marquer toutes les notifications comme seen 
-        const unseenNotifications = notifications.filter(notif => !notif.seen);
-        for (const notif of unseenNotifications) {
-          notif.seen = true;
-        }
-        if (unseenNotifications.length > 0) {
-          await this.notificationRepo.save(unseenNotifications);
-        }
-        return notifications;
-      }
-
     // Fonction intégrée de traduction vers le français
     private async translateToFrench(text: string) {
     try {
@@ -111,6 +89,7 @@ export class NotificationService {
   notif.read = true;
   return this.notificationRepo.save(notif);
   }
+
   
   
    async countAllUnread() {
@@ -137,6 +116,31 @@ async resetUserPasswordAndNotify(userId: string) {
 generateTempPassword(length = 8): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+
+async getAllNotifications(user: any) {
+  const allNotifications = await this.notificationRepo.find({
+    relations: ['recipients'],
+    order: { createdAt: 'DESC' },
+  });
+
+  // filtrer seulement les notifications où le user est dans recipients
+  const userNotifications = allNotifications.filter(n =>
+    n.recipients.some(r => (typeof r === 'string' ? r === user.id : r.id === user.id))
+  );
+
+  // marquer comme vu
+  const unseenNotifications = userNotifications.filter(notif => !notif.seen);
+  for (const notif of unseenNotifications) {
+    notif.seen = true;
+  }
+
+  if (unseenNotifications.length > 0) {
+    await this.notificationRepo.save(unseenNotifications);
+  }
+
+  return userNotifications;
 }
 
 

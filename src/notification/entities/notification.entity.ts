@@ -20,11 +20,12 @@ export class Notification {
   @JoinTable()
   recipients: IUser[]|string[];
 
-  @Column({  default: false })
-  read: Boolean;
+  @Column({ default: false })
+  read: boolean;
   
-  @Column({  default: false })
-  seen: Boolean;
+  @Column({ default: false })
+  seen: boolean;
+
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

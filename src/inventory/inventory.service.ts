@@ -7,7 +7,7 @@ import { userRepository } from 'src/user/repositories/user.repository';
 import { AffectationRepository } from 'src/affectation/repositories/affectation.repository';
 import { SiteRepository } from 'src/site/Repositories/site.repository';
 import { User } from 'src/user/entities/user.entity';
-import { Between, In, LessThan, Not } from 'typeorm';
+import { Between, In, IsNull, LessThan, Not } from 'typeorm';
 import { Cron, CronExpression} from '@nestjs/schedule';
 import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
@@ -416,36 +416,39 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   if (dto.name) inventory.name = dto.name;
 
   // Mise à jour du statut vers "Completed"
-  if (dto.statusId) {
-    const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
-    if (!status) {
-      throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
-    }
-
-    if (status.name !== 'Completed') {
-      throw new BadRequestException('Inventory status can only be updated to "Completed"');
-    }
-
-    if (lastStatusName !== 'In Progress') {
-      throw new BadRequestException('Inventory can only be completed if the current status is "In Progress"');
-    }
-
-    const newInventoryStatus = this.inventoryStatusRepository.create({
-      inventory,
-      status,
-    });
-
-    const savedStatus = await this.inventoryStatusRepository.save(newInventoryStatus);
-    statusUpdated = true;
-
-    return {
-      inventory,
-      status: savedStatus,
-      statusUpdated,
-    };
+ if (dto.statusId) {
+  const status = await this.statusRepository.findOne({ where: { id: dto.statusId } });
+  if (!status) {
+    throw new BadRequestException(`Status with ID ${dto.statusId} not found`);
   }
 
-  const savedInventory = await this.inventoryRepository.save(inventory);
+  if (status.name !== 'Completed') {
+    throw new BadRequestException('Inventory status can only be updated to "Completed"');
+  }
+
+  if (lastStatusName !== 'In Progress') {
+    throw new BadRequestException('Inventory can only be completed if the current status is "In Progress"');
+  }
+
+  const newInventoryStatus = this.inventoryStatusRepository.create({
+    inventory,
+    status,
+  });
+
+  const savedStatus = await this.inventoryStatusRepository.save(newInventoryStatus);
+  statusUpdated = true;
+
+  // Envoi de la notification à tous les admins
+  await this.notifyAdminsOfCompletedInventory(inventory.name);
+
+  return {
+    inventory,
+    status: savedStatus,
+    statusUpdated,
+  };
+}
+
+const savedInventory = await this.inventoryRepository.save(inventory);
 
   // Assignation opérateur
 if (dto.operatorId) {
@@ -528,6 +531,26 @@ if (newOperator.playerId) {
   };
 }
 
+async notifyAdminsOfCompletedInventory(inventoryName: string) {
+  const admins = await this.userRepository.find({
+    where: {
+      role: { role: UserRoleEnum.ADMIN },
+      playerId: Not(IsNull()),
+    },
+    relations: ['role'],
+  });
+
+  const playerIds = admins.map((admin) => admin.playerId).filter(Boolean);
+  if (playerIds.length === 0) return;
+
+  const title = 'Inventory Completed';
+  const message = `The inventory "${inventoryName}" has been marked as completed.`;
+
+
+  await this.notificationService.notifyOperators(playerIds, title, message);
+}
+
+
   private getTodayStart(): Date {
     return moment().startOf('day').toDate();
   }
@@ -556,7 +579,7 @@ async handleExpiredInventories() {
   let expiredCount = 0;
 
   for (const inventory of expiredInventories) {
-    // ⛑️ filtre les strings
+    //  filtre les strings
     const statuses = inventory.inventoryStatus.filter(
       (s): s is IinventoryStatus => typeof s !== 'string'
     );
@@ -599,6 +622,21 @@ async handleExpiredInventories() {
       const [latest, ...duplicates] = allExpiredStatuses;
       const idsToDelete = duplicates.map((d) => d.id);
       await this.inventoryStatusRepository.delete(idsToDelete);
+    }
+     const admins = await this.userRepository.find({
+      where: {
+        role: { role: UserRoleEnum.ADMIN },
+        playerId: Not(IsNull()),
+      },
+      relations: ['role'],
+    });
+
+    const playerIds = admins.map((admin) => admin.playerId).filter(Boolean);
+    if (playerIds.length > 0) {
+      const title = 'Expired Inventory';
+      const message = `The inventory "${inventory.name}" has expired.`;
+
+      await this.notificationService.notifyOperators(playerIds, title, message);
     }
   }
 }

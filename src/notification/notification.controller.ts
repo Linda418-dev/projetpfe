@@ -11,12 +11,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  async getAllNotifications(@Req() req){
-    const user = req.user;
-    return this.notificationService.getAllNotifications(user);
-  }
+ 
   
   @Post('send')
   async sendNotification(@Body() dto: SendNotificationDto){
@@ -30,6 +25,13 @@ export class NotificationController {
   @Get('notifications/unread-count')
   getTotalUnread() {
   return this.notificationService.countAllUnread();
+  }
+
+   @Get()
+  @UseGuards(JwtAuthGuard)
+  async getAllNotifications(@Req() req){
+    const user = req.user;
+    return this.notificationService.getAllNotifications(user);
   }
 
   @Get(':id')

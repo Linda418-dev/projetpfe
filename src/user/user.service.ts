@@ -79,8 +79,11 @@ export class UserService {
   }
        
    // methode pour update user 
-  async updateUser(id: string, updateUserDto: UpdateUserDto) {
-  const user = await this.userRepository.findOne({ where: { id }, relations: ['role'] });
+ async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  const user = await this.userRepository.findOne({ 
+    where: { id }, 
+    relations: ['role', 'affectations'] 
+  });
 
   if (!user) {
     throw new NotFoundException('User not found');
@@ -90,8 +93,13 @@ export class UserService {
     updateUserDto.password = await this.bcryptService.hashPassword(updateUserDto.password);
   }
 
-  // Mise à jour du rôle si roleId est fourni
-  if (updateUserDto.roleId) {
+  // Vérification avant de modifier le rôle
+  if (updateUserDto.roleId && updateUserDto.roleId !== (user.role as any).id) {
+    // Vérifie si l'utilisateur a des affectations
+    if (user.affectations && user.affectations.length > 0) {
+      throw new ConflictException('User has active affectations, role cannot be changed');
+    }
+
     const newRole = await this.userRoleRepository.findOne({
       where: { id: updateUserDto.roleId },
     });
@@ -103,7 +111,7 @@ export class UserService {
     user.role = newRole;
   }
 
-  // Supprimer roleId du DTO pour éviter de l'assigner directement
+  // Supprimer roleId pour ne pas l'assigner par erreur via Object.assign
   const { roleId, ...otherUpdates } = updateUserDto;
   Object.assign(user, otherUpdates);
 
@@ -119,6 +127,7 @@ export class UserService {
     updatedAt: savedUser.updatedAt,
   };
 }
+
 
 
       // méthode poure  supprimer user  s'il n'a pas d’affectations. 
