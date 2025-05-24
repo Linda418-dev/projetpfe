@@ -5,9 +5,6 @@ import { BcryptService } from 'src/auth/common/bcrypt.service';
 import { CreateUserDto } from './types/dto/create-user.dto';
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
-import { Not } from 'typeorm';
-import { NotificationService } from 'src/notification/notification.service';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -15,7 +12,6 @@ export class UserService {
     private readonly userRepository: userRepository,
     private readonly userRoleRepository: userRoleRepository,
     private readonly bcryptService: BcryptService,
-    private readonly notificationService : NotificationService
   ) {}
 
 
@@ -24,6 +20,7 @@ export class UserService {
       relations: ['role', 'affectations', 'anomalies'],
     });
   }
+
   // methode get All Users
   async getAllUsers(params: PaginateSearchDto) {
   const [users, total] = await this.userRepository.getAllUsersWithPaginate(params);

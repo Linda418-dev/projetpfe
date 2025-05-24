@@ -19,11 +19,14 @@ export class NotificationRepository extends Repository<Notification> {
       .getMany();
   }
 
-   async countAllUnread() {
-    return this.createQueryBuilder('notification')
-      .where('notification.seen = false')
-      .getCount();
-  }
+  async countAllUnread(userId: string): Promise<number> {
+  return this.createQueryBuilder('notification')
+    .innerJoin('notification.recipients', 'user')
+    .where('user.id = :userId', { userId })
+    .andWhere('notification.seen = false')
+    .getCount();
+}
+
  
  
 }

@@ -92,9 +92,10 @@ export class NotificationService {
 
   
   
-   async countAllUnread() {
-    return this.notificationRepo.countAllUnread();
-  }
+  async countAllUnread(userId: string) {
+  return this.notificationRepo.countAllUnread(userId);
+}
+
 
 
 async resetUserPasswordAndNotify(userId: string) {

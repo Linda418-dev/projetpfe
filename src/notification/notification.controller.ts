@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, Request, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { ApiBearerAuth,ApiTags } from '@nestjs/swagger';
 import { SendNotificationDto } from './type/dto/createnotif.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Roles } from 'src/auth/guards/roles.decorator';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { request } from 'express';
 @ApiBearerAuth()
 @ApiTags('Notifications')
 @Controller('notification')
@@ -20,12 +21,12 @@ export class NotificationController {
   }
 
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
-  @Get('notifications/unread-count')
-  getTotalUnread() {
-  return this.notificationService.countAllUnread();
-  }
+  @UseGuards(JwtAuthGuard)
+@Get('notifications/unread-count')
+getTotalUnread(@Request() req) {
+  return this.notificationService.countAllUnread(req.user.id);
+}
+
 
    @Get()
   @UseGuards(JwtAuthGuard)
