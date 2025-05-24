@@ -39,8 +39,8 @@ export class DepartmentController {
     
          @Patch(':id')
          @ApiOperation({ summary: 'edit department' })
-         async updateDepatment(@Param('id', new ParseUUIDPipe()) id: string,@Body() updateDepartmentDto: UpdateDepartmentDto) {
-         return this.departmentService.updateDepatment(id, updateDepartmentDto);
+         async updateDepartment(@Param('id', new ParseUUIDPipe()) id: string,@Body() updateDepartmentDto: UpdateDepartmentDto) {
+         return this.departmentService.updateDepartment(id, updateDepartmentDto);
         }
       
          @Delete(':id')

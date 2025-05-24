@@ -11,7 +11,7 @@ export class Department implements IDepartment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
 
   @ManyToOne(() => Site, (site) => site.departments, { onDelete: 'CASCADE' })

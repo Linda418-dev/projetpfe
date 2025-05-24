@@ -23,57 +23,54 @@ export class SiteService {
         }
 
         // methode pour le creation d'un site
-        async createSite(createSiteDto: CreateSiteDto) {
-          //créer le site
-          const site = await this.siteRepository.save(
-            this.siteRepository.create({ name: createSiteDto.name })
-          );
-        
-          // si aucun département doit  crée un département par défaut
-          const departments: CreateDepartmentDto[] = createSiteDto.department?.length
-            ? createSiteDto.department
-            : [{ name: site.name }];
-        
-          for (const deptDto of departments) {
-            //créer le département et lier au site
-            const department = await this.departmentRepository.save(
-              this.departmentRepository.create({
-                name: deptDto.name,
-                site: site,
-              })
-            );
-        
-            //créer les services et les locations imbriquées
-            const services: CreateServiceDto[] = deptDto.services?.length
-              ? deptDto.services
-              : [{ name: department.name }]; 
-        
-            for (const servDto of services) {
-              const service = await this.serviceRepository.save(
-                this.serviceRepository.create({
-                  name: servDto.name,
-                  department: department,  
-                })
-              );
-        
-              // créer les locations et lier au service
-              const locations: CreateLocationDto[] = servDto.locations?.length
-                ? servDto.locations
-                : [{ name: service.name }]; 
-        
-              for (const locDto of locations) {
-                await this.locationRepository.save(
-                  this.locationRepository.create({
-                    name: locDto.name,
-                    service: service,  
-                  })
-                );
-              }
-            }
-          }
-        
-          return site;
-        }   
+       async createSite(createSiteDto: CreateSiteDto) {
+        const site = await this.siteRepository.save(
+          this.siteRepository.create({ name: createSiteDto.name })
+        );
+        const departments: CreateDepartmentDto[] = createSiteDto.department?.length
+        ? createSiteDto.department
+        : [{ 
+          name: 'Département 1', 
+          services: [{ 
+          name: 'Service 1', 
+          locations: [{ name: 'Location 1' }] 
+        }] 
+      }];
+      for (const deptDto of departments) {
+        const department = await this.departmentRepository.save(
+          this.departmentRepository.create({
+            name: deptDto.name,
+            site: site,
+          })
+        );
+        const services: CreateServiceDto[] = deptDto.services?.length
+      ? deptDto.services
+      : [{ name: 'Service 1', locations: [{ name: 'Location 1' }] }];
+      for (const servDto of services) {
+      const service = await this.serviceRepository.save(
+        this.serviceRepository.create({
+          name: servDto.name,
+          department: department,
+        })
+      );
+
+      const locations: CreateLocationDto[] = servDto.locations?.length
+        ? servDto.locations
+        : [{ name: 'Location 1' }];
+
+      for (const locDto of locations) {
+        await this.locationRepository.save(
+          this.locationRepository.create({
+            name: locDto.name,
+            service: service,
+          })
+        );
+      }
+    }
+  }
+  return site;
+}
+
 
         // methode pour get site by id
         async getSiteById(id: string) {

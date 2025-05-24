@@ -13,7 +13,7 @@ export class Location implements Ilocation{
     @PrimaryGeneratedColumn('uuid')
     id: string;  
 
-    @Column({ unique: true })
+    @Column()
     name: string;
     
     @ManyToOne(() => Service, (service) => service.locations, { onDelete: 'CASCADE' })

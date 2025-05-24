@@ -394,8 +394,8 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   // Vérification de chevauchement d’un autre inventaire sur le même site
   const startDateToCheck = dto.startDate ? new Date(dto.startDate) : inventory.startDate;
   const endDateToCheck = dto.endDate ? new Date(dto.endDate) : inventory.endDate;
-let site = inventory.site as Isite;
-const overlappingInventory = await this.inventoryRepository.findOverlappingInventoryexcludeId(
+  let site = inventory.site as Isite;
+  const overlappingInventory = await this.inventoryRepository.findOverlappingInventoryexcludeId(
   site.id,
   startDateToCheck,
   endDateToCheck,

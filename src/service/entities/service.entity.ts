@@ -12,7 +12,7 @@ export class Service implements IService{
     @PrimaryGeneratedColumn('uuid')
     id: string;  
 
-    @Column({ unique: true })
+    @Column()
     name: string
 
     @ManyToOne(() => Department, (department) => department.services, { onDelete: 'CASCADE' })
