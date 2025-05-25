@@ -12,8 +12,6 @@ import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { ILocationHistory } from 'src/location-history/types/interfaces/location-history.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { IFile } from 'src/uploads/types/interfaces/file.interface';
-import { IUser } from 'src/user/types/interface/user.interface';
-import { User } from 'src/user/entities/user.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {

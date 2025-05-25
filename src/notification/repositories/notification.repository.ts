@@ -11,7 +11,7 @@ export class NotificationRepository extends Repository<Notification> {
   }
 
 
-  async findAllByUserId(userId: string): Promise<Notification[]> {
+  async findAllByUserId(userId: string) {
     return this.createQueryBuilder('notification')
       .leftJoinAndSelect('notification.recipients', 'recipient')
       .where('recipient.id = :userId', { userId })
@@ -19,7 +19,7 @@ export class NotificationRepository extends Repository<Notification> {
       .getMany();
   }
 
-  async countAllUnread(userId: string): Promise<number> {
+  async countAllUnread(userId: string){
   return this.createQueryBuilder('notification')
     .innerJoin('notification.recipients', 'user')
     .where('user.id = :userId', { userId })
@@ -27,6 +27,5 @@ export class NotificationRepository extends Repository<Notification> {
     .getCount();
 }
 
- 
  
 }

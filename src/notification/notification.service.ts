@@ -9,6 +9,9 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class NotificationService {
+  notifyAdminsOperatorCompletedScan(arg0: any, name: any) {
+    throw new Error('Method not implemented.');
+  }
     private readonly ONE_SIGNAL_APP_ID: string;
     private readonly ONE_SIGNAL_API_KEY: string;
   

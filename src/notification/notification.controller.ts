@@ -3,9 +3,7 @@ import { NotificationService } from './notification.service';
 import { ApiBearerAuth,ApiTags } from '@nestjs/swagger';
 import { SendNotificationDto } from './type/dto/createnotif.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { Roles } from 'src/auth/guards/roles.decorator';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { request } from 'express';
+
 @ApiBearerAuth()
 @ApiTags('Notifications')
 @Controller('notification')
@@ -22,13 +20,13 @@ export class NotificationController {
 
 
   @UseGuards(JwtAuthGuard)
-@Get('notifications/unread-count')
-getTotalUnread(@Request() req) {
-  return this.notificationService.countAllUnread(req.user.id);
-}
+  @Get('notifications/unread-count')
+  getTotalUnread(@Request() req) {
+    return this.notificationService.countAllUnread(req.user.id);
+  }
 
 
-   @Get()
+  @Get()
   @UseGuards(JwtAuthGuard)
   async getAllNotifications(@Req() req){
     const user = req.user;
@@ -39,16 +37,15 @@ getTotalUnread(@Request() req) {
   async getNotificationById(@Param('id') id: string) {
     return this.notificationService.getNotificationById(id);
   }
+
   @Patch(':id/read')
   markRead(@Param('id') id: string) {
   return this.notificationService.markAsRead(id);
   }
+
   @Post('reset-password/:id')
   async resetPassword(@Param('id') id: string) {
   return this.notificationService.resetUserPasswordAndNotify(id);
   }
 
-
-  
-  
 }

@@ -22,6 +22,7 @@ import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { In } from 'typeorm';
 import { userRepository } from 'src/user/repositories/user.repository';
 import * as QRCode from 'qrcode';
+import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -33,6 +34,7 @@ export class AssetsService {
         private readonly assetStatusRepository : AssetStatusRepository,
         private readonly statusRepository : StatusRepository,
         private readonly userRepository : userRepository,
+        private readonly inventoryDetailsRepository : InventoryDetailsRepository
          
     
        
@@ -61,23 +63,42 @@ export class AssetsService {
     return fetchAsset;
     }
 
-  async deleteAsset(id: string) {
-    const asset = await this.assetRepository.findOne({
-      where: { id },
-      relations: ['locationHistory'],
-      });
-    
-      if (!asset) {
-        throw new NotFoundException('Asset not found');
-      }
-    
-      if (asset.locationHistory.length > 0) {
-        throw new BadRequestException('Cannot delete asset, it has  history');
-      }
-    
-      await this.assetRepository.remove(asset);
-      return { message: 'Asset deleted successfully' };
-    }
+ async deleteAsset(id: string) {
+  const asset = await this.assetRepository.findOne({
+    where: { id },
+    relations: ['locationHistory'],
+  });
+
+  if (!asset) {
+    throw new NotFoundException('Asset not found');
+  }
+
+  // Vérifier s'il existe un AssetStatus lié
+  const hasBeenScannedViaStatus = await this.inventoryDetailsRepository
+  .createQueryBuilder('details')
+  .leftJoin('details.assetStatus', 'assetStatus')
+  .leftJoin('assetStatus.asset', 'asset')
+  .where('asset.id = :id', { id })
+  .getExists();
+
+
+  // Vérifier s'il existe un LocationHistory lié dans un InventoryDetails
+  const hasBeenScannedViaLocation = await this.locationHistoryRepository
+    .createQueryBuilder('locationHistory')
+    .leftJoin('locationHistory.inventoryDetails', 'inventoryDetails')
+    .where('locationHistory.asset = :id', { id })
+    .getExists();
+
+  if (hasBeenScannedViaStatus || hasBeenScannedViaLocation) {
+    throw new BadRequestException(
+      "Cet asset a déjà été scanné dans un inventaire et ne peut pas être supprimé."
+    );
+  }
+
+  await this.assetRepository.remove(asset);
+  return { message: 'Asset deleted successfully' };
+}
+
     
     async updateAsset(id: string, updateAssetDto: updateAssetDto) {
       const fetchAsset = await this.getAssetById(id);

@@ -1,11 +1,11 @@
 
 import {  CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Iaffectation } from '../types/interfaces/affectation.interface';
-import { User } from 'src/user/entities/user.entity';
 import { InventoryDetails } from 'src/inventory-details/entities/inventory-details.entity';
 import { Inventory } from 'src/inventory/entities/inventory.entity';
 import { IUser } from 'src/user/types/interface/user.interface';
 import { Iinventory } from 'src/inventory/types/interfaces/inventory.interface';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 export class Affectation implements Iaffectation{

@@ -15,6 +15,10 @@ import { AssetStatusRepository } from 'src/asset-status/repositories/asset-statu
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
 import { InventoryStatusRepository } from 'src/inventory-status/repositories/inventory-status.repository';
+import { NotificationService } from 'src/notification/notification.service';
+import { userRepository } from 'src/user/repositories/user.repository';
+import { ConfigService } from '@nestjs/config';
+import { NotificationRepository } from 'src/notification/repositories/notification.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([InventoryDetails, Inventory, Asset])],
@@ -25,7 +29,8 @@ import { InventoryStatusRepository } from 'src/inventory-status/repositories/inv
     InventoryRepository,
     AssetRepository,
     FileRepository,
-    AffectationRepository,AssetStatusRepository,LocationHistoryRepository,AnomalyRepository,InventoryStatusRepository
+    AffectationRepository,AssetStatusRepository,LocationHistoryRepository,AnomalyRepository,InventoryStatusRepository,
+    NotificationService,userRepository,ConfigService,NotificationRepository
   ],
   exports: [InventoryDetailsRepository],
 })

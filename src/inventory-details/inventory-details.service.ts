@@ -6,9 +6,12 @@ import { InventoryDetailsRepository } from './repositories/inventory-details.rep
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
 import { LocationHistoryRepository } from 'src/location-history/repositories/location-history.repository';
 import { InventoryDetails } from './entities/inventory-details.entity';
-import { AnomalyRepository } from 'src/anomaly/Repositories/anomaly.repository';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { IAsset } from 'src/assets/types/interface/Asset.interface';
+import { NotificationService } from 'src/notification/notification.service';
+import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
+import { IsNull, Not } from 'typeorm';
+import { userRepository } from 'src/user/repositories/user.repository';
 
 
 @Injectable()
@@ -20,6 +23,8 @@ export class InventoryDetailsService {
     private readonly assetStatusRepository : AssetStatusRepository,
     private readonly locationHistoryRepository : LocationHistoryRepository,
     private readonly assetRepository : AssetRepository,
+    private readonly notificationService : NotificationService,
+    private readonly userRepository : userRepository
 
   ) {}
   async getAllInventoryDetails() {
@@ -41,9 +46,12 @@ export class InventoryDetailsService {
   
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
     // Vérifier si l'affectation existe
-    const affectation = await this.affectationRepository.findOne({
-      where: { id: dto.affectationId },
-    });
+ const affectation = await this.affectationRepository.findOne({
+  where: { id: dto.affectationId },
+  relations: ['operator', 'operator.role', 'inventory', 'inventory.site'],
+});
+;
+
     if (!affectation) {
       throw new NotFoundException('Affectation not found.');
     }
@@ -97,9 +105,62 @@ export class InventoryDetailsService {
   
     // Sauvegarder le détail d’inventaire
     const savedInventoryDetail = await this.inventoryDetailsRepository.save(inventoryDetail);
+      // Exemples : récupérer operatorId, inventoryId, siteId, inventoryName depuis affectation ou dto
+     const operatorId = (affectation.operator as any)?.id;
+     const inventoryId = (affectation.inventory as any)?.id;
+     const siteId = (affectation.inventory as any)?.site?.id;
+     const inventoryName = (affectation.inventory as any)?.name;
+  // sinon à adapter
+
+  if (operatorId && inventoryId && siteId && inventoryName) {
+    await this.checkAndNotifyIfScanComplete(operatorId, inventoryId, siteId, inventoryName);
+  } else {
+    // Optionnel : log warning si info manquante
+    console.warn('Info manquante pour checkAndNotifyIfScanComplete');
+  }
   
     return savedInventoryDetail;
   }
+
+
+
+ async checkAndNotifyIfScanComplete(operatorId: string, inventoryId: string, siteId: string, inventoryName: string) {
+  const totalAssets = await this.affectationRepository.countTotalAssetsBySite(operatorId, inventoryId, siteId);
+  const scannedAssets = await this.inventoryDetailsRepository.countScannedAssetsBySite(operatorId, inventoryId, siteId);
+
+  if (scannedAssets >= totalAssets) {
+    await this.notifyAdminsOfCompletedsacnned(inventoryName);
+  }
+}
+
+
+
+async notifyAdminsOfCompletedsacnned(inventoryName: string) {
+  // Trouver tous les admins qui ont un playerId pour recevoir les notifications
+  const admins = await this.userRepository.find({
+    where: {
+      role: { role: UserRoleEnum.ADMIN },  
+      playerId: Not(IsNull()),              
+    },
+    relations: ['role'],
+  });
+
+  // Extraire les playerIds valides
+  const playerIds = admins
+    .map(admin => admin.playerId)
+    .filter(id => !!id);
+
+  if (playerIds.length === 0) return; 
+
+  // Préparer le titre et message de la notification
+  const title = 'Inventaire terminé';
+  const message = `L'inventaire "${inventoryName}" a été complètement scanné.`;
+
+  // Appeler le service de notification pour envoyer aux admins
+  await this.notificationService.notifyOperators(playerIds, title, message);
+}
+
+
   
   async getInventorydetailsById(id: string) {
     const detail = await this.inventoryDetailsRepository.findOne({
@@ -118,7 +179,6 @@ export class InventoryDetailsService {
     };
   }
   
-
   async getInventoryDetailsByInventoryId(inventoryId: string) {
     return this.inventoryDetailsRepository.findByInventoryId(inventoryId);
   }

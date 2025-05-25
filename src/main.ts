@@ -7,8 +7,12 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // http://localhost:4201 pour le container local du front pout le test
+  // http://148.113.24.178:4201 l'adresse ip de serveur du front 
+
   app.enableCors({
-    origin: ['http://localhost:4200','http://localhost:4201'],  
+    origin: ['http://localhost:4200','http://localhost:4201','http://148.113.24.178:4201'],  
     methods: ['GET', 'POST', 'PATCH', 'DELETE','PUT'],  
     allowedHeaders: ['Content-Type', 'Authorization', 'Origin'],  
     credentials: true,  

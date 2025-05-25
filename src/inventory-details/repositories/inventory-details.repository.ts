@@ -37,6 +37,17 @@ export class InventoryDetailsRepository extends Repository<InventoryDetails> {
       .getMany();
   }
 
+async countScannedAssetsBySite(operatorId: string, inventoryId: string, siteId: string){
+  return this.createQueryBuilder('details')
+    .innerJoin('details.affectation', 'affectation')
+    .innerJoin('affectation.inventory', 'inventory')
+    .where('affectation.operator = :operatorId', { operatorId })
+    .andWhere('inventory.id = :inventoryId', { inventoryId })
+    .andWhere('inventory.site = :siteId', { siteId })
+    .getCount();
+}
+
+
 
   
 
