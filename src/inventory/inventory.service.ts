@@ -556,7 +556,7 @@ async notifyAdminsOfCompletedInventory(inventoryName: string) {
   }
 
   @Cron('*/1 * * * *')
-async handleExpiredInventories() {
+  async handleExpiredInventories() {
   const expiredStatus = await this.statusRepository.findOne({
     where: { name: InventoryStatusEnum.EXPIRED, type: 'inventory' },
   });

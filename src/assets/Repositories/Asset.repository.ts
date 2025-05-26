@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Asset } from '../Entities/asset.entity';
 import { PaginateSearchDto } from '../types/dto/paginate-search.dto';
+import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
 
 
 @Injectable()
@@ -121,6 +122,43 @@ export class AssetRepository extends Repository<Asset> {
 
     return formatted;
   }
+
+
+async countAssetsNotInRepairBySite(siteId: string): Promise<number> {
+  const subQuery = this.createQueryBuilder('a')
+    .select('ast.status')
+    .from(AssetStatus, 'ast')
+    .where('ast.asset = a.id')
+    .orderBy('ast.createdAt', 'DESC')
+    .limit(1);
+
+  const count = await this.createQueryBuilder('a')
+    .innerJoin('a.location', 'location')
+    .innerJoin('location.service', 'service')
+    .innerJoin('service.department', 'department')
+    .innerJoin('department.site', 'site')
+    .where('site.id = :siteId', { siteId })
+    .andWhere(qb => {
+      const sub = qb.subQuery()
+        .select('status.name')
+        .from(AssetStatus, 'ast')
+        .innerJoin('ast.status', 'status')
+        .where('ast.asset = a.id')
+        .orderBy('ast.createdAt', 'DESC')
+        .limit(1)
+        .getQuery();
+      return `${sub} != :inRepair`;
+    })
+    .setParameter('inRepair', 'In Repair')
+    .getCount();
+
+  return count;
+}
+
+
+
+
+
 
 
 

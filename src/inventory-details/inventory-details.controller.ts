@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { InventoryDetailsService } from './inventory-details.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
@@ -29,6 +29,9 @@ export class InventoryDetailsController {
     getInventoryDetailsByInventoryId(@Param('inventoryId') inventoryId: string) {
       return this.inventoryDetailsService.getInventoryDetailsByInventoryId(inventoryId);
     }
+
+
+
 
     
 

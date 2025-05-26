@@ -43,7 +43,6 @@ export class InventoryDetailsService {
   });
   }
   
-  
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
     // Vérifier si l'affectation existe
  const affectation = await this.affectationRepository.findOne({
@@ -124,14 +123,18 @@ export class InventoryDetailsService {
 
 
 
- async checkAndNotifyIfScanComplete(operatorId: string, inventoryId: string, siteId: string, inventoryName: string) {
-  const totalAssets = await this.affectationRepository.countTotalAssetsBySite(operatorId, inventoryId, siteId);
+async checkAndNotifyIfScanComplete(operatorId: string, inventoryId: string, siteId: string, inventoryName: string) {
+  const totalAssets = await this.assetRepository.countAssetsNotInRepairBySite(siteId);
+  console.log('Total assets NOT in repair:', totalAssets);
+
   const scannedAssets = await this.inventoryDetailsRepository.countScannedAssetsBySite(operatorId, inventoryId, siteId);
+  console.log('Scanned assets:', scannedAssets);
 
   if (scannedAssets >= totalAssets) {
     await this.notifyAdminsOfCompletedsacnned(inventoryName);
   }
 }
+
 
 
 
