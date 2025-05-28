@@ -30,7 +30,7 @@ export class SiteService {
         const departments: CreateDepartmentDto[] = createSiteDto.department?.length
         ? createSiteDto.department
         : [{ 
-          name: 'Département 1', 
+          name: 'Department 1', 
           services: [{ 
           name: 'Service 1', 
           locations: [{ name: 'Location 1' }] 
