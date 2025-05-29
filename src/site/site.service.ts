@@ -21,32 +21,34 @@ export class SiteService {
         async getAllSites() {
             return this.siteRepository.findAll();
         }
-
-        // methode pour le creation d'un site
-       async createSite(createSiteDto: CreateSiteDto) {
-        const site = await this.siteRepository.save(
-          this.siteRepository.create({ name: createSiteDto.name })
-        );
-        const departments: CreateDepartmentDto[] = createSiteDto.department?.length
-        ? createSiteDto.department
-        : [{ 
-          name: 'Department 1', 
-          services: [{ 
-          name: 'Service 1', 
-          locations: [{ name: 'Location 1' }] 
-        }] 
+        async createSite(createSiteDto: CreateSiteDto) {
+          const site = await this.siteRepository.save(
+            this.siteRepository.create({ name: createSiteDto.name })
+          );
+          const departments: CreateDepartmentDto[] = createSiteDto.department?.length
+          ? createSiteDto.department
+          : [{
+            name: `Department_${site.name}`,
+            services: [{
+              name: `Service_${site.name}`,
+              locations: [{ name: `Location_${site.name}` }]
+        }]
       }];
       for (const deptDto of departments) {
         const department = await this.departmentRepository.save(
           this.departmentRepository.create({
             name: deptDto.name,
             site: site,
-          })
-        );
-        const services: CreateServiceDto[] = deptDto.services?.length
+      })
+    );
+    const services: CreateServiceDto[] = deptDto.services?.length
       ? deptDto.services
-      : [{ name: 'Service 1', locations: [{ name: 'Location 1' }] }];
-      for (const servDto of services) {
+      : [{
+          name: `Service_${site.name}`,
+          locations: [{ name: `Location_${site.name}` }]
+        }];
+
+    for (const servDto of services) {
       const service = await this.serviceRepository.save(
         this.serviceRepository.create({
           name: servDto.name,
@@ -56,7 +58,7 @@ export class SiteService {
 
       const locations: CreateLocationDto[] = servDto.locations?.length
         ? servDto.locations
-        : [{ name: 'Location 1' }];
+        : [{ name: `Location_${site.name}` }];
 
       for (const locDto of locations) {
         await this.locationRepository.save(
@@ -68,8 +70,10 @@ export class SiteService {
       }
     }
   }
+
   return site;
 }
+
 
 
         // methode pour get site by id

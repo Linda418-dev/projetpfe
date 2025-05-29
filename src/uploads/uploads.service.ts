@@ -11,10 +11,10 @@ export class UploadsService {
   async createFile(file: Express.Multer.File) {
     const newFile = this.fileRepository.create({
       name: file.originalname,
-     urlFile: `uploads/${file.filename}`,
+      urlFile: `uploads/${file.filename}`,
       //urlFile: file.originalname,
-
       typeFile: file.mimetype,
+      // size: file.size,
     });
 
     const savedFile  = await this.fileRepository.save(newFile);
@@ -23,6 +23,7 @@ export class UploadsService {
       fileId: savedFile.id,
       urlFile: savedFile.urlFile,
       typeFile: savedFile.typeFile,
+      // size: savedFile.size,
     };
   }
 

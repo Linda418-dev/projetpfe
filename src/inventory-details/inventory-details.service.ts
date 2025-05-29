@@ -60,7 +60,7 @@ export class InventoryDetailsService {
       where: { id: dto.assetId },
     });
     if (!asset) {
-      throw new NotFoundException('Asset not found.');
+      throw new NotFoundException( 'Asset not found ');
     }
   
     // Récupérer les fichiers si fournis
@@ -115,7 +115,7 @@ export class InventoryDetailsService {
     await this.checkAndNotifyIfScanComplete(operatorId, inventoryId, siteId, inventoryName);
   } else {
     // Optionnel : log warning si info manquante
-    console.warn('Info manquante pour checkAndNotifyIfScanComplete');
+    console.warn('Missing information for checkAndNotifyIfScanComplete');
   }
   
     return savedInventoryDetail;
@@ -156,8 +156,8 @@ async notifyAdminsOfCompletedsacnned(inventoryName: string) {
   if (playerIds.length === 0) return; 
 
   // Préparer le titre et message de la notification
-  const title = 'Inventaire terminé';
-  const message = `L'inventaire "${inventoryName}" a été complètement scanné.`;
+  const title = 'Inventory Completed';
+  const message = `The inventory "${inventoryName}" has been fully scanned`;
 
   // Appeler le service de notification pour envoyer aux admins
   await this.notificationService.notifyOperators(playerIds, title, message);

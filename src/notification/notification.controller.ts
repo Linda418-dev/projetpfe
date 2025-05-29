@@ -43,9 +43,6 @@ export class NotificationController {
   return this.notificationService.markAsRead(id);
   }
 
-  @Post('reset-password/:id')
-  async resetPassword(@Param('id') id: string) {
-  return this.notificationService.resetUserPasswordAndNotify(id);
-  }
+ 
 
 }

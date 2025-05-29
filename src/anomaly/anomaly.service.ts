@@ -391,52 +391,7 @@ async resolveAnomaly(anomalyId: string) {
   };
 }
 
-// async assignTechnician(anomalyId: string, technicianId: string) {
-//   const anomaly = await this.anomalyRepository.findOne({
-//     where: { id: anomalyId },
-//     relations: ['technician', 'statusHistory'],
-//   });
 
-//   if (!anomaly) {
-//     throw new NotFoundException('Anomaly not found');
-//   }
-
-//   // Vérifier que le dernier statut est "accepted"
-//   const lastStatus = anomaly.statusHistory
-//     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())[0];
-
-//   if (
-//     !lastStatus ||
-//     typeof lastStatus.status !== 'object' ||
-//     lastStatus.status.name !== AnomalyStatusEnum.RESOLVED
-//   ) {
-//     throw new BadRequestException('Technician can only be assigned if anomaly status is accepted');
-//   }
-
-//   // Vérifier si un technicien est déjà assigné
-//   if (anomaly.technician) {
-//     throw new BadRequestException('A technician has already been assigned to this anomaly');
-//   }
-
-//   const technician = await this.userRepository.findOne({
-//     where: { id: technicianId },
-//     relations: ['role'],
-//   });
-
-//   if (!technician || (typeof technician.role !== 'string' && technician.role?.role !== 'technician')) {
-//     throw new NotFoundException('Technician not found or invalid role');
-//   }
-
-//   // Assigner le technicien
-//   anomaly.technician = technician;
-
-//   const updated = await this.anomalyRepository.save(anomaly);
-
-//   return {
-//     message: 'Technician assigned to anomaly',
-//     anomaly: updated,
-//   };
-// }
 
 
 

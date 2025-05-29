@@ -28,7 +28,6 @@ import { ConfigService } from '@nestjs/config';
         const allowedMimeTypes = [
           'image/jpeg', 
           'image/jpg',  
- 
           'image/png',   
           'image/gif',   
           'image/webp',   

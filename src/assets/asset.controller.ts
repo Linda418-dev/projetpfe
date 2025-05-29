@@ -35,12 +35,7 @@ export class AssetController {
      asset,
    };
   }
-
-  // @Patch('assign-multiple')
-  // async assignMultipleAssetsToUser(@Body() assignDto: AssignMultipleAssetsDto) {
-  //   return this.assetService.assignMultipleAssetsToUser(assignDto.assetIds, assignDto.userId);
-  // }
-
+  
   @Get('statistics')
   async getStatistics() {
   return this.assetService.getStatistics();

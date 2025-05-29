@@ -73,7 +73,7 @@ export class NotificationService {
     }
   }
 
-// methode pour get  notification by id 
+  // methode pour get  notification by id 
   async getNotificationById(id: string) {
     const notification = await this.notificationRepo.findOne({
       where: { id },
@@ -86,42 +86,20 @@ export class NotificationService {
   
     return notification;
   }
+  //marker comme vu
   async markAsRead(id: string) {
   const notif = await this.notificationRepo.findOne({ where: { id } });
   if (!notif) throw new NotFoundException('Notification not found');
   notif.read = true;
   return this.notificationRepo.save(notif);
   }
+   
 
-  
-  
   async countAllUnread(userId: string) {
   return this.notificationRepo.countAllUnread(userId);
-}
-
-
-
-async resetUserPasswordAndNotify(userId: string) {
-  const user = await this.userRepository.findOne({ where: { id: userId } });
-  if (!user || !user.playerId) {
-    throw new NotFoundException('Utilisateur introuvable ou sans playerId');
   }
-
-  const tempPassword = this.generateTempPassword();
-  user.password = await bcrypt.hash(tempPassword, 10);
-  await this.userRepository.save(user);
-
-  const message = `Votre mot de passe temporaire est : ${tempPassword}. Veuillez le changer dès que possible.`;
-  const title = 'Réinitialisation du mot de passe';
-
-  await this.notifyOperators([user.playerId], title, message);
-}
-
-generateTempPassword(length = 8): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-}
-
+  
+  
 
 async getAllNotifications(user: any) {
   const allNotifications = await this.notificationRepo.find({

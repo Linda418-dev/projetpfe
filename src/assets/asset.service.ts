@@ -73,28 +73,6 @@ export class AssetsService {
     throw new NotFoundException('Asset not found');
   }
 
-  // Vérifier s'il existe un AssetStatus lié
-  const hasBeenScannedViaStatus = await this.inventoryDetailsRepository
-  .createQueryBuilder('details')
-  .leftJoin('details.assetStatus', 'assetStatus')
-  .leftJoin('assetStatus.asset', 'asset')
-  .where('asset.id = :id', { id })
-  .getExists();
-
-
-  // Vérifier s'il existe un LocationHistory lié dans un InventoryDetails
-  const hasBeenScannedViaLocation = await this.locationHistoryRepository
-    .createQueryBuilder('locationHistory')
-    .leftJoin('locationHistory.inventoryDetails', 'inventoryDetails')
-    .where('locationHistory.asset = :id', { id })
-    .getExists();
-
-  if (hasBeenScannedViaStatus || hasBeenScannedViaLocation) {
-    throw new BadRequestException(
-      "Cet asset a déjà été scanné dans un inventaire et ne peut pas être supprimé."
-    );
-  }
-
   await this.assetRepository.remove(asset);
   return { message: 'Asset deleted successfully' };
 }
@@ -180,19 +158,17 @@ export class AssetsService {
 
       if (updateAssetDto.fileIds && updateAssetDto.fileIds.length > 0) {
      // Vérifie si tous les fichiers existent
-    const relatedFiles = await this.fileRepository.find({
-    where: { id: In(updateAssetDto.fileIds) },
-  });
+       const relatedFiles = await this.fileRepository.find({
+        where: { id: In(updateAssetDto.fileIds) },
+      });
+      if (relatedFiles.length !== updateAssetDto.fileIds.length) {
+        const foundIds = relatedFiles.map((file) => file.id);
+        const missingIds = updateAssetDto.fileIds.filter(id => !foundIds.includes(id));
+        throw new BadRequestException(`The following files could not be found : ${missingIds.join(', ')}`);
+      }
 
-  if (relatedFiles.length !== updateAssetDto.fileIds.length) {
-    const foundIds = relatedFiles.map((file) => file.id);
-    const missingIds = updateAssetDto.fileIds.filter(id => !foundIds.includes(id));
-    throw new BadRequestException(`The following files could not be found : ${missingIds.join(', ')}`);
-  }
-
-  // Remplace complètement les anciens fichiers
-  fetchAsset.files = relatedFiles;
-  }
+      // Remplace complètement les anciens fichiers
+      fetchAsset.files = relatedFiles;}
 
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
@@ -363,33 +339,7 @@ async generateQrCodeAndAttachToAsset(asset: Asset) {
   }
 
 
-//   async assignMultipleAssetsToUser(assetIds: string[], userId: string) {
-//   const user = await this.userRepository.findOneBy({ id: userId });
-//   if (!user) throw new NotFoundException('User not found');
 
-//   const assets = await this.assetRepository.find({
-//     where: { id: In(assetIds) },
-//     relations: ['user'],
-//   });
-//   if (assets.length === 0) throw new NotFoundException('No assets found for provided IDs');
-//   const conflictedAssets = assets.filter(asset => {
-//     if (!asset.user) return false;
-//     if (typeof asset.user === 'string') return asset.user !== userId;
-//     return asset.user.id !== userId;
-//   });
-
-//   if (conflictedAssets.length > 0) {
-//     const conflictedIds = conflictedAssets.map(a => a.id).join(', ');
-//     throw new BadRequestException(`Assets already assigned to another user: ${conflictedIds}`);
-//   }
-
-//   assets.forEach(asset => {
-//     asset.user = user;
-//   });
-
-//   await this.assetRepository.save(assets);
-//   return assets;
-// }
 
 
 async findOne(id: string) {

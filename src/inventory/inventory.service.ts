@@ -439,7 +439,7 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   statusUpdated = true;
 
   // Envoi de la notification à tous les admins
-  await this.notifyAdminsOfCompletedInventory(inventory.name);
+  await this.notifyOpertorOfCompletedInventory(inventory.name);
 
   return {
     inventory,
@@ -531,10 +531,10 @@ if (newOperator.playerId) {
   };
 }
 
-async notifyAdminsOfCompletedInventory(inventoryName: string) {
+async notifyOpertorOfCompletedInventory(inventoryName: string) {
   const admins = await this.userRepository.find({
     where: {
-      role: { role: UserRoleEnum.ADMIN },
+      role: { role: UserRoleEnum.OPERATOR },
       playerId: Not(IsNull()),
     },
     relations: ['role'],

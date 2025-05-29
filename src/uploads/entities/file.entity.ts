@@ -22,6 +22,8 @@ export class File implements IFile {
   @Column()
   typeFile: string;
 
+  // @Column()
+  // size: number;
 
   @ManyToOne(() => Asset, (asset) => asset.files, { nullable: true,onDelete: 'CASCADE' })
   asset: IAsset|string;
