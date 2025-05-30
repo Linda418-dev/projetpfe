@@ -1,4 +1,4 @@
-import { Brackets, Repository } from 'typeorm';
+import {  Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Asset } from '../Entities/asset.entity';
@@ -25,6 +25,24 @@ export class AssetRepository extends Repository<Asset> {
     query.andWhere("asset.name ILIKE :keyword", {
       keyword: `%${params.keyword}%`,
     });
+  }
+
+   if (params.categoryId) {
+    query.andWhere("category.id = :categoryId", { categoryId: params.categoryId });
+  }
+
+   if (params.categoryId) {
+    query.andWhere("supplier.id = :supplierId", { supplierId: params.supplierId });
+  }
+
+  
+   if (params.locationId) {
+    query.andWhere("location.id = :locationId", { locationId: params.locationId });
+  }
+
+  
+   if (params.statusId) {
+    query.andWhere("status.id = :statusId", { statusId: params.statusId });
   }
 
   if (params.orderField && params.orderDirection) {

@@ -20,7 +20,6 @@ import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
 import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { In } from 'typeorm';
-import { userRepository } from 'src/user/repositories/user.repository';
 import * as QRCode from 'qrcode';
 import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
 @Injectable()
@@ -33,8 +32,6 @@ export class AssetsService {
         private readonly locationHistoryRepository : LocationHistoryRepository,
         private readonly assetStatusRepository : AssetStatusRepository,
         private readonly statusRepository : StatusRepository,
-        private readonly userRepository : userRepository,
-        private readonly inventoryDetailsRepository : InventoryDetailsRepository
          
     
        
