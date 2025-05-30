@@ -1,6 +1,6 @@
-import { IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Min } from "class-validator";
 
-import { Type } from "class-transformer";
+import { Transform, Type } from "class-transformer";
 import { ApiProperty} from "@nestjs/swagger";
 import { PaginateDto } from "./paginate.dto";
 import { SearchKeyword } from "../interface/paginateKeyword.interface";
@@ -35,4 +35,10 @@ export class PaginateSearchDto extends PaginateDto implements SearchKeyword{
     @IsOptional()
     @IsEnum(SortDirection)
     orderDirection?: SortDirection;
+
+    @ApiProperty({ required: false, example: true })
+    @IsOptional()
+    @Transform(({ value }) => value === 'true') 
+    @IsBoolean()
+    isActive?: boolean;
 }

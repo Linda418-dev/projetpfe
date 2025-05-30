@@ -29,6 +29,10 @@ export class userRepository extends Repository<User> {
       { keyword: `%${params.keyword}%` }
     );
   }
+  
+  if (params.isActive) {
+    query.andWhere("user.isActive = :isActive", { isActive: params.isActive });
+  }
 
   if (params.orderField && params.orderDirection) {
     query.orderBy(`user.${params.orderField}`, params.orderDirection.toUpperCase() as 'ASC' | 'DESC');
