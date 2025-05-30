@@ -438,9 +438,7 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   const savedStatus = await this.inventoryStatusRepository.save(newInventoryStatus);
   statusUpdated = true;
 
-  // Envoi de la notification à tous les admins
-  await this.notifyOpertorOfCompletedInventory(inventory.name);
-
+  
   return {
     inventory,
     status: savedStatus,
@@ -531,24 +529,7 @@ if (newOperator.playerId) {
   };
 }
 
-async notifyOpertorOfCompletedInventory(inventoryName: string) {
-  const admins = await this.userRepository.find({
-    where: {
-      role: { role: UserRoleEnum.OPERATOR },
-      playerId: Not(IsNull()),
-    },
-    relations: ['role'],
-  });
 
-  const playerIds = admins.map((admin) => admin.playerId).filter(Boolean);
-  if (playerIds.length === 0) return;
-
-  const title = 'Inventory Completed';
-  const message = `The inventory "${inventoryName}" has been marked as completed.`;
-
-
-  await this.notificationService.notifyOperators(playerIds, title, message);
-}
 
 
   private getTodayStart(): Date {

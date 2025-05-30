@@ -40,7 +40,6 @@ export class AssetRepository extends Repository<Asset> {
     query.andWhere("location.id = :locationId", { locationId: params.locationId });
   }
 
-  
    if (params.statusId) {
     query.andWhere("status.id = :statusId", { statusId: params.statusId });
   }
