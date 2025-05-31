@@ -9,7 +9,16 @@ import { UpdateServiceDto } from './types/dto/update-service.dto';
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) {}
 
+
+    
     @Get()
+    @ApiOperation({ summary: 'Get all services by departmentId and siteId' })
+    getAllServicesByDepartment(
+      @Query('siteId') siteId: string,
+      @Query('departmentId') departmentId: string) {
+            return this.serviceService.getAllServicesByDepartment(siteId, departmentId);
+    }
+    @Get('get-all-srevice')
     @ApiOperation({ summary: 'get all services' })
     getAllServices() {
       return this.serviceService.getAllServices();

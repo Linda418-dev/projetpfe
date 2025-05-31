@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SiteService } from './site.service';
 import { CreateSiteDto } from './Types/dto/create-site.dto';
@@ -8,6 +8,8 @@ import { updateSiteDto } from './Types/dto/update-site.dto';
 @Controller('sites')
 export class SiteController {
 constructor(private readonly siteService:SiteService){}
+
+
 
     @Get()
     @ApiOperation({ summary: 'get all sites' })
