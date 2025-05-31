@@ -25,6 +25,7 @@ import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
 import { User } from 'src/user/entities/user.entity';
 import { userRepository } from 'src/user/repositories/user.repository';
 import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
+import { AssetAssignmentRepository } from 'src/asset-assignment/repositories/asset-assignment.repository';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -35,10 +36,8 @@ export class AssetsService {
         private readonly locationHistoryRepository : LocationHistoryRepository,
         private readonly assetStatusRepository : AssetStatusRepository,
         private readonly statusRepository : StatusRepository,
-        private readonly userRepository : userRepository
-         
-    
-       
+        private readonly userRepository : userRepository,
+        private readonly assetAssignmentRepository : AssetAssignmentRepository
     ) {}
         
     
@@ -309,10 +308,10 @@ async generateQrCodeAndAttachToAsset(asset: Asset) {
   await this.assetRepository.save(asset);
 }
 
-async generateNextRef(): Promise<string> {
+async generateNextRef(){
   const lastAsset = await this.assetRepository
     .createQueryBuilder('asset')
-    .orderBy('CAST(asset.ref AS INTEGER)', 'DESC')
+    .orderBy('CAST(asset.referenceNumber AS INTEGER)', 'DESC')
     .getOne();
 
   const lastRefNumber = lastAsset ? parseInt(lastAsset.referenceNumber, 10) : 0;

@@ -58,6 +58,8 @@ import { NotificationRepository } from './notification/repositories/notification
 import { Notification } from './notification/entities/notification.entity';
 import { AnomalyStatusModule } from './anomaly-status/anomaly-status.module';
 import { AnomalyStatus } from './anomaly-status/entities/anomaly-status.entity';
+import { AssetAssignmentModule } from './asset-assignment/asset-assignment.module';
+import { AssetAssignment } from './asset-assignment/Entities/asset-assignment.entity';
 
 @Module({
   imports: [
@@ -73,7 +75,7 @@ import { AnomalyStatus } from './anomaly-status/entities/anomaly-status.entity';
         username: configService.get('POSTGRES_USER'),
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DATABASE'),
-        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly,Notification,AnomalyStatus], 
+        entities: [Site,Department,Service,Location, Asset,File,Supplier,Category ,LocationHistory,AssetStatus, User,UserRole,Inventory,Status,InventoryStatus,Affectation,InventoryDetails,Anomaly,Notification,AnomalyStatus,AssetAssignment], 
         synchronize: true, 
       }),
     }),
@@ -99,6 +101,7 @@ import { AnomalyStatus } from './anomaly-status/entities/anomaly-status.entity';
     AnomalyModule,
     NotificationModule,
     AnomalyStatusModule,
+    AssetAssignmentModule,
   
   ],
   controllers: [AppController],

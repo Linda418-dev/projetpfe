@@ -14,6 +14,18 @@ export class DepartmentService {
         private readonly  locationRepository : LocationRepository
         
       ){}
+
+      async getAllDepartmentsBySiteId(siteId?: string) {
+        if (siteId) {
+          return this.departmentRepository.find({
+            where: {
+              site: { id: siteId },
+            },
+            relations: ['site'],
+          });
+        }
+      }
+
       // methode pour get All Departments 
       async getAllDepartments() {
         return this.departmentRepository.find({

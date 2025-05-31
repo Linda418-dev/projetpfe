@@ -60,6 +60,8 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => User, { nullable: true, eager: true, onDelete: 'SET NULL' })
   employee?: IUser | string;
+
+ 
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

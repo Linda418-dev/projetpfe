@@ -11,6 +11,13 @@ export class DepartmentController {
    
     constructor(private readonly departmentService: DepartmentService) {}
           
+
+        @Get()
+        @ApiOperation({ summary: 'Get all departments by siteId (optional)' })
+        getAllDepartmentsBySiteId(@Query('siteId') siteId?: string) {
+          return this.departmentService.getAllDepartmentsBySiteId(siteId);
+        }
+
          @Get()
          @ApiOperation({ summary: 'get all departments' })
          getAllDepartments() {

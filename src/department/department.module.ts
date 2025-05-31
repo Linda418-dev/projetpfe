@@ -7,7 +7,7 @@ import { ServiceRepository } from 'src/service/repositories/service.repository';
 import { LocationRepository } from 'src/location/repositories/location.repository';
 
 @Module({
-  providers: [DepartmentService , DepartmentRepository, SiteRepository,ServiceRepository,LocationRepository],
+  providers: [DepartmentService , DepartmentRepository, SiteRepository,ServiceRepository,LocationRepository,],
   controllers: [DepartmentController]
 })
 export class DepartmentModule {}
