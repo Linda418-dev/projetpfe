@@ -14,9 +14,9 @@ export class ServiceController {
     @Get()
     @ApiOperation({ summary: 'Get all services by departmentId and siteId' })
     getAllServicesByDepartment(
-      @Query('siteId') siteId: string,
+      
       @Query('departmentId') departmentId: string) {
-            return this.serviceService.getAllServicesByDepartment(siteId, departmentId);
+            return this.serviceService.getAllServicesByDepartment(departmentId);
     }
     @Get('get-all-srevice')
     @ApiOperation({ summary: 'get all services' })

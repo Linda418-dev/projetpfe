@@ -11,6 +11,11 @@ export class LocationService {
             private readonly serviceRepository : ServiceRepository
         ) {}
 
+
+        async getAllLocationsByService(serviceId: string) {
+    return this.locationRepository.findAllByService(serviceId);
+  }
+
       // methode pour gett All locations
       async getAllLocations() {
         return this.locationRepository.find({

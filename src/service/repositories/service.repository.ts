@@ -8,4 +8,12 @@ export class ServiceRepository extends Repository<Service> {
   constructor(private readonly dataSource: DataSource) {
     super(Service, dataSource.createEntityManager());
   }
+
+    async findAllByDepartmentAndSite(departmentId: string) {
+    return this.createQueryBuilder('service')
+      .leftJoinAndSelect('service.department', 'department')
+      .leftJoinAndSelect('department.site', 'site')
+      .where('department.id = :departmentId', { departmentId })
+      .getMany();
+  }
 }

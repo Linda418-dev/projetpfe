@@ -8,6 +8,12 @@ import { UpdateLocationDto } from './types/dto/update-location.dto';
 @Controller('locations')
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
+
+  @Get('by-service')
+  @ApiOperation({ summary: 'Get all locations by serviceId' })
+  getAllLocationsByService(@Query('serviceId') serviceId: string) {
+    return this.locationService.getAllLocationsByService(serviceId);
+  }
   
   @Get()
   @ApiOperation({ summary: 'get all locations' })

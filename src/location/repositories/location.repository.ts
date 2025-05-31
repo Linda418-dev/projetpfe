@@ -10,4 +10,11 @@ export class LocationRepository extends Repository<Location> {
   constructor(private readonly dataSource: DataSource) {
     super(Location, dataSource.createEntityManager());
   }
+
+   async findAllByService(serviceId: string): Promise<Location[]> {
+    return this.createQueryBuilder('location')
+      .leftJoinAndSelect('location.service', 'service')
+      .where('service.id = :serviceId', { serviceId })
+      .getMany();
+  }
 }

@@ -13,15 +13,9 @@ export class ServiceService {
         private readonly locationRepository : LocationRepository
     ) {}
 
-async getAllServicesByDepartment(siteId: string, departmentId: string) {
-  return this.serviceRepository
-    .createQueryBuilder('service')
-    .leftJoinAndSelect('service.department', 'department')
-    .leftJoinAndSelect('department.site', 'site')
-    .where('department.id = :departmentId', { departmentId })
-    .andWhere('site.id = :siteId', { siteId })
-    .getMany();
-}
+  async getAllServicesByDepartment( departmentId: string) {
+    return this.serviceRepository.findAllByDepartmentAndSite(departmentId);
+  }
 
 
     // methode pour get All Services 
