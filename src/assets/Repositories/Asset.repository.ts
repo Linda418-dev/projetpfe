@@ -13,12 +13,18 @@ export class AssetRepository extends Repository<Asset> {
   }
 
  async getAllAssetWithPaginate(params: PaginateSearchDto) {
-  const query = this.createQueryBuilder("asset")
+const query = this.createQueryBuilder("asset")
     .leftJoinAndSelect("asset.status", "status")
     .leftJoinAndSelect("asset.category", "category")
     .leftJoinAndSelect("asset.supplier", "supplier")
     .leftJoinAndSelect("asset.location", "location")
     .leftJoinAndSelect("asset.files", "files")
+
+    // Jointures supplémentaires pour filtrer par site, department, service
+    .leftJoin("location.service", "service")
+    .leftJoin("service.department", "department")
+    .leftJoin("department.site", "site");
+
     
 
   if (params.keyword) {
@@ -42,6 +48,16 @@ export class AssetRepository extends Repository<Asset> {
 
    if (params.statusId) {
     query.andWhere("status.id = :statusId", { statusId: params.statusId });
+  }
+
+  // **Nouveaux filtres : site > department > service > location**
+
+  if (params.siteId) {
+    query.andWhere("site.id = :siteId", { siteId: params.siteId });
+  } else if (params.departmentId) {
+    query.andWhere("department.id = :departmentId", { departmentId: params.departmentId });
+  } else if (params.serviceId) {
+    query.andWhere("service.id = :serviceId", { serviceId: params.serviceId });
   }
 
   if (params.orderField && params.orderDirection) {

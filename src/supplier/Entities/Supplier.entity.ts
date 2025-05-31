@@ -10,10 +10,10 @@ export class Supplier implements ISupplier {
   @PrimaryGeneratedColumn('uuid')
   id: string;  
 
-  @Column({ unique: true })
+  @Column()
   name: string;
 
-  @Column({ unique: true })
+  @Column()
   email: string;
 
   @Column()
@@ -24,7 +24,7 @@ export class Supplier implements ISupplier {
   
   @ManyToOne(() => Site, (site) => site.suppliers, { onDelete: 'CASCADE' })
   site: Isite | string; 
-  
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
