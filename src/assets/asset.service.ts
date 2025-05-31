@@ -181,21 +181,37 @@ export class AssetsService {
         fetchAsset.purchasePrice = updateAssetDto.purchasePrice;
       }
 
-      // Mise à jour de l'employé
-      if (updateAssetDto.employeeId) {
-        const employee = await this.userRepository.findOne({
-          where: { id: updateAssetDto.employeeId },
-          relations: ['role'],
-        });
-        if (!employee) {
-          throw new BadRequestException('Employee not found');
-        }
-        const userRole = employee.role as IUserRole;
-        if (!userRole || userRole.role !== UserRoleEnum.EMPLOYEE) {
-          throw new BadRequestException('User is not an employee');
-        }
-        fetchAsset.employee = employee;
-      }
+      // Mise à jour de l'employé via AssetAssignment
+if (updateAssetDto.employeeId) {
+  const employee = await this.userRepository.findOne({
+    where: { id: updateAssetDto.employeeId },
+    relations: ['role'],
+  });
+
+  if (!employee) {
+    throw new BadRequestException('Employee not found');
+  }
+
+  const userRole = employee.role as IUserRole;
+  if (!userRole || userRole.role !== UserRoleEnum.EMPLOYEE) {
+    throw new BadRequestException('User is not an employee');
+  }
+
+  const lastAssignment = await this.assetAssignmentRepository.findOne({
+    where: { asset: { id: fetchAsset.id } },
+    order: { assignedAt: 'DESC' },
+  });
+
+  if (!lastAssignment || (lastAssignment.employee as User).id !== employee.id) {
+    const newAssignment = this.assetAssignmentRepository.create({
+      asset: fetchAsset,
+      employee,
+    });
+    await this.assetAssignmentRepository.save(newAssignment);
+     fetchAsset.employee = employee;
+  }
+}
+
 
 
       const updatedAsset = await this.assetRepository.save(fetchAsset);
