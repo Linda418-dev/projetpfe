@@ -19,6 +19,7 @@ const query = this.createQueryBuilder("asset")
     .leftJoinAndSelect("asset.supplier", "supplier")
     .leftJoinAndSelect("asset.location", "location")
     .leftJoinAndSelect("asset.files", "files")
+    .leftJoinAndSelect("asset.employee", "employee")
 
     // Jointures supplémentaires pour filtrer par site, department, service
     .leftJoin("location.service", "service")

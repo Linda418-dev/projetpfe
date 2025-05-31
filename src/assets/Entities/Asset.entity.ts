@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, Generated } from 'typeorm';
 import { File } from 'src/uploads/entities/file.entity';  
 import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
@@ -12,6 +12,8 @@ import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { ILocationHistory } from 'src/location-history/types/interfaces/location-history.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { IFile } from 'src/uploads/types/interfaces/file.interface';
+import { IUser } from 'src/user/types/interface/user.interface';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity('asset')
 export class Asset implements IAsset {
@@ -24,6 +26,19 @@ export class Asset implements IAsset {
   @Column({ nullable: true })
   qrCode: string;
 
+   
+ @Column({ unique: true })
+ referenceNumber: string;
+
+
+  @Column({ type: 'date', nullable: true })
+  purchaseDate: Date | null;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  purchasePrice: number | null;
+
+  @Column({ type: 'date', nullable: true })
+  productionDate: Date | null;
 
   @ManyToOne(() => Category, (category) => category.assets, { nullable: true, eager: true, onDelete: "CASCADE" })
   category:ICategory|string;  
@@ -42,6 +57,9 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => Status, { eager: true, nullable: false, onDelete: 'SET NULL' })
   status: Istatus|string;
+
+  @ManyToOne(() => User, { nullable: true, eager: true, onDelete: 'SET NULL' })
+  employee?: IUser | string;
   
 
   @CreateDateColumn({ type: 'timestamp' })

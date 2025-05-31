@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsArray, IsDateString, IsNumber, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateAssetDto {
     @ApiProperty()
@@ -14,6 +14,7 @@ export class CreateAssetDto {
     @IsUUID()
     supplierId: string;
 
+   
     @ApiProperty()
     @IsUUID()
     locationId: string;
@@ -23,5 +24,25 @@ export class CreateAssetDto {
     @IsArray()
     @IsUUID('all', { each: true })
     fileIds?: string[];
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsUUID()
+    employeeId?: string;
+
+    @ApiProperty({ required: false, example: "YYYY-MM-JJ" })
+    @IsOptional()
+    @IsDateString()
+    purchaseDate?: Date;
+
+    @ApiProperty({ required: false, example: 1499.99 })
+    @IsOptional()
+    @IsNumber()
+    purchasePrice?: number;
+    
+    @ApiProperty({ required: false, example: "YYYY-MM-JJ" })
+    @IsOptional()
+    @IsDateString()
+    productionDate?: Date;
     
 }

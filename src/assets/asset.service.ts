@@ -21,7 +21,10 @@ import { Ilocation } from 'src/location/types/interfaces/location.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { In } from 'typeorm';
 import * as QRCode from 'qrcode';
-import { InventoryDetailsRepository } from 'src/inventory-details/repositories/inventory-details.repository';
+import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
+import { User } from 'src/user/entities/user.entity';
+import { userRepository } from 'src/user/repositories/user.repository';
+import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -32,6 +35,7 @@ export class AssetsService {
         private readonly locationHistoryRepository : LocationHistoryRepository,
         private readonly assetStatusRepository : AssetStatusRepository,
         private readonly statusRepository : StatusRepository,
+        private readonly userRepository : userRepository
          
     
        
@@ -167,6 +171,34 @@ export class AssetsService {
       // Remplace complètement les anciens fichiers
       fetchAsset.files = relatedFiles;}
 
+      // Mise à jour des dates et prix
+      if (updateAssetDto.purchaseDate) {
+        fetchAsset.purchaseDate = new Date(updateAssetDto.purchaseDate);
+      }
+      if (updateAssetDto.productionDate) {
+        fetchAsset.productionDate = new Date(updateAssetDto.productionDate);
+      }
+      if (updateAssetDto.purchasePrice !== undefined) {
+        fetchAsset.purchasePrice = updateAssetDto.purchasePrice;
+      }
+
+      // Mise à jour de l'employé
+      if (updateAssetDto.employeeId) {
+        const employee = await this.userRepository.findOne({
+          where: { id: updateAssetDto.employeeId },
+          relations: ['role'],
+        });
+        if (!employee) {
+          throw new BadRequestException('Employee not found');
+        }
+        const userRole = employee.role as IUserRole;
+        if (!userRole || userRole.role !== UserRoleEnum.EMPLOYEE) {
+          throw new BadRequestException('User is not an employee');
+        }
+        fetchAsset.employee = employee;
+      }
+
+
       const updatedAsset = await this.assetRepository.save(fetchAsset);
       return updatedAsset;
     
@@ -174,7 +206,7 @@ export class AssetsService {
     
   // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
-  const { name, categoryId, supplierId, fileIds, locationId } = createAssetDto;
+  const { name, categoryId, supplierId, fileIds, locationId ,employeeId, purchaseDate, purchasePrice,productionDate} = createAssetDto;
 
   const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
   if (!category) throw new Error('Category not found');
@@ -210,6 +242,30 @@ export class AssetsService {
   asset.supplier = supplier;
   asset.location = location;
   asset.status = defaultStatus;
+
+    // Nouveaux champs
+  asset.purchaseDate = purchaseDate ?? null;
+  asset.purchasePrice = purchasePrice ?? null;
+  asset.productionDate = productionDate ?? null;
+
+  // --- Ajoute ce code ici ---
+  let employee: User | null = null;
+  if (createAssetDto.employeeId) {
+  employee = await this.userRepository.findOne({
+    where: { id: createAssetDto.employeeId },
+    relations: ['role'],
+  });
+
+  if (!employee) throw new Error('Employee not found');
+  const userRole = employee.role as IUserRole;
+
+  if (!userRole || userRole.role !== UserRoleEnum.EMPLOYEE) {
+  throw new Error('User is not an employee');
+}
+  asset.employee = employee; 
+}
+asset.referenceNumber = await this.generateNextRef();
+
 
   const savedAsset = await this.assetRepository.save(asset);
 
@@ -252,6 +308,20 @@ async generateQrCodeAndAttachToAsset(asset: Asset) {
   asset.qrCode = base64; 
   await this.assetRepository.save(asset);
 }
+
+async generateNextRef(): Promise<string> {
+  const lastAsset = await this.assetRepository
+    .createQueryBuilder('asset')
+    .orderBy('CAST(asset.ref AS INTEGER)', 'DESC')
+    .getOne();
+
+  const lastRefNumber = lastAsset ? parseInt(lastAsset.referenceNumber, 10) : 0;
+  const nextRefNumber = lastRefNumber + 1;
+
+  // Format : 3 chiffres avec padding à gauche
+  return nextRefNumber.toString().padStart(3, '0');
+}
+
 
   //  methode pour get history by asseId 
   async getHistoryAssetById(assetId: string) {
