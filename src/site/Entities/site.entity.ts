@@ -6,6 +6,8 @@ import { Category } from "src/category/Entities/category.entity";
 import { ICategory } from "src/category/types/interface/category.interface";
 import { Supplier } from "src/supplier/Entities/Supplier.entity";
 import { ISupplier } from "src/supplier/types/interfaces/Supplier.interface";
+import { User } from "src/user/entities/user.entity";
+import { IUser } from "src/user/types/interface/user.interface";
 
 @Entity()
 export class Site implements Isite{
@@ -23,6 +25,9 @@ export class Site implements Isite{
 
     @OneToMany(() => Supplier, (supplier) => supplier.site)
     suppliers: ISupplier[] | string[];
+
+    @OneToMany(() => User, (user) => user.site)
+    users: IUser[] | string[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  

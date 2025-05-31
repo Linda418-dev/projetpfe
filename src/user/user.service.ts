@@ -6,6 +6,7 @@ import { CreateUserDto } from './types/dto/create-user.dto';
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
 import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
+import { SiteRepository } from 'src/site/Repositories/site.repository';
 
 @Injectable()
 export class UserService implements OnApplicationBootstrap {
@@ -13,6 +14,7 @@ export class UserService implements OnApplicationBootstrap {
     private readonly userRepository: userRepository,
     private readonly userRoleRepository: userRoleRepository,
     private readonly bcryptService: BcryptService,
+    private readonly siteRepository :SiteRepository
   ) {}
 
 
@@ -44,7 +46,7 @@ export class UserService implements OnApplicationBootstrap {
 
   // méthode create user 
   async createUser(createUserDto: CreateUserDto) {
-    const { email, username, password, roleId } = createUserDto;
+    const { email, username, password, roleId ,siteId } = createUserDto;
     const userExists = await this.userRepository.findOne({
       where: [{ email }, { username }],
     });
@@ -57,12 +59,18 @@ export class UserService implements OnApplicationBootstrap {
     if (!userRole) {
       throw new ConflictException('Invalid role ID');
     }
+
+     const site = await this.siteRepository.findOne({ where: { id: siteId } });
+     if (!site) {
+    throw new ConflictException('Invalid site ID');
+    }
     const hashedPassword = await this.bcryptService.hashPassword(password);
     const newUser = this.userRepository.create({
       email,
       username,
       password: hashedPassword,
       role: userRole,
+      site,
     });
     const savedUser = await this.userRepository.save(newUser);
     return {
@@ -70,6 +78,7 @@ export class UserService implements OnApplicationBootstrap {
       email: savedUser.email,
       username: savedUser.username,
       role: savedUser.role,
+      site: savedUser.site,
       isActive: savedUser.isActive,
       createdAt: savedUser.createdAt,
       updatedAt: savedUser.updatedAt,
@@ -80,7 +89,7 @@ export class UserService implements OnApplicationBootstrap {
  async updateUser(id: string, updateUserDto: UpdateUserDto) {
   const user = await this.userRepository.findOne({ 
     where: { id }, 
-    relations: ['role', 'affectations'] 
+    relations: ['role', 'affectations','site'] 
   });
 
   if (!user) {
@@ -107,6 +116,24 @@ export class UserService implements OnApplicationBootstrap {
     }
 
     user.role = newRole;
+  }
+  // ✅ Mise à jour du site uniquement si le rôle est EMPLOYEE
+  if (updateUserDto.siteId) {
+    const currentRole = (user.role as any).role;
+
+    if (currentRole !== 'employee') {
+      throw new ConflictException('Only employees can be assigned to a site');
+    }
+
+    const site = await this.siteRepository.findOne({
+      where: { id: updateUserDto.siteId },
+    });
+
+    if (!site) {
+      throw new ConflictException('Invalid site ID');
+    }
+
+    user.site = site;
   }
 
   // Supprimer roleId pour ne pas l'assigner par erreur via Object.assign

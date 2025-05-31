@@ -23,4 +23,9 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUUID()
   roleId?: string;
+  
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUUID()
+  siteId?: string;
 }
