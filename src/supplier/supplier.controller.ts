@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post } from
 import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './types/dto/create-supplier.dto';
 import { UpdateSupplierDto } from './types/dto/update-supplier.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Supplier Resource')
 @Controller('suppliers')
@@ -38,5 +38,12 @@ export class SupplierController {
         async deleteSupplier(@Param('id',new ParseUUIDPipe()) id : string){
             return this.supplierService.deleteSupplier(id);
         }
+
+        @Get('/by-site/:siteId')
+        @ApiOperation({ summary: 'get suppliers by site' })
+        async getSuppliersBySite(@Param('siteId', new ParseUUIDPipe()) siteId: string) {
+            return this.supplierService.getSuppliersBySite(siteId);
+        }
+
     
 }

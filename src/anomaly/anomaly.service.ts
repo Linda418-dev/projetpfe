@@ -50,17 +50,17 @@ export class AnomalyService {
   } else if (userRole === 'operator'|| userRole === 'employee') {
     anomalies = await this.anomalyRepository.find({
       where: { reportedBy: { id: currentUser.id } },
-relations: [
-  'files',
-  'statusHistory',
-  'statusHistory.status',
-  'reportedBy',
-  'asset',
-  'asset.location',
-  'asset.location.service',
-  'asset.location.service.department',
-  'asset.location.service.department.site',
-],
+      relations: [
+        'files',
+        'statusHistory',
+        'statusHistory.status',
+        'reportedBy',
+        'asset',
+        'asset.location',
+        'asset.location.service',
+        'asset.location.service.department',
+        'asset.location.service.department.site',
+      ],
       order: {
         createdAt: 'DESC',
       },

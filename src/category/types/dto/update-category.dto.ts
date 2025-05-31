@@ -6,4 +6,9 @@ export class UpdateCategoryDto {
     @IsString()
     @IsOptional()
     name?: string;
+       
+    @ApiProperty()
+    @IsString()
+    @IsOptional()
+    siteId?: string;
 }

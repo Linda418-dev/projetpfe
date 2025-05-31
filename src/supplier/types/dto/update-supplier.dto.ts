@@ -20,5 +20,11 @@ export class UpdateSupplierDto {
       message: 'Phone number must start with "+" followed by 6 to 15 digits',
     })
     phone: string;
+
+    
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  siteId?: string;
     
 }

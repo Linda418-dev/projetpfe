@@ -2,6 +2,10 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, Up
 import { Isite } from "../Types/interfaces/site.interface";
 import { Department } from "src/department/entities/department.entity";
 import { IDepartment } from "src/department/types/interface/department.interface";
+import { Category } from "src/category/Entities/category.entity";
+import { ICategory } from "src/category/types/interface/category.interface";
+import { Supplier } from "src/supplier/Entities/Supplier.entity";
+import { ISupplier } from "src/supplier/types/interfaces/Supplier.interface";
 
 @Entity()
 export class Site implements Isite{
@@ -13,6 +17,12 @@ export class Site implements Isite{
    
     @OneToMany(() => Department, (department) => department.site)
     departments: IDepartment[]|string[];
+
+    @OneToMany(() => Category, (category) => category.site)
+    categories: ICategory[] | string[];
+
+    @OneToMany(() => Supplier, (supplier) => supplier.site)
+    suppliers: ISupplier[] | string[];
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  

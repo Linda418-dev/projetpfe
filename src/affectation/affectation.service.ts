@@ -13,7 +13,8 @@ export class AffectationService {
           relations: ['inventory', 'operator'],
         });
       }
-    //Récupérer  les affectations by id operator
+    
+      //Récupérer  les affectations by id operator
       async getAffectationsByOperator(operatorId: string){
         const affectations = await this.affectationRepository.find({
           where: { operator: { id: operatorId } },
@@ -26,6 +27,7 @@ export class AffectationService {
     
         return affectations;
       }
+      
       //Récupérer  les affectations by id inventaire 
       async getAffectationsByInventory(inventoryId: string) {
         const affectations = await this.affectationRepository.find({

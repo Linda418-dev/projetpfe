@@ -3,12 +3,15 @@ import { SupplierRepository } from './Repositories/Supplier.repository';
 import { CreateSupplierDto } from './types/dto/create-supplier.dto';
 import { UpdateSupplierDto } from './types/dto/update-supplier.dto';
 import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
+import { SiteRepository } from 'src/site/Repositories/site.repository';
 
 @Injectable()
 export class SupplierService {
      constructor(private readonly supplierRepository:SupplierRepository,
-        private readonly assetRepository : AssetRepository
+        private readonly assetRepository : AssetRepository, 
+        private readonly siteRepository : SiteRepository
      ){}
+
     //  methode pour get All Suppliers
       async getAllSuppliers () {
         return this.supplierRepository.find();
@@ -16,9 +19,17 @@ export class SupplierService {
 
     //  methode pour creation suplier 
       async  CreateSupplier(createSupplierDto: CreateSupplierDto) {
-        return this.supplierRepository.save(
-          this.supplierRepository.create(createSupplierDto)
-        )
+        const {name ,email , phone , siteId } =  createSupplierDto ;
+        const site = await this.siteRepository.findOneBy({ id: siteId });
+        if (!site) throw new NotFoundException(`Site with ID ${siteId} not found`);
+
+        const Supplier =  this.supplierRepository.create({
+          name,
+          email,
+          phone,
+          site,
+        });
+        return this.supplierRepository.save(Supplier);
       }
 
     //  methode pour get supplier by id 
@@ -70,5 +81,14 @@ export class SupplierService {
               assets: updatedAssets,
             };
           }
+
+
+          async getSuppliersBySite(siteId: string) {
+            return this.supplierRepository.find({
+              where: { site: { id: siteId } },
+              relations: ['site'],
+            });
+          }
+
           
 }

@@ -38,4 +38,11 @@ export class CategoryController {
     deleteCategory(@Param('id') id: string) {
         return this.categoryService.deleteCategory(id);
     }
+
+    @Get('site/:siteId')
+    @ApiOperation({ summary: 'Get categories by site ID' })
+    getCategoriesBySite(@Param('siteId') siteId: string) {
+        return this.categoryService.getCategoriesBySite(siteId);
+    }
+
 }
