@@ -43,6 +43,6 @@ export class CreateAssetDto {
     @ApiProperty({ required: false, example: "YYYY-MM-JJ" })
     @IsOptional()
     @IsDateString()
-    productionDate?: Date;
+    productionStartDate?: Date;
     
 }

@@ -1,13 +1,14 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, OnApplicationBootstrap } from '@nestjs/common';
 import { userRepository } from './repositories/user.repository';
 import { userRoleRepository } from 'src/user-role/repositories/user-role.repository';
 import { BcryptService } from 'src/auth/common/bcrypt.service';
 import { CreateUserDto } from './types/dto/create-user.dto';
 import { UpdateUserDto } from './types/dto/update-user.dto';
 import { PaginateSearchDto } from './types/dto/paginate-search.dto';
+import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
 
 @Injectable()
-export class UserService {
+export class UserService implements OnApplicationBootstrap {
   constructor(
     private readonly userRepository: userRepository,
     private readonly userRoleRepository: userRoleRepository,
@@ -197,12 +198,42 @@ export class UserService {
       }
     
 
-    
+   async onApplicationBootstrap() {
+  // Vérifie si le rôle super admin existe
+   let superAdminRole = await this.userRoleRepository.findOne({ where: { role: UserRoleEnum.SUPER_ADMIN } });
 
-     
+   if (!superAdminRole) {
+    superAdminRole = this.userRoleRepository.create({ role: UserRoleEnum.SUPER_ADMIN });
+    await this.userRoleRepository.save(superAdminRole);
+    console.log('Rôle superAdmin créé');
+  }
 
+  const superAdminEmail = 'superadmin@gmail.com';
+  const superAdminUsername = 'superadmin';
 
+  // Vérifie si un utilisateur existe déjà avec cet email ou ce username
+  const existingUser = await this.userRepository.findOne({
+    where: [
+      { email: superAdminEmail },
+      { username: superAdminUsername },
+    ],
+  });
 
-      
-      
+  if (!existingUser) {
+    const hashedPassword = await this.bcryptService.hashPassword('SuperSecurePassword123');
+    const superAdminUser = this.userRepository.create({
+      email: superAdminEmail,
+      username: superAdminUsername,
+      password: hashedPassword,
+      isActive: true,
+      role: superAdminRole,
+    });
+    await this.userRepository.save(superAdminUser);
+    console.log(' Compte superAdmin créé');
+  } else {
+    console.log('Le  super admin existe déjà');
+  }
 }
+
+}
+

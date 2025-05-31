@@ -38,7 +38,7 @@ export class Asset implements IAsset {
   purchasePrice: number | null;
 
   @Column({ type: 'date', nullable: true })
-  productionDate: Date | null;
+  productionStartDate: Date | null;
 
   @ManyToOne(() => Category, (category) => category.assets, { nullable: true, eager: true, onDelete: "CASCADE" })
   category:ICategory|string;  
@@ -61,7 +61,6 @@ export class Asset implements IAsset {
   @ManyToOne(() => User, { nullable: true, eager: true, onDelete: 'SET NULL' })
   employee?: IUser | string;
   
-
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

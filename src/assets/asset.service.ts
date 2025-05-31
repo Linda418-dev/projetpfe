@@ -175,8 +175,8 @@ export class AssetsService {
       if (updateAssetDto.purchaseDate) {
         fetchAsset.purchaseDate = new Date(updateAssetDto.purchaseDate);
       }
-      if (updateAssetDto.productionDate) {
-        fetchAsset.productionDate = new Date(updateAssetDto.productionDate);
+      if (updateAssetDto.productionStartDate) {
+        fetchAsset.productionStartDate = new Date(updateAssetDto.productionStartDate);
       }
       if (updateAssetDto.purchasePrice !== undefined) {
         fetchAsset.purchasePrice = updateAssetDto.purchasePrice;
@@ -206,7 +206,7 @@ export class AssetsService {
     
   // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
-  const { name, categoryId, supplierId, fileIds, locationId ,employeeId, purchaseDate, purchasePrice,productionDate} = createAssetDto;
+  const { name, categoryId, supplierId, fileIds, locationId ,employeeId, purchaseDate, purchasePrice,productionStartDate} = createAssetDto;
 
   const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
   if (!category) throw new Error('Category not found');
@@ -246,7 +246,7 @@ export class AssetsService {
     // Nouveaux champs
   asset.purchaseDate = purchaseDate ?? null;
   asset.purchasePrice = purchasePrice ?? null;
-  asset.productionDate = productionDate ?? null;
+  asset.productionStartDate = productionStartDate ?? null;
 
   // --- Ajoute ce code ici ---
   let employee: User | null = null;
@@ -428,6 +428,16 @@ async findOne(id: string) {
       byCategory,
     };
   }
+
+  async getTotalPurchasePrice() {
+  const result = await this.assetRepository
+    .createQueryBuilder('asset')
+    .select('SUM(asset.purchasePrice)', 'total')
+    .getRawOne();
+
+  return parseFloat(result.total) || 0;
+}
+
 }
 
     

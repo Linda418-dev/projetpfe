@@ -6,8 +6,6 @@ import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
 import { Response } from 'express';
 
-
-
 @ApiBearerAuth()
 @ApiTags('Asset Resource')
 @Controller('assets')
@@ -39,6 +37,11 @@ export class AssetController {
   @Get('statistics')
   async getStatistics() {
   return this.assetService.getStatistics();
+  }
+
+  @Get('total-purchase-price')
+  getTotalPrice() {
+  return this.assetService.getTotalPurchasePrice();
   }
   
   @Get(':id')
@@ -81,5 +84,8 @@ export class AssetController {
   });
   res.end(imgBuffer);
 }
+
+
+
 }
   

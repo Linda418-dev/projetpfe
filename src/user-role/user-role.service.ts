@@ -32,15 +32,18 @@ export class UserRoleService implements OnApplicationBootstrap {
     }
 
 
-      // Seeder automatique à l'initialisation de l'application
+   // Seeder automatique à l'initialisation de l'application
   async onApplicationBootstrap() {
-    const employeeRole = await this.userRoleRepository.findOneBy({ role: UserRoleEnum.EMPLOYEE });
+    const employeeRole = await this.userRoleRepository.findOneBy({ role: UserRoleEnum.SUPER_ADMIN
+     });
     if (!employeeRole) {
-      console.log('Seeding role EMPLOYEE...');
-      await this.createRole(UserRoleEnum.EMPLOYEE);
-      console.log('Role EMPLOYEE seeded.');
+      console.log('Seeding role SUPPERAdmin...');
+      await this.createRole(UserRoleEnum.SUPER_ADMIN);
+      console.log('Role superAdmin seeded.');
     } else {
-      console.log('Role EMPLOYEE already exists.');
+      console.log('Role supperAdmin already exists.');
     }
   }
+
+  
 }

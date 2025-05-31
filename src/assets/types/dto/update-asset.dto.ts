@@ -45,7 +45,7 @@ export class updateAssetDto{
     @ApiProperty()
     @IsOptional()
     @IsDateString()
-    productionDate?: string;
+    productionStartDate?: string;
     
     @ApiProperty()
     @IsOptional()
