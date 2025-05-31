@@ -292,6 +292,14 @@ asset.referenceNumber = await this.generateNextRef();
       await this.fileRepository.save(files);
     }
 
+      // Affectation
+    if (employee) {
+      const assetAssignment = this.assetAssignmentRepository.create({
+        asset: savedAsset,
+        employee: employee,
+      });
+      await this.assetAssignmentRepository.save(assetAssignment);
+    }
     return savedAsset;
   } catch (error) {
     await this.assetRepository.remove(savedAsset); 
@@ -304,9 +312,9 @@ async generateQrCodeAndAttachToAsset(asset: Asset) {
   const dataUrl = await QRCode.toDataURL(qrData); 
   const base64 = dataUrl.split(',')[1]; 
 
-  asset.qrCode = base64; 
-  await this.assetRepository.save(asset);
+  await this.assetRepository.update(asset.id, { qrCode: base64 });
 }
+
 
 async generateNextRef(){
   const lastAsset = await this.assetRepository

@@ -12,13 +12,9 @@ export class DepartmentController {
     constructor(private readonly departmentService: DepartmentService) {}
           
 
-        @Get()
-        @ApiOperation({ summary: 'Get all departments by siteId (optional)' })
-        getAllDepartmentsBySiteId(@Query('siteId') siteId?: string) {
-          return this.departmentService.getAllDepartmentsBySiteId(siteId);
-        }
+       
 
-         @Get()
+         @Get('get-all-department')
          @ApiOperation({ summary: 'get all departments' })
          getAllDepartments() {
              return this.departmentService.getAllDepartments();
@@ -42,6 +38,13 @@ export class DepartmentController {
          @ApiOperation({ summary: 'get department by id' })
          getDepartmentById(@Param('id') id: string) {
              return this.departmentService.getDepartmentById(id);
+        }
+
+
+         @Get('')
+        @ApiOperation({ summary: 'Get all departments by siteId ' })
+        getAllDepartmentsBySiteId(@Query('siteId') siteId?: string) {
+          return this.departmentService.getAllDepartmentsBySiteId(siteId);
         }
     
          @Patch(':id')

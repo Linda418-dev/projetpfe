@@ -5,16 +5,16 @@ import { IUser } from 'src/user/types/interface/user.interface';
 import { Entity, PrimaryGeneratedColumn,  CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 import { IAssetAssignment } from '../types/interface/asset-assignment.interface';
 
-@Entity('asset')
+@Entity('asset_assignment')
 export class AssetAssignment implements IAssetAssignment{
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ManyToOne(() => Asset, { eager: true, onDelete: 'CASCADE' })
-  asset: IAsset | string;
+  asset: Asset | string;
 
   @ManyToOne(() => User, { eager: true, onDelete: 'CASCADE' })
-  employee: IUser | string;
+  employee: User | string;
 
   @CreateDateColumn()
   assignedAt: Date;
