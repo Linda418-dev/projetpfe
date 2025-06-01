@@ -356,11 +356,17 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
   const now = new Date();
 
   // Validation de la startDate
-  if (dto.startDate) {
-    const startDate = new Date(dto.startDate);
-    if (startDate < now) {
-      throw new BadRequestException('startDate cannot be in the past');
-    }
+ if (dto.startDate) {
+  const now = new Date();
+  const stripTime = (date: Date): Date =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const today = stripTime(now);
+  const startDate = stripTime(new Date(dto.startDate));
+
+  if (startDate < today) {
+    throw new BadRequestException('startDate cannot be in the past');
+  }
 
     if (lastStatusName !== 'Planned') {
       throw new BadRequestException('startDate can only be updated when the inventory status is "Planned"');
@@ -430,6 +436,27 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
 
   // Mise à jour du nom
   if (dto.name) inventory.name = dto.name;
+
+  // Mise à jour des locations (seulement si le statut est Planned)
+if (dto.locationIds) {
+  if (lastStatusName !== InventoryStatusEnum.Planned) {
+    throw new BadRequestException('Locations can only be updated when the inventory status is "Planned"');
+  }
+
+  const locations = await this.locationRepository.findBy({
+    id: In(dto.locationIds),
+  });
+
+  if (locations.length !== dto.locationIds.length) {
+    throw new BadRequestException(`One or more location IDs are invalid`);
+  }
+
+  for (const location of locations) {
+    location.inventory = inventory;
+  }
+
+  await this.locationRepository.save(locations);
+}
 
   // Mise à jour du statut vers "Completed"
  if (dto.statusId) {

@@ -29,5 +29,12 @@ export class UpdateInventoryDto {
   @ApiProperty({ required: false })
   operatorId?: string;
 
+
+  @IsOptional()
+  @IsUUID('4', { each: true })
+  @ApiProperty({ required: false, type: [String] })
+  locationIds?: string[];
+
+
  
 }

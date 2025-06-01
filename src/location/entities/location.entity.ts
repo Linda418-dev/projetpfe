@@ -26,7 +26,7 @@ export class Location implements Ilocation{
     @OneToMany(() => LocationHistory, (history) => history.location)
     locationHistory: ILocationHistory[]|LocationHistory[];
 
-    @ManyToOne(() => Inventory, (inventory) => inventory.locations)
+    @ManyToOne(() => Inventory, (inventory) => inventory.locations ,{ eager: true , onDelete: 'CASCADE' })
     inventory: Inventory | string;
 
     @CreateDateColumn({ type: 'timestamp' })

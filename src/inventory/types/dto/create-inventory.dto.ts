@@ -35,6 +35,4 @@ export class CreateInventoryDto {
   @IsUUID('all', { each: true })
   locationIds: string[];
 
-  
- 
 }
