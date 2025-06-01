@@ -26,6 +26,7 @@ import { User } from 'src/user/entities/user.entity';
 import { userRepository } from 'src/user/repositories/user.repository';
 import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
 import { AssetAssignmentRepository } from 'src/asset-assignment/repositories/asset-assignment.repository';
+import { IUser } from 'src/user/types/interface/user.interface';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -324,11 +325,12 @@ asset.referenceNumber = await this.generateNextRef();
 }
 
 async generateQrCodeAndAttachToAsset(asset: Asset) {
-  const qrData = `${asset.id}`;
+ const qrData = `${asset.id}`;
   const dataUrl = await QRCode.toDataURL(qrData); 
   const base64 = dataUrl.split(',')[1]; 
 
-  await this.assetRepository.update(asset.id, { qrCode: base64 });
+  asset.qrCode = base64; 
+  await this.assetRepository.save(asset);
 }
 
 
@@ -347,86 +349,81 @@ async generateNextRef(){
 
 
   //  methode pour get history by asseId 
-  async getHistoryAssetById(assetId: string) {
-    
-    // récupérer l'asset actuel avec sa localisation et son statut
-    const asset = await this.assetRepository.findOne({
-      where: { id: assetId },
-      relations: ['location', 'status'],
-    });
-  
-    if (!asset) {
-      throw new NotFoundException('Asset not found');
-    }
-    let location = asset.location as Ilocation;
-    let status = asset.location as Istatus;
-    // récupérer l'historique de localisation
-    const locationEvents =  await this.assetRepository.getLocationHistoryByAssetId(assetId);
+ async getHistoryAssetById(assetId: string) {
+  // Récupérer l'asset actuel
+  const asset = await this.assetRepository.findOne({
+    where: { id: assetId },
+    relations: ['location', 'status', 'employee'],
+  });
 
-    //  récupérer l'historique de statut
-    const statusEvents = await this.assetRepository.getStatusHistoryByAssetId(assetId);
-  
-    //  fusionner les événements
-    const allEvents: {
-      date: Date;
-      type: 'location' | 'status';
-      value: string;
-    }[] = [...locationEvents, ...statusEvents];
-  
-    // trier les événements par date 
-    allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  
-    // grouper les événements par date exacte arrondie à la seconde
-    const groupedMap = new Map<string, { date: Date; values: { location?: string; status?: string } }>();
-  
-    for (const event of allEvents) {
-      // arrondir la date à la seconde 
-      const dateKey = new Date(event.date).setMilliseconds(0);
-      const group = groupedMap.get(dateKey.toString());
-  
-      if (group) {
-        // mettre à jour les valeurs si elles changent
-        group.values[event.type] = event.value;
-      } else {
-        groupedMap.set(dateKey.toString(), {
-          date: new Date(dateKey),
-          values: { [event.type]: event.value },
-        });
-      }
-    }
-    // créer  timeline  
-    const timeline: {
-      asset: string;
-      assetId: string;
-      location: string;
-      locationId: string;
-      status: string;
-      statusId: string;
-      date: Date;
-    }[] = [];
-      
-    //les valeurs initiales
-    let currentLocation = location.name;
-    let currentStatus = status.name;
-  
-    // ajouter les événements à la timeline par ordre
-    for (const group of groupedMap.values()) { 
-      // si l'emplacement ou le statut a changé on  les ajouter à la timeline
-      if (group.values.location) currentLocation = group.values.location;
-      if (group.values.status) currentStatus = group.values.status;
-  
-      timeline.push({
-        asset: asset.name,
-        assetId: asset.id,
-        location: currentLocation,
-        locationId: location.id, 
-        status: currentStatus,
-        statusId: status.id,   
-        date: group.date,
-      }); 
-    }
-    return timeline;
+  if (!asset) {
+    throw new NotFoundException('Asset not found');
   }
+
+  let location = asset.location as Ilocation;
+  let status = asset.status as Istatus;
+  let employee = asset.employee as IUser;
+
+  const locationEvents = await this.assetRepository.getLocationHistoryByAssetId(assetId);
+  const statusEvents = await this.assetRepository.getStatusHistoryByAssetId(assetId);
+  const employeeEvents = await this.assetAssignmentRepository.getAssignmentHistoryByAssetId(assetId);
+
+  const allEvents: {
+    date: Date;
+    type: 'location' | 'status' | 'employee';
+    value: string;
+  }[] = [...locationEvents, ...statusEvents, ...employeeEvents];
+
+  // Tri par date
+  allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const groupedMap = new Map<string, { date: Date; values: { location?: string; status?: string; employee?: string } }>();
+
+  for (const event of allEvents) {
+    const dateKey = new Date(event.date).setMilliseconds(0);
+    const existing = groupedMap.get(dateKey.toString());
+
+    if (existing) {
+      existing.values[event.type] = event.value;
+    } else {
+      groupedMap.set(dateKey.toString(), {
+        date: new Date(dateKey),
+        values: { [event.type]: event.value },
+      });
+    }
+  }
+
+  const timeline: {
+    asset: string;
+    assetId: string;
+    location: string;
+    status: string;
+    employee: string;
+    date: Date;
+  }[] = [];
+
+  let currentLocation = location?.name || '';
+  let currentStatus = status?.name || '';
+  let currentEmployee = employee ? `${employee.username} ` : 'Not affected';
+
+  for (const group of groupedMap.values()) {
+    if (group.values.location) currentLocation = group.values.location;
+    if (group.values.status) currentStatus = group.values.status;
+    if (group.values.employee) currentEmployee = group.values.employee;
+
+    timeline.push({
+      asset: asset.name,
+      assetId: asset.id,
+      location: currentLocation,
+      status: currentStatus,
+      employee: currentEmployee,
+      date: group.date,
+    });
+  }
+
+  return timeline;
+}
+
 
 
 

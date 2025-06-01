@@ -117,7 +117,7 @@ export class UserService implements OnApplicationBootstrap {
 
     user.role = newRole;
   }
-  // ✅ Mise à jour du site uniquement si le rôle est EMPLOYEE
+  //  Mise à jour du site uniquement si le rôle est EMPLOYEE
   if (updateUserDto.siteId) {
     const currentRole = (user.role as any).role;
 
@@ -222,6 +222,15 @@ export class UserService implements OnApplicationBootstrap {
       async updatePlayerId(userId: number, playerId: string) {
         await this.userRepository.update(userId, { playerId });
         return { message: 'Player ID mis à jour' };
+      }
+
+      
+      async getAllUsersBySite(siteId: string) {
+        return this.userRepository.find({
+          where: { site: { id: siteId } },
+          relations: ['role'], 
+          order: { createdAt: 'DESC' },
+        });
       }
     
 

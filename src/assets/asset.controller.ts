@@ -63,7 +63,7 @@ export class AssetController {
   }  
 
   @Get(':id/history')
-  @ApiOperation({ summary: 'Get asset history status and location' })
+  @ApiOperation({ summary: 'Get asset history status and location and employee' })
   async getHistoryAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getHistoryAssetById(id);
   }

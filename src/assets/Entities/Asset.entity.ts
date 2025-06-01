@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne, Generated } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
 import { File } from 'src/uploads/entities/file.entity';  
 import { IAsset } from "../types/interface/Asset.interface";
 import { Category } from 'src/category/Entities/category.entity';
@@ -25,11 +25,9 @@ export class Asset implements IAsset {
   
   @Column({ nullable: true })
   qrCode: string;
-
    
- @Column({ unique: true })
- referenceNumber: string;
-
+  @Column({ unique: true })
+  referenceNumber: string;
 
   @Column({ type: 'date', nullable: true })
   purchaseDate: Date | null;
@@ -60,8 +58,6 @@ export class Asset implements IAsset {
 
   @ManyToOne(() => User, { nullable: true, eager: true, onDelete: 'SET NULL' })
   employee?: IUser | string;
-
- 
   
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;

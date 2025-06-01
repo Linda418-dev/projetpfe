@@ -110,6 +110,8 @@ const query = this.createQueryBuilder("asset")
       .getRawMany();
   }
 
+ 
+
    async findAllAssetsNotInRepair() {
     return this.createQueryBuilder('asset')
       .leftJoinAndSelect('asset.status', 'status')

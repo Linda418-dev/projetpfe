@@ -19,16 +19,12 @@ export class UserController {
     constructor(private readonly userService : UserService,
       private readonly notificationService : NotificationService
     ){}
-
-
-
- @Get('all-users')
-@UseGuards(JwtAuthGuard)
-async getUsers() {
-  return this.userService.getUsers();
-}
-
-
+    
+  @Get('all-users')
+  @UseGuards(JwtAuthGuard)
+  async getUsers() {
+      return this.userService.getUsers();
+  }
 
   @Get()
   @UseGuards(JwtAuthGuard)
@@ -68,32 +64,32 @@ async getUsers() {
  }
 
  @Patch(':id/deactivate')
-@UseGuards(JwtAuthGuard)
-async deactivateUser(@Param('id') userId: string, @Req() req: any) {
+ @UseGuards(JwtAuthGuard)
+ async deactivateUser(@Param('id') userId: string, @Req() req: any) {
   const currentUserId = req.user.id;
   return this.userService.deactivateUser(userId, currentUserId);
 }
 
  
-  @BypassInventoryLock()
-  @Patch(':id/activate')
-   // @UseGuards(JwtAuthGuard, RolesGuard)
-   // @Roles('admin')
-    async activateUser(@Param('id') id: string) {
+ @BypassInventoryLock()
+ @Patch(':id/activate')
+// @UseGuards(JwtAuthGuard, RolesGuard)
+// @Roles('admin')
+  async activateUser(@Param('id') id: string) {
      return this.userService.activateUser(id);
-  }
+}
 
-  @Post('me/player-id/:playerId')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  async updatePlayerId(
-    @Param('playerId') playerId: string, @Req() req,) {
+ @Post('me/player-id/:playerId')
+ @UseGuards(JwtAuthGuard, RolesGuard)
+ async updatePlayerId(
+  @Param('playerId') playerId: string, @Req() req,) {
     return this.userService.updatePlayerId(req.user.id, playerId);
   }
 
 
-
-
-  
-  
+@Get('by-site/:siteId')
+async getUsersBySite(@Param('siteId') siteId: string) {
+    return this.userService.getAllUsersBySite(siteId);
+}
 
 }
