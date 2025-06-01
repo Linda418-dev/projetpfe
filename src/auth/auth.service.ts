@@ -21,7 +21,7 @@ export class AuthService {
     const user = await this.userRepository.findOne({
       where: isEmail ? { email: identifier } : { username: identifier },
       select: ['id', 'username', 'email', 'password', 'isActive'],
-      relations: ['role'],
+      relations: ['role','site'],
     });
   
     if (!user) {
@@ -45,6 +45,8 @@ export class AuthService {
     email: user.email,
     isActive: user.isActive,
     role: user.role,
+    siteId: (user.site as any)?.id, // Ajoute le siteId ici
+
   };
 
   return { user: userWithoutPassword, token };

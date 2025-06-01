@@ -13,7 +13,7 @@ export class AssetRepository extends Repository<Asset> {
   }
 
  async getAllAssetWithPaginate(params: PaginateSearchDto) {
-const query = this.createQueryBuilder("asset")
+  const query = this.createQueryBuilder("asset")
     .leftJoinAndSelect("asset.status", "status")
     .leftJoinAndSelect("asset.category", "category")
     .leftJoinAndSelect("asset.supplier", "supplier")
@@ -25,9 +25,6 @@ const query = this.createQueryBuilder("asset")
    .leftJoinAndSelect("location.service", "service")
    .leftJoinAndSelect("service.department", "department")
    .leftJoinAndSelect("department.site", "site")
-
-
-    
 
   if (params.keyword) {
     query.andWhere("asset.name ILIKE :keyword", {
@@ -161,7 +158,7 @@ const query = this.createQueryBuilder("asset")
   }
 
 
-async countAssetsNotInRepairBySite(siteId: string): Promise<number> {
+  async countAssetsNotInRepairBySite(siteId: string) {
   const subQuery = this.createQueryBuilder('a')
     .select('ast.status')
     .from(AssetStatus, 'ast')
@@ -192,13 +189,4 @@ async countAssetsNotInRepairBySite(siteId: string): Promise<number> {
   return count;
 }
 
-
-
-
-
-
-
-
-  
- 
 }

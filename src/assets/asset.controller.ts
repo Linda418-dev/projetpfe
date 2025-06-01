@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
 import { Response } from 'express';
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
 @ApiBearerAuth()
 @ApiTags('Asset Resource')
@@ -33,6 +34,16 @@ export class AssetController {
      asset,
    };
   }
+
+  @Get('by-site')
+  @UseGuards(JwtAuthGuard)
+  async getAssetsBySite(@Req() req) {
+  console.log('USER PAYLOAD:', req.user); 
+  const siteId = req.user.site?.id;
+  console.log('Site ID:', req.user.siteId);
+  return this.assetService.getAssetsBySite(siteId);
+}
+
   
   @Get('statistics')
   async getStatistics() {
