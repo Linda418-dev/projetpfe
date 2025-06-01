@@ -22,9 +22,10 @@ const query = this.createQueryBuilder("asset")
     .leftJoinAndSelect("asset.employee", "employee")
 
     // Jointures supplémentaires pour filtrer par site, department, service
-    .leftJoin("location.service", "service")
-    .leftJoin("service.department", "department")
-    .leftJoin("department.site", "site");
+   .leftJoinAndSelect("location.service", "service")
+   .leftJoinAndSelect("service.department", "department")
+   .leftJoinAndSelect("department.site", "site")
+
 
     
 
@@ -38,7 +39,7 @@ const query = this.createQueryBuilder("asset")
     query.andWhere("category.id = :categoryId", { categoryId: params.categoryId });
   }
 
-   if (params.categoryId) {
+   if (params.supplierId) {
     query.andWhere("supplier.id = :supplierId", { supplierId: params.supplierId });
   }
 

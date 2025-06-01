@@ -14,7 +14,7 @@ export class Department implements IDepartment {
   @Column()
   name: string;
 
-  @ManyToOne(() => Site, (site) => site.departments, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Site, (site) => site.departments, {  eager: true ,onDelete: 'CASCADE' })
   site: Isite|string;
 
   @OneToMany(() => Service, (service) => service.department)

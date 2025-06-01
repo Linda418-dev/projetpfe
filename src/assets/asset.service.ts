@@ -43,7 +43,9 @@ export class AssetsService {
         
     
   async getAssets(params: PaginateSearchDto) {
+
       const [assets, total] = await this.assetRepository.getAllAssetWithPaginate(params);
+      
       return {
         data: assets,
         total,

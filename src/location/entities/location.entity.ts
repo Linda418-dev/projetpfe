@@ -16,7 +16,7 @@ export class Location implements Ilocation{
     @Column()
     name: string;
     
-    @ManyToOne(() => Service, (service) => service.locations, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Service, (service) => service.locations, { eager: true , onDelete: 'CASCADE' })
     service: IService|string;
 
     @OneToMany(() => Asset, (asset) => asset.location)

@@ -15,7 +15,7 @@ export class Service implements IService{
     @Column()
     name: string
 
-    @ManyToOne(() => Department, (department) => department.services, { onDelete: 'CASCADE' })
+    @ManyToOne(() => Department, (department) => department.services, { eager: true , onDelete: 'CASCADE' })
     department: IDepartment|string;
     
     @OneToMany(() => Location, (location) => location.service)
