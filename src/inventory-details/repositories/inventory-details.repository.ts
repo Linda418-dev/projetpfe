@@ -44,15 +44,9 @@ async countScannedAssetsBySite(operatorId: string, inventoryId: string, siteId: 
     .innerJoin('inventory.site', 'site')
     .where('affectation.operator = :operatorId', { operatorId })
     .andWhere('inventory.id = :inventoryId', { inventoryId })
-    .andWhere('site.id = :siteId', { siteId }) // <== Fix ici
+    .andWhere('site.id = :siteId', { siteId }) 
     .getCount();
 }
-
-
-
-  
-
-  
-  
+ 
   
 }

@@ -6,6 +6,7 @@ import { LocationHistory } from "src/location-history/entities/location-history.
 import { IService } from "src/service/types/interfaces/service.interface";
 import { IAsset } from "src/assets/types/interface/Asset.interface";
 import { ILocationHistory } from "src/location-history/types/interfaces/location-history.interface";
+import { Inventory } from "src/inventory/entities/inventory.entity";
 
 @Entity()
 export class Location implements Ilocation{
@@ -24,6 +25,9 @@ export class Location implements Ilocation{
 
     @OneToMany(() => LocationHistory, (history) => history.location)
     locationHistory: ILocationHistory[]|LocationHistory[];
+
+    @ManyToOne(() => Inventory, (inventory) => inventory.locations)
+    inventory: Inventory | string;
 
     @CreateDateColumn({ type: 'timestamp' })
     createdAt: Date;  

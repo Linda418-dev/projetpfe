@@ -8,10 +8,9 @@ import { AffectationRepository } from 'src/affectation/repositories/affectation.
 import { SiteRepository } from 'src/site/Repositories/site.repository';
 import { User } from 'src/user/entities/user.entity';
 import { Between, In, IsNull, LessThan, Not } from 'typeorm';
-import { Cron, CronExpression} from '@nestjs/schedule';
+import { Cron} from '@nestjs/schedule';
 import { InventoryStatusEnum } from 'src/status/types/enums/inventory-status.enum';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
-import { InventoryStatus } from 'src/inventory-status/entities/inventory-status.entity';
 import * as moment from 'moment';
 import { NotificationService } from 'src/notification/notification.service';
 import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
@@ -19,8 +18,8 @@ import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
 import { IUser } from 'src/user/types/interface/user.interface';
 import { Isite } from 'src/site/Types/interfaces/site.interface';
 import { IinventoryStatus } from 'src/inventory-status/types/interfaces/inventory-status.interface';
-import { Iinventory } from './types/interfaces/inventory.interface';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
+import { LocationRepository } from 'src/location/repositories/location.repository';
 
 
 @Injectable()
@@ -31,7 +30,8 @@ export class InventoryService {
     private readonly userRepository : userRepository,
     private readonly affectationRepository : AffectationRepository,
     private readonly siteRepository : SiteRepository,
-    private readonly notificationService : NotificationService
+    private readonly notificationService : NotificationService,
+    private readonly  locationRepository :LocationRepository
   ){}
 
  
@@ -154,6 +154,22 @@ export class InventoryService {
     });
 
     await this.inventoryStatusRepository.save(newStatus);
+
+    // Vérifie et associe les locations
+const locations = await this.locationRepository.findBy({
+  id: In(createinventorydto.locationIds),
+});
+
+if (locations.length !== createinventorydto.locationIds.length) {
+  throw new BadRequestException(`One or more location IDs are invalid.`);
+}
+
+// Affecte l'inventaire à chaque location
+for (const location of locations) {
+  location.inventory = savedInventory;
+}
+await this.locationRepository.save(locations);
+
 
     // Affectation des opérateurs
     const affectations = operators.map((operator) =>

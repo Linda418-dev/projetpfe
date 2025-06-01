@@ -60,6 +60,9 @@ import { AnomalyStatusModule } from './anomaly-status/anomaly-status.module';
 import { AnomalyStatus } from './anomaly-status/entities/anomaly-status.entity';
 import { AssetAssignmentModule } from './asset-assignment/asset-assignment.module';
 import { AssetAssignment } from './asset-assignment/Entities/asset-assignment.entity';
+import { ServiceRepository } from './service/repositories/service.repository';
+import { AssetRepository } from './assets/Repositories/Asset.repository';
+import { LocationRepository } from './location/repositories/location.repository';
 
 @Module({
   imports: [
@@ -119,6 +122,9 @@ import { AssetAssignment } from './asset-assignment/Entities/asset-assignment.en
     NotificationService,
     ConfigService,
     NotificationRepository,
+    ServiceRepository,
+    AssetRepository,
+    LocationRepository,
     {
       provide: APP_GUARD,
       useClass: InventoryLockGuard,

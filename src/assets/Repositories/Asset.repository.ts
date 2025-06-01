@@ -189,4 +189,20 @@ export class AssetRepository extends Repository<Asset> {
   return count;
 }
 
+
+  async findBySite(siteId: string) {
+    return this.createQueryBuilder('asset')
+      .leftJoinAndSelect('asset.category', 'category')
+      .leftJoinAndSelect('asset.supplier', 'supplier')
+      .leftJoinAndSelect('asset.location', 'location')
+      .leftJoinAndSelect('location.service', 'service')
+      .leftJoinAndSelect('service.department', 'department')
+      .leftJoinAndSelect('department.site', 'site')
+      .leftJoinAndSelect('asset.status', 'status')
+      .leftJoinAndSelect('asset.files', 'files')
+      .leftJoinAndSelect('asset.employee', 'employee')
+      .where('site.id = :siteId', { siteId })
+      .getMany();
+  }
+
 }

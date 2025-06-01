@@ -29,5 +29,12 @@ export class CreateInventoryDto {
   @ApiProperty()
   @IsUUID()
   siteId: string;
+
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsUUID('all', { each: true })
+  locationIds: string[];
+
+  
  
 }

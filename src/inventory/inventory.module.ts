@@ -10,9 +10,11 @@ import { SiteRepository } from 'src/site/Repositories/site.repository';
 import { NotificationService } from 'src/notification/notification.service';
 import { ConfigService } from '@nestjs/config';
 import { NotificationRepository } from 'src/notification/repositories/notification.repository';
+import { LocationRepository } from 'src/location/repositories/location.repository';
 
 @Module({
-  providers: [InventoryService , InventoryRepository, StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository,NotificationService,ConfigService,NotificationRepository],
+  providers: [InventoryService , InventoryRepository, StatusRepository,InventoryStatusRepository,userRepository,AffectationRepository,SiteRepository,NotificationService,ConfigService,NotificationRepository,
+    LocationRepository  ],
   controllers: [InventoryController],
   exports: [InventoryService],
 })
