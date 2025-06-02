@@ -27,6 +27,8 @@ import { userRepository } from 'src/user/repositories/user.repository';
 import { IUserRole } from 'src/user-role/types/interface/user-role.interface';
 import { AssetAssignmentRepository } from 'src/asset-assignment/repositories/asset-assignment.repository';
 import { IUser } from 'src/user/types/interface/user.interface';
+import * as PDFDocument from 'pdfkit';
+import { Response } from 'express';
 @Injectable()
 export class AssetsService {
     constructor(private readonly assetRepository: AssetRepository,
@@ -190,42 +192,36 @@ export class AssetsService {
       }
 
       // Mise à jour de l'employé via AssetAssignment
-if (updateAssetDto.employeeId) {
-  const employee = await this.userRepository.findOne({
-    where: { id: updateAssetDto.employeeId },
-    relations: ['role'],
-  });
+      if (updateAssetDto.employeeId) {
+      const employee = await this.userRepository.findOne({
+      where: { id: updateAssetDto.employeeId },
+      relations: ['role'],
+      });
 
-  if (!employee) {
-    throw new BadRequestException('Employee not found');
-  }
-
-  const userRole = employee.role as IUserRole;
-  if (!userRole || userRole.role !== UserRoleEnum.EMPLOYEE) {
-    throw new BadRequestException('User is not an employee');
-  }
-
-  const lastAssignment = await this.assetAssignmentRepository.findOne({
-    where: { asset: { id: fetchAsset.id } },
-    order: { assignedAt: 'DESC' },
-  });
-
-  if (!lastAssignment || (lastAssignment.employee as User).id !== employee.id) {
-    const newAssignment = this.assetAssignmentRepository.create({
-      asset: fetchAsset,
-      employee,
-    });
-    await this.assetAssignmentRepository.save(newAssignment);
-     fetchAsset.employee = employee;
-  }
-}
-
-
-
-      const updatedAsset = await this.assetRepository.save(fetchAsset);
-      return updatedAsset;
-    
+      if (!employee) {
+        throw new BadRequestException('Employee not found');7
+      }
+      const userRole = employee.role as IUserRole;
+      if (!userRole || userRole.role !== UserRoleEnum.EMPLOYEE) {
+        throw new BadRequestException('User is not an employee');
+      }
+      const lastAssignment = await this.assetAssignmentRepository.findOne({
+        where: { asset: { id: fetchAsset.id } },
+        order: { assignedAt: 'DESC' },
+      });
+      
+      if (!lastAssignment || (lastAssignment.employee as User).id !== employee.id) {
+        const newAssignment = this.assetAssignmentRepository.create({
+          asset: fetchAsset,
+          employee,
+        });
+        await this.assetAssignmentRepository.save(newAssignment);
+        fetchAsset.employee = employee;
+      }
     }
+    const updatedAsset = await this.assetRepository.save(fetchAsset);
+    return updatedAsset;
+  }
     
   // methode pour creation asset 
   async createAssetAndAssignToFile(createAssetDto: CreateAssetDto) {
@@ -464,6 +460,40 @@ async findOne(id: string) {
 
   return parseFloat(result.total) || 0;
 }
+
+
+
+  async generateQrPdf(res: Response) {
+    const assets = await this.assetRepository.find(); // ou `findAllAssetsNotInRepair()`
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename=assets-qrcodes.pdf');
+    doc.pipe(res);
+
+    let count = 0;
+
+    for (const asset of assets) {
+      if (count > 0 && count % 4 === 0) {
+        doc.addPage(); // 4 QR codes par page
+      }
+
+      const qrData = asset.qrCode || await QRCode.toDataURL(`Asset ID: ${asset.id}`);
+      const img = qrData.replace(/^data:image\/png;base64,/, '');
+      const buffer = Buffer.from(img, 'base64');
+
+      const x = 50 + (count % 2) * 270;
+      const y = 50 + Math.floor((count % 4) / 2) * 320;
+
+      doc.image(buffer, x, y, { width: 200, height: 200 });
+      doc.fontSize(12).text(asset.name, x, y + 210, { width: 200, align: 'center' });
+      doc.text(`Ref: ${asset.referenceNumber}`, x, y + 230, { width: 200, align: 'center' });
+
+      count++;
+    }
+
+    doc.end();
+  }
 
 }
 

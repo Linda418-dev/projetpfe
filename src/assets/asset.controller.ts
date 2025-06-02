@@ -97,6 +97,14 @@ export class AssetController {
 }
 
 
+@Get('export/qrcodes')
+@ApiOperation({ summary: 'Export all asset QR codes as PDF' })
+async exportQrCodesPdf(@Res() res: Response) {
+  return this.assetService.generateQrPdf(res);
+}
+
+
+
 
 }
   
