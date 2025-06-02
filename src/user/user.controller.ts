@@ -21,13 +21,13 @@ export class UserController {
     ){}
     
   @Get('all-users')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async getUsers() {
       return this.userService.getUsers();
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   async getAllUsers(
   @Query() params: PaginateSearchDto,
   @Req() req: any

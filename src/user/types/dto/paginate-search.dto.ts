@@ -26,6 +26,11 @@ export class PaginateSearchDto extends PaginateDto implements SearchKeyword{
    @IsString()
    keyword?: string;
 
+   @ApiProperty()
+   @IsString()
+   siteId?: string;
+
+
     @ApiProperty({ example: 'createdAt' })
     @IsOptional()
     @IsString()

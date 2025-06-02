@@ -22,6 +22,7 @@ export class userRepository extends Repository<User> {
   async getAllUsersWithPaginate(params: PaginateSearchDto) {
    const query = this.createQueryBuilder("user")
     .leftJoinAndSelect("user.role", "role")
+    .leftJoinAndSelect("user.site", "site");
 
   if (params.keyword) {
     query.andWhere(
@@ -32,6 +33,10 @@ export class userRepository extends Repository<User> {
   
   if (params.isActive) {
     query.andWhere("user.isActive = :isActive", { isActive: params.isActive });
+  }
+
+  if (params.siteId) {
+    query.andWhere("site.id = :siteId", { siteId: params.siteId });
   }
 
   if (params.orderField && params.orderDirection) {
