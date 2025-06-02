@@ -41,10 +41,11 @@ export class PaginateSearchDto extends PaginateDto implements SearchKeyword{
     locationId?: string;
 
 
-    @ApiProperty({ required: false })
-    @IsOptional()
+    @ApiProperty()
     @IsUUID()
     siteId?: string;
+
+
     @ApiProperty({ required: false })
     @IsOptional()
     @IsUUID()
