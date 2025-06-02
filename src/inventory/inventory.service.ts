@@ -156,9 +156,9 @@ export class InventoryService {
     await this.inventoryStatusRepository.save(newStatus);
 
     // Vérifie et associe les locations
-const locations = await this.locationRepository.findBy({
+   const locations = await this.locationRepository.findBy({
   id: In(createinventorydto.locationIds),
-});
+   });
 
 if (locations.length !== createinventorydto.locationIds.length) {
   throw new BadRequestException(`One or more location IDs are invalid.`);

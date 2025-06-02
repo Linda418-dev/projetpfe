@@ -4,7 +4,6 @@ import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany,
 import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
 import { LocationHistory } from 'src/location-history/entities/location-history.entity';
 import { IInventoryDetails } from '../types/interfaces/inventory-details.interface';
-import { Anomaly } from 'src/anomaly/Entities/anomaly.entity';
 import { Iaffectation } from 'src/affectation/types/interfaces/affectation.interface';
 import { IAssetStatus } from 'src/asset-status/types/interfaces/asset-status.interface';
 import { ILocationHistory } from 'src/location-history/types/interfaces/location-history.interface';

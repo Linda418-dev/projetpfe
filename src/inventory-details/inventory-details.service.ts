@@ -131,37 +131,40 @@ async checkAndNotifyIfScanComplete(operatorId: string, inventoryId: string, site
   console.log('Scanned assets:', scannedAssets);
 
   if (scannedAssets >= totalAssets) {
-    await this.notifyAdminsOfCompletedsacnned(inventoryName);
+    await this.notifyAdminsOfCompletedsacnned(inventoryName, siteId);
   }
 }
 
 
 
 
-async notifyAdminsOfCompletedsacnned(inventoryName: string) {
-  // Trouver tous les admins qui ont un playerId pour recevoir les notifications
+async notifyAdminsOfCompletedsacnned(inventoryName: string, siteId: string) {
+  // Trouver les admins associés au site concerné ET qui ont un playerId
   const admins = await this.userRepository.find({
     where: {
-      role: { role: UserRoleEnum.ADMIN },  
-      playerId: Not(IsNull()),              
+      role: { role: UserRoleEnum.ADMIN },
+      playerId: Not(IsNull()),
+      site: { id: siteId }, // Filtre par site
     },
-    relations: ['role'],
+    relations: ['role', 'site'],
   });
 
-  // Extraire les playerIds valides
   const playerIds = admins
     .map(admin => admin.playerId)
     .filter(id => !!id);
 
-  if (playerIds.length === 0) return; 
+  if (playerIds.length === 0) {
+  console.warn(`No admins with playerId found for siteId: ${siteId}`);
+  return;
+}
 
-  // Préparer le titre et message de la notification
+
   const title = 'Inventory Completed';
   const message = `The inventory "${inventoryName}" has been fully scanned`;
 
-  // Appeler le service de notification pour envoyer aux admins
   await this.notificationService.notifyOperators(playerIds, title, message);
 }
+
 
 
   
