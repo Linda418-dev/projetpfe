@@ -9,11 +9,13 @@ export class ServiceRepository extends Repository<Service> {
     super(Service, dataSource.createEntityManager());
   }
 
-    async findAllByDepartmentAndSite(departmentId: string) {
-    return this.createQueryBuilder('service')
-      .leftJoinAndSelect('service.department', 'department')
-      .leftJoinAndSelect('department.site', 'site')
-      .where('department.id = :departmentId', { departmentId })
-      .getMany();
-  }
+ async findAllByDepartments(departmentIds: string[]) {
+  return this.createQueryBuilder('service')
+    .leftJoinAndSelect('service.department', 'department')
+    .leftJoinAndSelect('department.site', 'site')
+    .where('department.id IN (:...departmentIds)', { departmentIds })
+    .getMany();
+}
+
+
 }

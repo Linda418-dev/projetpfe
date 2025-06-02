@@ -14,6 +14,7 @@ import { Status } from 'src/status/entities/status.entity';
 import { Istatus } from 'src/status/types/interfaces/status.interface';
 import { ISupplier } from 'src/supplier/types/interfaces/Supplier.interface';
 import { User } from 'src/user/entities/user.entity';
+import { IUser } from 'src/user/types/interface/user.interface';
 
 @Injectable()
 export class ExcelService { 
@@ -30,25 +31,31 @@ export class ExcelService {
       { header: 'Supplier', key: 'supplier', width: 20 },
       { header: 'Location', key: 'location', width: 20 },
       { header: 'Status', key: 'status', width: 20 },
-      { header: 'Created At', key: 'createdAt', width: 25 },
-      { header: 'Updated At', key: 'updatedAt', width: 25 },
+      { header: 'reference', key: 'status', width: 20 },
+      { header: 'purchaseDate', key: 'status', width: 20 },
+      { header: 'purchasePrice', key: 'status', width: 20 },
+      { header: 'employee', key: 'status', width: 20 },
+      { header: 'productionStartDate', key: 'status', width: 20 },
     ];
     
   // ajouter les lignes de données d'un asset 
-   
   assets.forEach(asset => {
   let category =  asset.category as ICategory;
   let supplier = asset.supplier as ISupplier;
   let location = asset.location as Ilocation;
   let status = asset.status as Istatus;
+  let employee = asset.employee as IUser;
       worksheet.addRow({
         name: asset.name,
         category: category.name,
         supplier: supplier.name,
         location: location.name,
         status: status.name,
-        createdAt: asset.createdAt,
-        updatedAt: asset.updatedAt,
+        referenceNumber: asset.referenceNumber,
+        purchaseDate : asset.purchaseDate,
+        purchasePrice : asset.purchasePrice,
+        employee:employee.username,
+        productionStartDate:asset.productionStartDate,
       });
     });
 

@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ServiceService } from './service.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateServiceDto } from './types/dto/create-service.dto';
 import { UpdateServiceDto } from './types/dto/update-service.dto';
 
@@ -11,13 +11,20 @@ export class ServiceController {
 
 
     
-    @Get()
-    @ApiOperation({ summary: 'Get all services by departmentId and siteId' })
-    getAllServicesByDepartment(
-      
-      @Query('departmentId') departmentId: string) {
-            return this.serviceService.getAllServicesByDepartment(departmentId);
-    }
+  @Get()
+@ApiOperation({ summary: 'Get all services by departmentIds' })
+@ApiQuery({ name: 'departmentIds', required: true, type: String, isArray: true })
+getAllServicesByDepartments(
+  @Query('departmentIds') departmentIds: string[] | string
+) {
+  const ids = Array.isArray(departmentIds)
+    ? departmentIds
+    : departmentIds.split(',');
+  return this.serviceService.getAllServicesByDepartments(ids);
+}
+
+
+
     @Get('get-all-srevice')
     @ApiOperation({ summary: 'get all services' })
     getAllServices() {

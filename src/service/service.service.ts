@@ -13,9 +13,11 @@ export class ServiceService {
         private readonly locationRepository : LocationRepository
     ) {}
 
-  async getAllServicesByDepartment( departmentId: string) {
-    return this.serviceRepository.findAllByDepartmentAndSite(departmentId);
-  }
+ async getAllServicesByDepartments(departmentIds: string[]) {
+  return this.serviceRepository.findAllByDepartments(departmentIds);
+}
+
+
 
 
     // methode pour get All Services 
