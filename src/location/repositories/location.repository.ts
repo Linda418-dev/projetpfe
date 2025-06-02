@@ -11,10 +11,11 @@ export class LocationRepository extends Repository<Location> {
     super(Location, dataSource.createEntityManager());
   }
 
-   async findAllByService(serviceId: string): Promise<Location[]> {
-    return this.createQueryBuilder('location')
-      .leftJoinAndSelect('location.service', 'service')
-      .where('service.id = :serviceId', { serviceId })
-      .getMany();
-  }
+  async findAllByServices(serviceIds: string[]) {
+  return this.createQueryBuilder('location')
+    .leftJoinAndSelect('location.service', 'service')
+    .where('service.id IN (:...serviceIds)', { serviceIds })
+    .getMany();
+}
+
 }

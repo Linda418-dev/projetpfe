@@ -12,16 +12,15 @@ export class ServiceController {
 
     
   @Get()
-@ApiOperation({ summary: 'Get all services by departmentIds' })
-@ApiQuery({ name: 'departmentIds', required: true, type: String, isArray: true })
-getAllServicesByDepartments(
-  @Query('departmentIds') departmentIds: string[] | string
-) {
+  @ApiOperation({ summary: 'Get all services by departmentIds' })
+  @ApiQuery({ name: 'departmentIds', required: true, type: String, isArray: true })
+  getAllServicesByDepartments(
+  @Query('departmentIds') departmentIds: string[] | string) {
   const ids = Array.isArray(departmentIds)
     ? departmentIds
     : departmentIds.split(',');
   return this.serviceService.getAllServicesByDepartments(ids);
-}
+  }
 
 
 

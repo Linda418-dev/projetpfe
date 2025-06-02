@@ -12,9 +12,9 @@ export class LocationService {
         ) {}
 
 
-        async getAllLocationsByService(serviceId: string) {
-    return this.locationRepository.findAllByService(serviceId);
-  }
+     async getAllLocationsByServices(serviceIds: string[]) {
+      return this.locationRepository.findAllByServices(serviceIds);
+    }
 
       // methode pour gett All locations
       async getAllLocations() {

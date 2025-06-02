@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { LocationService } from './location.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateLocationDto } from './types/dto/create-location.dto';
 import { UpdateLocationDto } from './types/dto/update-location.dto';
 
@@ -9,11 +9,15 @@ import { UpdateLocationDto } from './types/dto/update-location.dto';
 export class LocationController {
   constructor(private readonly locationService: LocationService) {}
 
-  @Get('by-service')
-  @ApiOperation({ summary: 'Get all locations by serviceId' })
-  getAllLocationsByService(@Query('serviceId') serviceId: string) {
-    return this.locationService.getAllLocationsByService(serviceId);
-  }
+ @Get('by-services')
+@ApiOperation({ summary: 'Get all locations by multiple serviceIds' })
+@ApiQuery({ name: 'serviceIds', type: String, isArray: true, required: true })
+getAllLocationsByServices(@Query('serviceIds') serviceIds: string[] | string) {
+  const ids = Array.isArray(serviceIds)
+    ? serviceIds
+    : serviceIds.split(',');
+  return this.locationService.getAllLocationsByServices(ids);
+}
   
   @Get()
   @ApiOperation({ summary: 'get all locations' })
