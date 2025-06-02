@@ -31,11 +31,11 @@ export class ExcelService {
       { header: 'Supplier', key: 'supplier', width: 20 },
       { header: 'Location', key: 'location', width: 20 },
       { header: 'Status', key: 'status', width: 20 },
-      { header: 'reference', key: 'status', width: 20 },
-      { header: 'purchaseDate', key: 'status', width: 20 },
-      { header: 'purchasePrice', key: 'status', width: 20 },
-      { header: 'employee', key: 'status', width: 20 },
-      { header: 'productionStartDate', key: 'status', width: 20 },
+      { header: 'reference', key: 'reference', width: 20 },
+      { header: 'purchaseDate', key: 'purchaseDate', width: 20 },
+      { header: 'purchasePrice', key: 'purchasePrice', width: 20 },
+      { header: 'employee', key: 'employee', width: 20 },
+      { header: 'productionStartDate', key: 'productionStartDate', width: 20 },
     ];
     
   // ajouter les lignes de données d'un asset 
@@ -51,7 +51,7 @@ export class ExcelService {
         supplier: supplier.name,
         location: location.name,
         status: status.name,
-        referenceNumber: asset.referenceNumber,
+        reference: asset.referenceNumber,
         purchaseDate : asset.purchaseDate,
         purchasePrice : asset.purchasePrice,
         employee:employee.username,
