@@ -1,6 +1,6 @@
 import { Affectation } from 'src/affectation/entities/affectation.entity';
 import { File } from 'src/uploads/entities/file.entity';
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
 import { AssetStatus } from 'src/asset-status/entities/asset-status.entity';
 import { LocationHistory } from 'src/location-history/entities/location-history.entity';
 import { IInventoryDetails } from '../types/interfaces/inventory-details.interface';

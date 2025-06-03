@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { InventoryDetailsService } from './inventory-details.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDetailsDto } from './types/dto/create-inventory.dto';
+import { UpdateInventoryDetailsDto } from './types/dto/update-Inventory-details.dto';
 
 
 @ApiTags('inventory-details Resource')
@@ -29,6 +30,14 @@ export class InventoryDetailsController {
     getInventoryDetailsByInventoryId(@Param('inventoryId') inventoryId: string) {
       return this.inventoryDetailsService.getInventoryDetailsByInventoryId(inventoryId);
     }
+    @Patch(':id')
+    async updateInventoryDetailsById(
+      @Param('id') inventoryDetailsId: string,
+      @Body() dto: UpdateInventoryDetailsDto,) {
+        return this.inventoryDetailsService.updateInventoryDetailsById(inventoryDetailsId, dto);
+      }
+
+
 
 
 

@@ -12,6 +12,8 @@ import { NotificationService } from 'src/notification/notification.service';
 import { UserRoleEnum } from 'src/user-role/types/enums/user-role.enum';
 import { IsNull, Not } from 'typeorm';
 import { userRepository } from 'src/user/repositories/user.repository';
+import { UpdateInventoryDetailsDto } from './types/dto/update-Inventory-details.dto';
+import { File } from 'src/uploads/entities/file.entity';
 
 
 @Injectable()
@@ -188,6 +190,68 @@ async notifyAdminsOfCompletedsacnned(inventoryName: string, siteId: string) {
   async getInventoryDetailsByInventoryId(inventoryId: string) {
     return this.inventoryDetailsRepository.findByInventoryId(inventoryId);
   }
+
+
+  async updateInventoryDetailsById(inventoryDetailsId: string, dto: UpdateInventoryDetailsDto) {
+  // 1. Vérifier que la ligne InventoryDetails existe
+  const inventoryDetails = await this.inventoryDetailsRepository.findOne({
+    where: { id: inventoryDetailsId },
+    relations: ['assetStatus', 'locationHistory', 'files'],
+  });
+
+  if (!inventoryDetails) {
+    throw new NotFoundException('InventoryDetails not found');
+  }
+
+  // 2. Vérifier que l'asset existe
+  const asset = await this.assetRepository.findOneBy({ id: dto.assetId });
+  if (!asset) {
+    throw new NotFoundException('Asset not found');
+  }
+
+  // 3. Nouveau statut
+if (dto.newStatusId) {
+  const newStatus = this.assetStatusRepository.create({
+    asset,
+    status: { id: dto.newStatusId },
+  });
+  const savedStatus = await this.assetStatusRepository.save(newStatus);
+  inventoryDetails.assetStatus = savedStatus;
+
+  // 🔁 MAJ du statut de l'asset
+  asset.status = savedStatus.status;
+}
+
+// 4. Nouvelle localisation
+if (dto.newLocationId) {
+  const newLocation = this.locationHistoryRepository.create({
+    asset,
+    location: { id: dto.newLocationId },
+  });
+  const savedLocation = await this.locationHistoryRepository.save(newLocation);
+  inventoryDetails.locationHistory = savedLocation;
+
+  // MAJ de la localisation de l'asset
+  asset.location = savedLocation.location;
+}
+
+//  Sauvegarder l'asset mis à jour
+await this.assetRepository.save(asset);
+  // 6. Mettre à jour la date de scan
+  inventoryDetails.scannedAt = new Date();
+
+  // 7. Sauvegarder
+  const saved = await this.inventoryDetailsRepository.save(inventoryDetails);
+ if (saved.files?.length) {
+  for (const file of saved.files) {
+    if (typeof file === 'object' && 'inventoryDetails' in file) {
+      delete (file as any).inventoryDetails;
+    }
+  }
+}
+
+  return saved;
+}
 
 
   

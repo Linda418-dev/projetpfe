@@ -119,12 +119,6 @@ export class UserService implements OnApplicationBootstrap {
   }
   //  Mise à jour du site uniquement si le rôle est EMPLOYEE
   if (updateUserDto.siteId) {
-    const currentRole = (user.role as any).role;
-
-    if (currentRole !== 'employee') {
-      throw new ConflictException('Only employees can be assigned to a site');
-    }
-
     const site = await this.siteRepository.findOne({
       where: { id: updateUserDto.siteId },
     });
