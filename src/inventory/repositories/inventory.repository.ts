@@ -9,47 +9,57 @@ export class InventoryRepository extends Repository<Inventory> {
   constructor(private readonly dataSource: DataSource) {
     super(Inventory, dataSource.createEntityManager());
   }
-  async findAllWithLatestStatus() {
-    return this.createQueryBuilder('inventory')
-      .leftJoinAndSelect('inventory.site', 'site')
-      .leftJoinAndSelect('inventory.affectations', 'affectation')
-      .leftJoinAndSelect('affectation.operator', 'operator')
-      .leftJoinAndSelect(
-        'inventory.inventoryStatus',
-        'latestStatus',
-        `latestStatus.id = (
-          SELECT "statusSub"."id"
-          FROM "inventory_status" "statusSub"
-          WHERE "statusSub"."inventoryId" = "inventory"."id"
-          ORDER BY "statusSub"."createdAt" DESC
-          LIMIT 1
-        )`
-      )
-      .leftJoinAndSelect('latestStatus.status', 'statusDetail')
-      .getMany();
-  }
+async findAllWithLatestStatus() {
+  return this.createQueryBuilder('inventory')
+    .leftJoinAndSelect('inventory.site', 'site')
+    .leftJoinAndSelect('inventory.affectations', 'affectation')
+    .leftJoinAndSelect('affectation.operator', 'operator')
+    .leftJoinAndSelect('inventory.locations', 'location') 
+    .leftJoinAndSelect('location.service', 'service')
+    .leftJoinAndSelect('service.department', 'department')
+    .leftJoinAndSelect('department.site', 'locationSite')
+    .leftJoinAndSelect(
+      'inventory.inventoryStatus',
+      'latestStatus',
+      `latestStatus.id = (
+        SELECT "statusSub"."id"
+        FROM "inventory_status" "statusSub"
+        WHERE "statusSub"."inventoryId" = "inventory"."id"
+        ORDER BY "statusSub"."createdAt" DESC
+        LIMIT 1
+      )`
+    )
+    .leftJoinAndSelect('latestStatus.status', 'statusDetail')
+    .getMany();
+}
+
   
 
-  async findInventoriesByOperatorIdWithStatus(userId: string) {
-    return this.createQueryBuilder('inventory')
-      .leftJoinAndSelect('inventory.affectations', 'affectation')
-      .leftJoinAndSelect('affectation.operator', 'operator')
-      .leftJoinAndSelect('inventory.site', 'site')
-      .leftJoinAndSelect(
-        'inventory.inventoryStatus',
-        'latestStatus',
-        `latestStatus.id = (
-          SELECT "statusSub"."id"
-          FROM "inventory_status" "statusSub"
-          WHERE "statusSub"."inventoryId" = "inventory"."id"
-          ORDER BY "statusSub"."createdAt" DESC
-          LIMIT 1
-        )`
-      )
-      .leftJoinAndSelect('latestStatus.status', 'statusDetail')
-      .where('operator.id = :userId', { userId })
-      .getMany();
-  }
+async findInventoriesByOperatorIdWithStatus(userId: string) {
+  return this.createQueryBuilder('inventory')
+    .leftJoinAndSelect('inventory.affectations', 'affectation')
+    .leftJoinAndSelect('affectation.operator', 'operator')
+    .leftJoinAndSelect('inventory.site', 'site')
+    .leftJoinAndSelect('inventory.locations', 'location') // 🟢 d'abord joindre les locations
+    .leftJoinAndSelect('location.service', 'service')     // 🟢 ensuite le service de chaque location
+    .leftJoinAndSelect('service.department', 'department')
+    .leftJoinAndSelect('department.site', 'locationSite') // site via department
+    .leftJoinAndSelect(
+      'inventory.inventoryStatus',
+      'latestStatus',
+      `latestStatus.id = (
+        SELECT "statusSub"."id"
+        FROM "inventory_status" "statusSub"
+        WHERE "statusSub"."inventoryId" = "inventory"."id"
+        ORDER BY "statusSub"."createdAt" DESC
+        LIMIT 1
+      )`
+    )
+    .leftJoinAndSelect('latestStatus.status', 'statusDetail')
+    .where('operator.id = :userId', { userId })
+    .getMany();
+}
+
   
   
   async getInventoryById(id: string){
