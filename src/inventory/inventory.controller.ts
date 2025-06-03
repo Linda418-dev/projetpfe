@@ -20,6 +20,11 @@ export class InventoryController {
       const user = req.user;
       return this.inventoryService.getAllInventories(user);
     }
+
+    @Get('site/:siteId')
+  async getInventoriesBySite(@Param('siteId') siteId: string) {
+    return this.inventoryService.getInventoriesBySite(siteId);
+  }
     @BypassInventoryLock()
      @Post()
      async create(@Body() dto: CreateInventoryDto) {

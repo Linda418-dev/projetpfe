@@ -736,4 +736,15 @@ async handlePlannedInventoriesToLaunch() {
   console.log(`${launchedCount} inventory(ies) have been launched.`);
 }
 
+
+
+  async getInventoriesBySite(siteId: string) {
+    return this.inventoryRepository.find({
+      where: {
+        site: { id: siteId },
+      },
+      relations: ['site', 'affectations', 'inventoryStatus', 'locations'],
+    });
+  }
+
 }
