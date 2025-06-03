@@ -45,7 +45,7 @@ export class AuthService {
     email: user.email,
     isActive: user.isActive,
     role: user.role,
-    siteId: (user.site as any)?.id, // Ajoute le siteId ici
+    siteId: (user.site as any)?.id, 
 
   };
 

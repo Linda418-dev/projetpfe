@@ -392,16 +392,9 @@ async resolveAnomaly(anomalyId: string) {
 }
 
 
+ 
   async getAnomaliesBySite(siteId: string) {
-    return this.anomalyRepository
-      .createQueryBuilder('anomaly')
-      .leftJoinAndSelect('anomaly.reportedBy', 'user')
-      .leftJoinAndSelect('anomaly.asset', 'asset')
-      .leftJoinAndSelect('user.site', 'site')
-      .leftJoinAndSelect('anomaly.statusHistory', 'statusHistory')
-      .leftJoinAndSelect('anomaly.files', 'files')
-      .where('site.id = :siteId', { siteId })
-      .getMany();
+    return this.anomalyRepository.findBySiteId(siteId);
   }
 
 
