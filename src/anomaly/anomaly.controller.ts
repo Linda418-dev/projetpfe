@@ -16,6 +16,11 @@ export class AnomalyController {
       return this.anomalyService.getAllAnomalies(req.user);
     }
 
+      @Get('site/:siteId')
+  async getAnomaliesBySite(@Param('siteId') siteId: string) {
+    return this.anomalyService.getAnomaliesBySite(siteId);
+  }
+
 
     @Post()
     @UseGuards(JwtAuthGuard)
