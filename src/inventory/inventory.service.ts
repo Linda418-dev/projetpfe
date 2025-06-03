@@ -738,13 +738,24 @@ async handlePlannedInventoriesToLaunch() {
 
 
 
-  async getInventoriesBySite(siteId: string) {
-    return this.inventoryRepository.find({
-      where: {
-        site: { id: siteId },
-      },
-      relations: ['site', 'affectations', 'inventoryStatus', 'locations'],
-    });
-  }
+async getInventoriesBySite(siteId: string) {
+  return this.inventoryRepository.find({
+    where: {
+      site: { id: siteId },
+    },
+    relations: [
+      'site',
+      'affectations',
+      'affectations.operator',
+      'inventoryStatus',
+      'inventoryStatus.status',
+      'locations',
+      'locations.service',
+      'locations.service.department',
+      'locations.service.department.site',
+    ],
+  });
+}
+
 
 }
