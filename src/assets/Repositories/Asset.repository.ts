@@ -49,13 +49,16 @@ export class AssetRepository extends Repository<Asset> {
     query.andWhere("status.id = :statusId", { statusId: params.statusId });
   }
 
-  // **Nouveaux filtres : site > department > service > location**
 
   if (params.siteId) {
     query.andWhere("site.id = :siteId", { siteId: params.siteId });
-  } else if (params.departmentId) {
+  } 
+
+  if (params.departmentId) {
     query.andWhere("department.id = :departmentId", { departmentId: params.departmentId });
-  } else if (params.serviceId) {
+  } 
+  
+  if (params.serviceId) {
     query.andWhere("service.id = :serviceId", { serviceId: params.serviceId });
   }
 
