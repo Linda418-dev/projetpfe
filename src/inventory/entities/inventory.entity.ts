@@ -22,9 +22,6 @@ export class Inventory implements Iinventory {
   @Column({ type: 'date', nullable: true })
   endDate: Date ; 
 
-  @Column({ default: true })
-  see: boolean;
-
 
   @OneToMany(() => Affectation, (affectation) => affectation.inventory)
   affectations: Iaffectation[]|string[];

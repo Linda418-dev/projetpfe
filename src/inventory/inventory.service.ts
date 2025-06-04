@@ -144,7 +144,6 @@ export class InventoryService {
    const newInventory = this.inventoryRepository.create({
   ...createinventorydto,
   site,
-  see: createinventorydto.see ?? true,
   });
 
     const savedInventory = await this.inventoryRepository.save(newInventory);

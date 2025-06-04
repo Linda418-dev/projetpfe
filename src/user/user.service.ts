@@ -85,8 +85,8 @@ export class UserService implements OnApplicationBootstrap {
     };
   }
        
-   // methode pour update user 
- async updateUser(id: string, updateUserDto: UpdateUserDto) {
+  // methode pour update user 
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
   const user = await this.userRepository.findOne({ 
     where: { id }, 
     relations: ['role', 'affectations','site'] 
@@ -147,8 +147,6 @@ export class UserService implements OnApplicationBootstrap {
   };
 }
 
-
-
       // méthode poure  supprimer user  s'il n'a pas d’affectations. 
       async deleteUser(targetUserId: string, currentUserId: string) {
         if (targetUserId === currentUserId) {
@@ -195,7 +193,6 @@ export class UserService implements OnApplicationBootstrap {
       }
       
       
-      
       // méthode pour activer compte d'un user 
       async activateUser(id: string) {
         const user = await this.userRepository.findOne({ where: { id } });
@@ -240,8 +237,6 @@ export class UserService implements OnApplicationBootstrap {
 
   const superAdminEmail = 'superadmin@gmail.com';
   const superAdminUsername = 'superadmin';
-
-  // Vérifie si un utilisateur existe déjà avec cet email ou ce username
   const existingUser = await this.userRepository.findOne({
     where: [
       { email: superAdminEmail },
@@ -259,9 +254,9 @@ export class UserService implements OnApplicationBootstrap {
       role: superAdminRole,
     });
     await this.userRepository.save(superAdminUser);
-    console.log(' Compte superAdmin créé');
+    console.log(' SuperAdmin account successfully created');
   } else {
-    console.log('Le  super admin existe déjà');
+    console.log('SuperAdmin account already exists');
   }
 }
 

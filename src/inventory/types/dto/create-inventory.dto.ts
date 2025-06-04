@@ -35,10 +35,6 @@ export class CreateInventoryDto {
   @IsUUID('all', { each: true })
   locationIds: string[];
 
-  @ApiProperty()
-  @IsOptional()
-  @IsBoolean()
-  see?: boolean;
 
 
 }

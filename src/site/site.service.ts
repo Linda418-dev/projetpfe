@@ -86,6 +86,7 @@ export class SiteService {
         
           return site;
         }
+        
         // methode pour supprimer site
         async deleteSite(id: string) {
           const fetchSite = await this.getSiteById(id);
