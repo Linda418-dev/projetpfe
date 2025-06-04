@@ -20,11 +20,9 @@ export class AssetRepository extends Repository<Asset> {
     .leftJoinAndSelect("asset.location", "location")
     .leftJoinAndSelect("asset.files", "files")
     .leftJoinAndSelect("asset.employee", "employee")
-
-    // Jointures supplémentaires pour filtrer par site, department, service
-   .leftJoinAndSelect("location.service", "service")
-   .leftJoinAndSelect("service.department", "department")
-   .leftJoinAndSelect("department.site", "site")
+    .leftJoinAndSelect("location.service", "service")
+    .leftJoinAndSelect("service.department", "department")
+    .leftJoinAndSelect("department.site", "site")
 
   if (params.keyword) {
     query.andWhere("asset.name ILIKE :keyword", {
@@ -113,16 +111,20 @@ export class AssetRepository extends Repository<Asset> {
 
  
 
-   async findAllAssetsNotInRepair() {
-    return this.createQueryBuilder('asset')
-      .leftJoinAndSelect('asset.status', 'status')
-      .leftJoinAndSelect('asset.category', 'category')
-      .leftJoinAndSelect('asset.files', 'files')
-      .leftJoinAndSelect('asset.supplier', 'supplier')
-      .leftJoinAndSelect('asset.location', 'location')
-      .where('status.name != :statusName', { statusName: 'In Repair' })
-      .getMany();
-  }
+  async findAllAssetsNotInRepair() {
+  return this.createQueryBuilder('asset')
+    .leftJoinAndSelect('asset.status', 'status')
+    .leftJoinAndSelect('asset.category', 'category')
+    .leftJoinAndSelect('asset.files', 'files')
+    .leftJoinAndSelect('asset.supplier', 'supplier')
+    .leftJoinAndSelect('asset.location', 'location')
+    .leftJoinAndSelect('location.inventory', 'inventory') 
+    .where('status.name != :statusName', { statusName: 'In Repair' })
+    .andWhere('inventory.see = true') 
+    .getMany();
+}
+
+
 
    async countAll() {
     return this.count();

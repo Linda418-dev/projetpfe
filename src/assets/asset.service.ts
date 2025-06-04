@@ -289,8 +289,7 @@ asset.referenceNumber = await this.generateNextRef();
   const savedAsset = await this.assetRepository.save(asset);
 
   try {
-    // Générer le QR code et  stocker dans l’asset
-    await this.generateQrCodeAndAttachToAsset(savedAsset); 
+  
 
     // Enregistrer l’historique de localisation
     const locationHistory = new LocationHistory();
@@ -323,17 +322,8 @@ asset.referenceNumber = await this.generateNextRef();
     return savedAsset;
   } catch (error) {
     await this.assetRepository.remove(savedAsset); 
-    throw new Error(`Unregistered asset. Problem during QR Code generation : ${error.message}`);
+    throw new Error(`Unregistered asset. Problem during  : ${error.message}`);
   }
-}
-
-async generateQrCodeAndAttachToAsset(asset: Asset) {
- const qrData = `${asset.id}`;
-  const dataUrl = await QRCode.toDataURL(qrData); 
-  const base64 = dataUrl.split(',')[1]; 
-
-  asset.qrCode = base64; 
-  await this.assetRepository.save(asset);
 }
 
 
@@ -428,10 +418,6 @@ async generateNextRef(){
 }
 
 
-
-
-
-
 async findOne(id: string) {
     return this.assetRepository.findOne({
       where: { id },
@@ -462,38 +448,6 @@ async findOne(id: string) {
 }
 
 
-
-  async generateQrPdf(res: Response) {
-    const assets = await this.assetRepository.find(); // ou `findAllAssetsNotInRepair()`
-    const doc = new PDFDocument({ margin: 30, size: 'A4' });
-
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename=assets-qrcodes.pdf');
-    doc.pipe(res);
-
-    let count = 0;
-
-    for (const asset of assets) {
-      if (count > 0 && count % 4 === 0) {
-        doc.addPage(); // 4 QR codes par page
-      }
-
-      const qrData = asset.qrCode || await QRCode.toDataURL(`Asset ID: ${asset.id}`);
-      const img = qrData.replace(/^data:image\/png;base64,/, '');
-      const buffer = Buffer.from(img, 'base64');
-
-      const x = 50 + (count % 2) * 270;
-      const y = 50 + Math.floor((count % 4) / 2) * 320;
-
-      doc.image(buffer, x, y, { width: 200, height: 200 });
-      doc.fontSize(12).text(asset.name, x, y + 210, { width: 200, align: 'center' });
-      doc.text(`Ref: ${asset.referenceNumber}`, x, y + 230, { width: 200, align: 'center' });
-
-      count++;
-    }
-
-    doc.end();
-  }
 
 }
 

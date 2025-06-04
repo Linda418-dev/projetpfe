@@ -141,10 +141,12 @@ export class InventoryService {
     }
 
     // Création de l'inventaire
-    const newInventory = this.inventoryRepository.create({
-      ...createinventorydto,
-      site,
-    });
+   const newInventory = this.inventoryRepository.create({
+  ...createinventorydto,
+  site,
+  see: createinventorydto.see ?? true,
+  });
+
     const savedInventory = await this.inventoryRepository.save(newInventory);
 
     // Ajoute le statut "Planned"

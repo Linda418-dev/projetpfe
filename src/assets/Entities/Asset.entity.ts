@@ -22,9 +22,6 @@ export class Asset implements IAsset {
 
   @Column()
   name: string;
-  
-  @Column({ nullable: true })
-  qrCode: string;
    
   @Column({ unique: true })
   referenceNumber: string;

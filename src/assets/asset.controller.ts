@@ -1,10 +1,9 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, ParseUUIDPipe, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateAssetDto } from "./types/dto/create-asset.dto";
 import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
-import { Response } from 'express';
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 
 @ApiBearerAuth()
@@ -78,35 +77,6 @@ export class AssetController {
   async getHistoryAssetById(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.assetService.getHistoryAssetById(id);
   }
-
-  @Get(':id/qrcode')
-  async downloadQrCode(@Param('id') id: string, @Res() res: Response) {
-    const asset = await this.assetService.findOne(id);
-      if (!asset || !asset.qrCode) {
-        throw new NotFoundException('QR Code not found');
-      }
-      // Convertir le base64 en Buffer
-    const base64Data = asset.qrCode.replace(/^data:image\/png;base64,/, '');
-    const imgBuffer = Buffer.from(base64Data, 'base64');
-    res.set({
-    'Content-Type': 'image/png',
-    'Content-Disposition': `attachment; filename="qr-code-${asset.id}.png"`,
-    'Content-Length': imgBuffer.length,
-  });
-  res.end(imgBuffer);
-}
-
-
-@Get('export/qrcodes')
-@ApiOperation({ summary: 'Export all asset QR codes as PDF' })
-// PAS DE GUARD ICI
-async exportQrCodesPdf(@Res() res: Response) {
-  return this.assetService.generateQrPdf(res);
-}
-
-
-
-
 
 }
   
