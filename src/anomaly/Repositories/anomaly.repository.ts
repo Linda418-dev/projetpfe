@@ -25,7 +25,7 @@ async findBySiteId(siteId: string) {
     .leftJoinAndSelect('anomaly.asset', 'asset')
     .leftJoinAndSelect('user.site', 'site')
     .leftJoinAndSelect('anomaly.statusHistory', 'statusHistory')
-    .leftJoinAndSelect('statusHistory.status', 'status')  // <--- Ici !!!
+    .leftJoinAndSelect('statusHistory.status', 'status')  
     .leftJoinAndSelect('anomaly.files', 'files')
     .where('site.id = :siteId', { siteId })
     .orderBy('statusHistory.createdAt', 'ASC')
