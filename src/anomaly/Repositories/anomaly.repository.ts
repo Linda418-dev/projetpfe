@@ -19,15 +19,19 @@ export class AnomalyRepository extends Repository<Anomaly> {
 }
 
 
- async findBySiteId(siteId: string): Promise<Anomaly[]> {
-    return this.createQueryBuilder('anomaly')
-      .leftJoinAndSelect('anomaly.reportedBy', 'user')
-      .leftJoinAndSelect('anomaly.asset', 'asset')
-      .leftJoinAndSelect('user.site', 'site')
-      .leftJoinAndSelect('anomaly.statusHistory', 'statusHistory')
-      .leftJoinAndSelect('anomaly.files', 'files')
-      .where('site.id = :siteId', { siteId })
-      .getMany();
-  }
+async findBySiteId(siteId: string) {
+  return this.createQueryBuilder('anomaly')
+    .leftJoinAndSelect('anomaly.reportedBy', 'user')
+    .leftJoinAndSelect('anomaly.asset', 'asset')
+    .leftJoinAndSelect('user.site', 'site')
+    .leftJoinAndSelect('anomaly.statusHistory', 'statusHistory')
+    .leftJoinAndSelect('statusHistory.status', 'status')  // <--- Ici !!!
+    .leftJoinAndSelect('anomaly.files', 'files')
+    .where('site.id = :siteId', { siteId })
+    .orderBy('statusHistory.createdAt', 'ASC')
+    .getMany();
+}
+
+
 
 }

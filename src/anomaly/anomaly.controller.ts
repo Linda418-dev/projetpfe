@@ -19,10 +19,10 @@ export class AnomalyController {
       return this.anomalyService.getAllAnomalies(req.user);
     }
 
-      @Get('site/:siteId')
-      async getAnomaliesBySite(@Param('siteId') siteId: string) {
+    @Get('site/:siteId')
+    async getAnomaliesBySite(@Param('siteId') siteId: string) {
     return this.anomalyService.getAnomaliesBySite(siteId);
-  }
+    }
 
 
     @Post()
@@ -72,7 +72,10 @@ export class AnomalyController {
         return this.anomalyService.assignTechnicianToAnomaly(id, assignTechnicianDto.technicianId);
       }
 
-     
-   
-
+      //  @UseGuards(JwtAuthGuard)
+      //  @Get('my-reports')
+      //  async getMyReportedAnomalies(@Req() req: any) {
+      //       const user = req.user;
+      //       return this.anomalyService.findAnomaliesReportedByUser(user.id);
+      //  }
 }

@@ -484,5 +484,14 @@ async getAllAnomaliesForTechnician(currentUser: User) {
   });
 }
 
+
+// async findAnomaliesReportedByUser(userId: string){
+//   return this.anomalyRepository.find({
+//     where: { reportedBy: { id: userId } },
+//     relations: ['asset', 'statusHistory', 'files', 'assignedTo'],
+//     order: { createdAt: 'DESC' },
+//   });
+// }
+
   
 }
