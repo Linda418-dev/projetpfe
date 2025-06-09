@@ -34,14 +34,14 @@ export class UserRoleService implements OnApplicationBootstrap {
 
    // Seeder automatique à l'initialisation de l'application
   async onApplicationBootstrap() {
-    const employeeRole = await this.userRoleRepository.findOneBy({ role: UserRoleEnum.SUPER_ADMIN
+    const employeeRole = await this.userRoleRepository.findOneBy({ role: UserRoleEnum.TECHNICIAN
      });
     if (!employeeRole) {
-      console.log('Seeding role SUPPERAdmin...');
-      await this.createRole(UserRoleEnum.SUPER_ADMIN);
-      console.log('Role superAdmin seeded.');
+      console.log('Seeding role TECHNICIAN...');
+      await this.createRole(UserRoleEnum.TECHNICIAN);
+      console.log('Role TECHNICIAN seeded.');
     } else {
-      console.log('Role supperAdmin already exists.');
+      console.log('Role TECHNICIAN already exists.');
     }
   }
 

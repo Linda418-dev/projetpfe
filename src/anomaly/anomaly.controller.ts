@@ -1,9 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post, Req, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Req, Request, UseGuards } from '@nestjs/common';
 import { AnomalyService } from './anomaly.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
 import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AssignTechnicianDto } from './types/dto/assign-technician.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { User } from 'src/user/entities/user.entity';
 
 @ApiBearerAuth()
 @ApiTags('Anomaly Resource')
@@ -17,7 +20,7 @@ export class AnomalyController {
     }
 
       @Get('site/:siteId')
-  async getAnomaliesBySite(@Param('siteId') siteId: string) {
+      async getAnomaliesBySite(@Param('siteId') siteId: string) {
     return this.anomalyService.getAnomaliesBySite(siteId);
   }
 
@@ -27,6 +30,14 @@ export class AnomalyController {
     createAnomaly(@Body() createAnomalyDto: CreateAnomalyDto, @Request() req) {
       return this.anomalyService.createAnomaly(createAnomalyDto, req.user);
     }
+
+
+      @Get('anomaly')
+       @UseGuards(JwtAuthGuard, RolesGuard)
+      async getAllAnomaliesforTechnicien(@Request() req) {
+        const user: User = req.user;
+        return this.anomalyService.getAllAnomaliesForTechnician(user);
+  }
 
     @Get('statistics/by-month')
     getAnomaliesByMonth() {
@@ -53,4 +64,15 @@ export class AnomalyController {
     refuseAnomaly(@Param('id') id: string){
       return this.anomalyService.refuseAnomaly(id);
     }
+
+    @Patch(':id/assign-technician')
+    async assignTechnician(
+      @Param('id', ParseUUIDPipe) id: string,
+      @Body() assignTechnicianDto: AssignTechnicianDto,) {
+        return this.anomalyService.assignTechnicianToAnomaly(id, assignTechnicianDto.technicianId);
+      }
+
+     
+   
+
 }

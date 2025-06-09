@@ -11,6 +11,7 @@ import { AssetRepository } from 'src/assets/Repositories/Asset.repository';
 import { Asset } from 'src/assets/Entities/asset.entity';
 import { AssetStatusEnum } from 'src/status/types/enums/asset-status.enum';
 import { AssetStatusRepository } from 'src/asset-status/repositories/asset-status.repository';
+import { userRepository } from 'src/user/repositories/user.repository';
 
 
 @Injectable()
@@ -22,6 +23,7 @@ export class AnomalyService {
         private readonly anomalyStatusRepository : AnomalyStatusRepository,
         private readonly assetRepository: AssetRepository,
         private readonly assetStatusHistoryRepository : AssetStatusRepository,
+        private readonly userRepository : userRepository,
     ){}
  async getAllAnomalies(currentUser: User) {
   let anomalies;
@@ -392,15 +394,95 @@ async resolveAnomaly(anomalyId: string) {
 }
 
 
- 
+
   async getAnomaliesBySite(siteId: string) {
     return this.anomalyRepository.findBySiteId(siteId);
   }
 
 
+  async assignTechnicianToAnomaly(anomalyId: string, technicianId: string) {
+  const anomaly = await this.anomalyRepository.findOne({
+    where: { id: anomalyId },
+    relations: ['statusHistory', 'statusHistory.status'],
+  });
 
+  if (!anomaly) {
+    throw new NotFoundException('Anomaly not found');
+  }
 
-  
+ 
+  const technician = await this.userRepository.findOne({ where: { id: technicianId } });
+  if (!technician) {
+    throw new NotFoundException('Technician not found');
+  }
+
+  anomaly.assignedTo = technician;
+
+  await this.anomalyRepository.save(anomaly);
+
+  return {
+    message: 'Technician successfully assigned to anomaly',
+    anomaly,
+    assignedTo: technician,
+  };
+}
+
+async getAllAnomaliesForTechnician(currentUser: User) {
+  let anomalies;
+
+  const userRole = typeof currentUser.role === 'string'
+    ? currentUser.role
+    : currentUser.role?.role;
+
+  const commonRelations = [
+    'files',
+    'statusHistory',
+    'statusHistory.status',
+    'reportedBy',
+    'asset',
+    'asset.location',
+    'asset.location.service',
+    'asset.location.service.department',
+    'asset.location.service.department.site',
+  ];
+
+  if (userRole === 'admin') {
+    anomalies = await this.anomalyRepository.find({
+      relations: commonRelations,
+      order: { createdAt: 'DESC' },
+    });
+  } else if (userRole === 'operator' || userRole === 'employee') {
+    anomalies = await this.anomalyRepository.find({
+      where: { reportedBy: { id: currentUser.id } },
+      relations: commonRelations,
+      order: { createdAt: 'DESC' },
+    });
+  } else if (userRole === 'technician') {
+    anomalies = await this.anomalyRepository.find({
+      where: { assignedTo: { id: currentUser.id } },
+      relations: commonRelations,
+      order: { createdAt: 'DESC' },
+    });
+  } else {
+    throw new UnauthorizedException('Rôle non autorisé');
+  }
+
+  return anomalies.map(anomaly => {
+    const latestStatus = Array.isArray(anomaly.statusHistory)
+      ? [...anomaly.statusHistory].sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )[0]?.status ?? null
+      : null;
+
+    const site = anomaly.asset?.location?.['service']?.['department']?.['site'];
+
+    return {
+      ...anomaly,
+      latestStatus,
+      siteName: site?.name,
+    };
+  });
+}
 
   
 }

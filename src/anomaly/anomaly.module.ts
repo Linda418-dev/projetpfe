@@ -11,7 +11,8 @@ import { AssetStatusRepository } from 'src/asset-status/repositories/asset-statu
 import { userRepository } from 'src/user/repositories/user.repository';
 
 @Module({
-  providers: [AnomalyService,AnomalyRepository,FileRepository,InventoryDetailsRepository,StatusRepository,AnomalyStatusRepository,AssetRepository,AssetStatusRepository,userRepository],
+  providers: [AnomalyService,AnomalyRepository,FileRepository,InventoryDetailsRepository,StatusRepository,AnomalyStatusRepository,
+    AssetRepository,AssetStatusRepository,userRepository],
   controllers: [AnomalyController]
 })
 export class AnomalyModule {}

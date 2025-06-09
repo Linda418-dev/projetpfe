@@ -29,6 +29,10 @@ export class Anomaly implements IAnomaly{
   @OneToMany(() => File, (file) => file.anomaly)
   files: IFile[]|string[];
 
+  @ManyToOne(() => User, { nullable: true, eager: true, onDelete: 'SET NULL' })
+  assignedTo?: IUser | string;
+
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

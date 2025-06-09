@@ -5,7 +5,7 @@ import { updateAssetDto } from "./types/dto/update-asset.dto";
 import { AssetsService } from "./asset.service";
 import { PaginateSearchDto } from "./types/dto/paginate-search.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
-
+import { Request } from 'express'; 
 @ApiBearerAuth()
 @ApiTags('Asset Resource')
 @Controller('assets')
@@ -32,7 +32,7 @@ export class AssetController {
      message: 'Asset successfully created and assigned to file, category, and location',
      asset,
    };
-  }
+   }
 
   @Get('by-site')
   @UseGuards(JwtAuthGuard)
@@ -53,6 +53,16 @@ export class AssetController {
   getTotalPrice() {
   return this.assetService.getTotalPurchasePrice();
   }
+
+   @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all assets assigned to the connected employee' })
+  async getMyAssets(@Req() req: Request) {
+    const userId = req.user['id']; // ou (req.user as any).id si non typé
+    return this.assetService.getAssetsByEmployee(userId);
+  }
+
   
   @Get(':id')
   @ApiOperation({ summary: 'get asset by id' })

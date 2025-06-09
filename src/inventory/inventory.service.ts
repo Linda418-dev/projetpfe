@@ -79,15 +79,26 @@ export class InventoryService {
       startDate,
       endDate,
     );
-
     if (overlappingInventory) {
-      const formattedStartDate = new Date(overlappingInventory.startDate).toDateString();
-      const formattedEndDate = new Date(overlappingInventory.endDate).toDateString();
+  // Récupère le dernier statut de l'inventaire existant
+  const statusHistory = await this.inventoryStatusRepository.find({
+    where: { inventory: { id: overlappingInventory.id } },
+    relations: ['status'],
+    order: { createdAt: 'DESC' },
+    take: 1,
+  });
 
-      throw new BadRequestException(
-        `An inventory already exists in the selected date range for the site (from ${formattedStartDate} to ${formattedEndDate}).`,
-      );
-    }
+  const latestStatus = (statusHistory[0]?.status as Istatus)?.name;
+
+  if (latestStatus === 'In Progress') {
+    const formattedStartDate = new Date(overlappingInventory.startDate).toDateString();
+    const formattedEndDate = new Date(overlappingInventory.endDate).toDateString();
+
+    throw new BadRequestException(
+      `An inventory is already in progress in the selected date range for the site (from ${formattedStartDate} to ${formattedEndDate}).`,
+    );
+  }
+}
 
     // Vérifie que le site existe
     const site = await this.siteRepository.findOne({

@@ -447,6 +447,15 @@ async findOne(id: string) {
   return parseFloat(result.total) || 0;
 }
 
+async getAssetsByEmployee(userId: string) {
+  return this.assetRepository.find({
+    where: { employee: { id: userId } },
+    relations: ['category', 'location', 'supplier', 'files', 'status'],
+    order: { createdAt: 'DESC' }
+  });
+}
+
+
 
 
 }
