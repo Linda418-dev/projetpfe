@@ -9,9 +9,6 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class NotificationService {
-  notifyAdminsOperatorCompletedScan(arg0: any, name: any) {
-    throw new Error('Method not implemented.');
-  }
     private readonly ONE_SIGNAL_APP_ID: string;
     private readonly ONE_SIGNAL_API_KEY: string;
   
@@ -24,7 +21,7 @@ export class NotificationService {
         this.ONE_SIGNAL_API_KEY = this.configService.get<string>('ONESIGNAL_API_KEY')!;
       }
 
-    // Fonction intégrée de traduction vers le français
+    // Fonction  de traduction vers le français
     private async translateToFrench(text: string) {
     try {
       const result = await translate(text, { to: 'fr' });

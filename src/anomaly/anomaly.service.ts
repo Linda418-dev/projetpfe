@@ -24,6 +24,7 @@ export class AnomalyService {
         private readonly assetRepository: AssetRepository,
         private readonly assetStatusHistoryRepository : AssetStatusRepository,
         private readonly userRepository : userRepository,
+        private readonly assetStatusRepository : AssetStatusRepository
     ){}
  async getAllAnomalies(currentUser: User) {
   let anomalies;
@@ -89,9 +90,10 @@ export class AnomalyService {
 }
 
    
-   async createAnomaly(createAnomalyDto: CreateAnomalyDto, reportedBy: User) {
+  async createAnomaly(createAnomalyDto: CreateAnomalyDto, reportedBy: User) {
   const { description, fileIds, assetId } = createAnomalyDto;
 
+  // récupérer le statut "pending" de type "anomaly"
   const pendingStatus = await this.statusRepository.findOne({
     where: { name: 'pending', type: 'anomaly' },
   });
@@ -100,11 +102,13 @@ export class AnomalyService {
     throw new NotFoundException("Default 'pending' status not found for anomaly");
   }
 
+  // récupérer l'asset 
   const asset = await this.assetRepository.findOne({ where: { id: assetId } });
   if (!asset) {
     throw new NotFoundException('Asset with the given ID not found');
   }
 
+  // récupérer les fichiers 
   let files: File[] = [];
   if (fileIds && fileIds.length > 0) {
     files = await this.fileRepository.findByIds(fileIds);
@@ -113,31 +117,43 @@ export class AnomalyService {
     }
   }
 
+  // create
   const anomaly = this.anomalyRepository.create({
     description,
     asset,
     reportedBy,
-   
   });
 
+  // save
   const savedAnomaly = await this.anomalyRepository.save(anomaly);
 
-  for (const file of files) {
-    file.anomaly = savedAnomaly;
-    await this.fileRepository.save(file);
+  // associer les fichiers
+  if (files.length > 0) {
+    for (const file of files) {
+      file.anomaly = savedAnomaly;
+    }
+    await this.fileRepository.save(files);
   }
-
   const anomalyStatus = this.anomalyStatusRepository.create({
     anomaly: savedAnomaly,
     status: pendingStatus,
   });
 
   await this.anomalyStatusRepository.save(anomalyStatus);
+  const fullAnomaly = await this.anomalyRepository.findOne({
+    where: { id: savedAnomaly.id },
+    relations: [
+      'asset',
+      'reportedBy',
+      'files',
+      'statusHistory',
+      'statusHistory.status',
+      'assignedTo',
+    ],
+  });
 
-  return savedAnomaly;
+  return fullAnomaly;
 }
-
-
 
 async getAnomaliesByMonth() {
   const result = await this.anomalyRepository.getAnomaliesByMonthRaw();
@@ -403,25 +419,46 @@ async resolveAnomaly(anomalyId: string) {
   async assignTechnicianToAnomaly(anomalyId: string, technicianId: string) {
   const anomaly = await this.anomalyRepository.findOne({
     where: { id: anomalyId },
-    relations: ['statusHistory', 'statusHistory.status'],
+    relations: ['statusHistory', 'statusHistory.status', 'asset'],
   });
 
   if (!anomaly) {
     throw new NotFoundException('Anomaly not found');
   }
 
- 
   const technician = await this.userRepository.findOne({ where: { id: technicianId } });
   if (!technician) {
     throw new NotFoundException('Technician not found');
   }
 
-  anomaly.assignedTo = technician;
+  const asset = anomaly.asset as Asset;
 
+  // Récupérer le statut "IN_REPAIR"
+  const inRepairStatus = await this.statusRepository.findOne({
+    where: { name: 'In Repair', type: 'asset' },
+  });
+
+  if (!inRepairStatus) {
+    throw new NotFoundException('Status "In Repair" not found');
+  }
+
+  // Modifier le statut du bien
+  asset.status = inRepairStatus;
+  await this.assetRepository.save(asset);
+
+  // Enregistrer dans l’historique de statut
+  const assetStatus = this.assetStatusRepository.create({
+    asset,
+    status: inRepairStatus,
+  });
+  await this.assetStatusRepository.save(assetStatus);
+
+  // Affecter le technicien
+  anomaly.assignedTo = technician;
   await this.anomalyRepository.save(anomaly);
 
   return {
-    message: 'Technician successfully assigned to anomaly',
+    message: 'Technician successfully assigned to anomaly. Asset marked as In Repair.',
     anomaly,
     assignedTo: technician,
   };
