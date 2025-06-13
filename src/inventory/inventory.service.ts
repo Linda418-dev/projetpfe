@@ -52,8 +52,13 @@ export class InventoryService {
   
   async createInventory(createinventorydto: CreateInventoryDto) {
     const existing = await this.inventoryRepository.findOne({
-      where: { name: createinventorydto.name },
-    });
+  where: {
+    name: createinventorydto.name,
+    site: { id: createinventorydto.siteId },
+  },
+  relations: ['site'], 
+});
+
 
     if (existing) {
       throw new BadRequestException(`Inventory with name "${createinventorydto.name}" already exists`);
@@ -70,9 +75,9 @@ export class InventoryService {
     }
 
     // Vérifie que la date de fin est après la date de début
-   if (endDate < startDate) {
-    throw new BadRequestException(`End date cannot be before start date`);
-  }
+    if (endDate < startDate) {
+      throw new BadRequestException(`End date cannot be before start date`);
+    }
 
     const overlappingInventory = await this.inventoryRepository.findOverlappingInventory(
       createinventorydto.siteId,
@@ -80,8 +85,9 @@ export class InventoryService {
       endDate,
     );
     if (overlappingInventory) {
-  // Récupère le dernier statut de l'inventaire existant
-  const statusHistory = await this.inventoryStatusRepository.find({
+  
+      // Récupère le dernier statut de l'inventaire existant
+    const statusHistory = await this.inventoryStatusRepository.find({
     where: { inventory: { id: overlappingInventory.id } },
     relations: ['status'],
     order: { createdAt: 'DESC' },
@@ -117,6 +123,14 @@ export class InventoryService {
     if (!plannedStatus) {
       throw new BadRequestException(`Default inventory status "Planned" not found`);
     }
+     // ✅ Vérifie et associe les locations AVANT la sauvegarde de l’inventaire
+   const locations = await this.locationRepository.findBy({
+  id: In(createinventorydto.locationIds),
+});
+
+if (locations.length !== createinventorydto.locationIds.length) {
+  throw new BadRequestException(`One or more location IDs are invalid.`);
+}
 
     // Récupération des opérateurs
     let operators: User[] = [];
@@ -166,21 +180,10 @@ export class InventoryService {
     });
 
     await this.inventoryStatusRepository.save(newStatus);
+    // Affecte l'inventaire à chaque location
+savedInventory.locations = locations;
+await this.inventoryRepository.save(savedInventory);
 
-    // Vérifie et associe les locations
-   const locations = await this.locationRepository.findBy({
-  id: In(createinventorydto.locationIds),
-   });
-
-if (locations.length !== createinventorydto.locationIds.length) {
-  throw new BadRequestException(`One or more location IDs are invalid.`);
-}
-
-// Affecte l'inventaire à chaque location
-for (const location of locations) {
-  location.inventory = savedInventory;
-}
-await this.locationRepository.save(locations);
 
 
     // Affectation des opérateurs
@@ -464,7 +467,7 @@ if (dto.locationIds) {
   }
 
   for (const location of locations) {
-    location.inventory = inventory;
+    inventory.locations = locations;
   }
 
   await this.locationRepository.save(locations);

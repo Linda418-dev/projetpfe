@@ -7,13 +7,14 @@ import { Iaffectation } from 'src/affectation/types/interfaces/affectation.inter
 import { Isite } from 'src/site/Types/interfaces/site.interface';
 import { IinventoryStatus } from 'src/inventory-status/types/interfaces/inventory-status.interface';
 import { Location } from 'src/location/entities/location.entity';
+import { Ilocation } from 'src/location/types/interfaces/location.interface';
 
 @Entity()
 export class Inventory implements Iinventory {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ unique: true })
+  @Column()
   name: string;
 
   @Column({ type: 'date' })
@@ -21,7 +22,6 @@ export class Inventory implements Iinventory {
 
   @Column({ type: 'date', nullable: true })
   endDate: Date ; 
-
 
   @OneToMany(() => Affectation, (affectation) => affectation.inventory)
   affectations: Iaffectation[]|string[];
@@ -31,9 +31,11 @@ export class Inventory implements Iinventory {
 
   @OneToMany(() => InventoryStatus, (inventoryStatus) => inventoryStatus.inventory)
   inventoryStatus: IinventoryStatus[]|string[];
+  
+  @ManyToMany(() => Location, { eager: true })
+  @JoinTable() 
+  locations: Ilocation[] | string[];
 
-  @OneToMany(() => Location, (location) => location.inventory)
- locations: Location[] | string[];
 
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;  

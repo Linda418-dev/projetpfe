@@ -40,10 +40,10 @@ async findInventoriesByOperatorIdWithStatus(userId: string) {
     .leftJoinAndSelect('inventory.affectations', 'affectation')
     .leftJoinAndSelect('affectation.operator', 'operator')
     .leftJoinAndSelect('inventory.site', 'site')
-    .leftJoinAndSelect('inventory.locations', 'location') // 🟢 d'abord joindre les locations
-    .leftJoinAndSelect('location.service', 'service')     // 🟢 ensuite le service de chaque location
+    .leftJoinAndSelect('inventory.locations', 'location') 
+    .leftJoinAndSelect('location.service', 'service')    
     .leftJoinAndSelect('service.department', 'department')
-    .leftJoinAndSelect('department.site', 'locationSite') // site via department
+    .leftJoinAndSelect('department.site', 'locationSite')
     .leftJoinAndSelect(
       'inventory.inventoryStatus',
       'latestStatus',

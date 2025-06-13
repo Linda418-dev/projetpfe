@@ -46,10 +46,10 @@ export class AnomalyService {
   'asset.location.service.department',
   'asset.location.service.department.site',
 ],
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    order: {
+    createdAt: 'DESC',
+  },
+});
   } else if (userRole === 'operator'|| userRole === 'employee') {
     anomalies = await this.anomalyRepository.find({
       where: { reportedBy: { id: currentUser.id } },
@@ -79,17 +79,13 @@ export class AnomalyService {
   : null;
 
     const site = anomaly.asset?.location?.['service']?.['department']?.['site'];
-  
-
     return {
       ...anomaly,
       latestStatus,
       siteName: site?.name,
     };
   });
-}
-
-   
+}  
   async createAnomaly(createAnomalyDto: CreateAnomalyDto, reportedBy: User) {
   const { description, fileIds, assetId } = createAnomalyDto;
 
@@ -126,7 +122,6 @@ export class AnomalyService {
 
   // save
   const savedAnomaly = await this.anomalyRepository.save(anomaly);
-
   // associer les fichiers
   if (files.length > 0) {
     for (const file of files) {
@@ -162,9 +157,7 @@ async getAnomaliesByMonth() {
     count: parseInt(item.count, 10),
   }));
 }
-
-  
-   async getAnomalyById(id: string) {
+  async getAnomalyById(id: string) {
   const anomaly = await this.anomalyRepository.findOne({
     where: { id },
     relations: [
@@ -203,8 +196,7 @@ async getAnomaliesByMonth() {
   };
 }
 
-
- async progressAnomaly(anomalyId: string) {
+async progressAnomaly(anomalyId: string) {
   // Vérifier si l'anomalie existe
   const anomaly = await this.anomalyRepository.findOne({ where: { id: anomalyId } });
   if (!anomaly) {
@@ -408,8 +400,6 @@ async resolveAnomaly(anomalyId: string) {
     status: refusedStatus,
   };
 }
-
-
 
   async getAnomaliesBySite(siteId: string) {
     return this.anomalyRepository.findBySiteId(siteId);
