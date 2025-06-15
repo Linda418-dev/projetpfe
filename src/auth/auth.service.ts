@@ -38,7 +38,6 @@ export class AuthService {
     }
   
     const token = this.generateJwt(user);
-    // return sans password
     const userWithoutPassword = {
     id: user.id,
     username: user.username,

@@ -7,14 +7,14 @@ export class AffectationService {
         private readonly affectationRepository: AffectationRepository,
       ) {}
     
-      //Récupérer  tous les  Affectations
+      // récupérer  tous les  Affectations
       async getAllAffectations(){
         return this.affectationRepository.find({
           relations: ['inventory', 'operator'],
         });
       }
     
-      //Récupérer  les affectations by id operator
+      // récupérer  les affectations by id operator
       async getAffectationsByOperator(operatorId: string){
         const affectations = await this.affectationRepository.find({
           where: { operator: { id: operatorId } },

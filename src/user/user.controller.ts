@@ -21,66 +21,70 @@ export class UserController {
     ){}
     
   @Get('all-users')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superAdmin','operator')
   async getUsers() {
       return this.userService.getUsers();
   }
 
   @Get()
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superAdmin','operator')
   async getAllUsers(
   @Query() params: PaginateSearchDto,
-  @Req() req: any
-) {
+  @Req() req: any) {
   return this.userService.getAllUsers(params);
-}
+  }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superAdmin','operator')
   async getUserById(@Param('id') id: string) {
     return this.userService.getUserById(id);
   }
 
-  @BypassInventoryLock()
   @Post()
-  // @UseGuards(JwtAuthGuard, RolesGuard) 
-  // @Roles('admin') 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superAdmin') 
   async createUser(@Body() createUserDto: CreateUserDto) {
     return this.userService.createUser(createUserDto);
   }
 
-  @BypassInventoryLock()
-   @Patch(':id')
-  // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles('admin') 
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superAdmin','operator')
   async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.updateUser(id, updateUserDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin', 'superAdmin')
   async deleteUser(@Param('id') targetUserId: string,@Req() req: any ) {
   const currentUserId = req.user.id;
   return this.userService.deleteUser(targetUserId, currentUserId);
  }
 
  @Patch(':id/deactivate')
- @UseGuards(JwtAuthGuard)
+ @UseGuards(JwtAuthGuard, RolesGuard)
+ @Roles('admin', 'superAdmin')
  async deactivateUser(@Param('id') userId: string, @Req() req: any) {
   const currentUserId = req.user.id;
   return this.userService.deactivateUser(userId, currentUserId);
 }
 
  
- @BypassInventoryLock()
+
  @Patch(':id/activate')
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// @Roles('admin')
+ @UseGuards(JwtAuthGuard, RolesGuard)
+ @Roles('admin', 'superAdmin')
   async activateUser(@Param('id') id: string) {
      return this.userService.activateUser(id);
 }
 
  @Post('me/player-id/:playerId')
  @UseGuards(JwtAuthGuard, RolesGuard)
+ @Roles('admin', 'superAdmin','operator','technician','employee')
  async updatePlayerId(
   @Param('playerId') playerId: string, @Req() req,) {
     return this.userService.updatePlayerId(req.user.id, playerId);
@@ -88,6 +92,8 @@ export class UserController {
 
 
 @Get('by-site/:siteId')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin', 'superAdmin','operator')
 async getUsersBySite(@Param('siteId') siteId: string) {
     return this.userService.getAllUsersBySite(siteId);
 }

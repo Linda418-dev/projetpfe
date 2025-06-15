@@ -94,9 +94,9 @@ export class ExcelService {
       inventory: inventory?.name ?? 'Non défini',
       operator: operator?.email ?? 'Non défini',
       scannedAt: detail.scannedAt?.toISOString().split('T')[0] ?? 'Non défini',
-      assetName: asset?.name ?? 'N/A',
-      locationName: location?.name ?? 'N/A',
-      statusName: status?.name ?? 'N/A',
+      assetName: asset?.name ?? 'Non défini',
+      locationName: location?.name ?? 'Non défini',
+      statusName: status?.name ?? 'Non défini',
     });
   }
 

@@ -20,9 +20,9 @@ export class AssetRepository extends Repository<Asset> {
     .leftJoinAndSelect("asset.location", "location")
     .leftJoinAndSelect("asset.files", "files")
     .leftJoinAndSelect("asset.employee", "employee")
-   .leftJoinAndSelect("location.service", "service")
-   .leftJoinAndSelect("service.department", "department")
-   .leftJoinAndSelect("department.site", "site")
+    .leftJoinAndSelect("location.service", "service")
+    .leftJoinAndSelect("service.department", "department")
+    .leftJoinAndSelect("department.site", "site")
 
   if (params.keyword) {
     query.andWhere("asset.name ILIKE :keyword", {

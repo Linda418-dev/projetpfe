@@ -21,10 +21,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { id: string }): Promise<User> {
+  async validate(payload: { id: string }){
     const user = await this.userRepository.findOne({
       where: { id: payload.id },
-      relations: ['role'], // vérifier que le rôle est bien chargé
+      relations: ['role'], 
     });
   
     if (!user) {

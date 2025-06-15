@@ -16,6 +16,7 @@ export class AssetAssignment implements IAssetAssignment{
 
   @CreateDateColumn()
   assignedAt: Date;
+  
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

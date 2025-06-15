@@ -18,6 +18,7 @@ async findSiteWithRelationsById(id: string) {
     .where('site.id = :id', { id })
     .getOne();
 }
+
 async findAll() {
   return this.createQueryBuilder('site')
     .leftJoinAndSelect('site.departments', 'department')

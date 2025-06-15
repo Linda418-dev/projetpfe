@@ -21,6 +21,8 @@ export class SiteService {
         async getAllSites() {
             return this.siteRepository.findAll();
         }
+
+      // methode create site 
         async createSite(createSiteDto: CreateSiteDto) {
           const site = await this.siteRepository.save(
             this.siteRepository.create({ name: createSiteDto.name })
@@ -32,50 +34,45 @@ export class SiteService {
             services: [{
               name: `Service_${site.name}`,
               locations: [{ name: `Location_${site.name}` }]
-        }]
-      }];
-      for (const deptDto of departments) {
-        const department = await this.departmentRepository.save(
-          this.departmentRepository.create({
-            name: deptDto.name,
-            site: site,
-      })
-    );
-    const services: CreateServiceDto[] = deptDto.services?.length
-      ? deptDto.services
-      : [{
-          name: `Service_${site.name}`,
-          locations: [{ name: `Location_${site.name}` }]
-        }];
-
-    for (const servDto of services) {
-      const service = await this.serviceRepository.save(
-        this.serviceRepository.create({
-          name: servDto.name,
-          department: department,
-        })
-      );
-
-      const locations: CreateLocationDto[] = servDto.locations?.length
-        ? servDto.locations
-        : [{ name: `Location_${site.name}` }];
-
-      for (const locDto of locations) {
-        await this.locationRepository.save(
-          this.locationRepository.create({
-            name: locDto.name,
-            service: service,
-          })
-        );
-      }
-    }
-  }
-
-  return site;
-}
-
-
-
+            }]
+          }];
+          for (const deptDto of departments) {
+            const department = await this.departmentRepository.save(
+              this.departmentRepository.create({
+                name: deptDto.name,
+                site: site,
+              })
+            );
+            const services: CreateServiceDto[] = deptDto.services?.length
+            ? deptDto.services
+            : [{
+              name: `Service_${site.name}`,
+              locations: [{ name: `Location_${site.name}` }]
+            }];
+            for (const servDto of services) {
+              const service = await this.serviceRepository.save(
+                this.serviceRepository.create({
+                  name: servDto.name,
+                  department: department,
+                })
+              );
+              const locations: CreateLocationDto[] = servDto.locations?.length
+              ? servDto.locations
+              : [{ name: `Location_${site.name}` }];
+              
+              for (const locDto of locations) {
+                await this.locationRepository.save(
+                  this.locationRepository.create({
+                    name: locDto.name,
+                    service: service,
+                  })
+                );
+              }
+            }
+          }
+          return site;
+        }
+        
         // methode pour get site by id
         async getSiteById(id: string) {
           const site = await this.siteRepository.findSiteWithRelationsById(id);

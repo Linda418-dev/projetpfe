@@ -22,6 +22,7 @@ export class CsvService {
     constructor (
         private readonly inventoryDetailsRepository :InventoryDetailsRepository
     ){}
+    
   async exportAssetsToCSV(assets: Asset[]){
     const rows = assets.map(asset => {
       const category = asset.category as ICategory;
@@ -69,9 +70,9 @@ export class CsvService {
       NomInventaire: inventory?.name ?? 'Non défini',
       Operateur: operator?.email ?? 'Non défini',
       DateScan: detail.scannedAt?.toISOString().split('T')[0] ?? 'Non défini',
-      NomBien: asset?.name ?? 'N/A',
-      Emplacement: location?.name ?? 'N/A',
-      Statut: status?.name ?? 'N/A',
+      NomBien: asset?.name ?? 'Non défini',
+      Emplacement: location?.name ?? 'Non défini',
+      Statut: status?.name ?? 'Non défini',
     };
   });
 

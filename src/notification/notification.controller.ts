@@ -10,8 +10,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
- 
-  
   @Post('send')
   async sendNotification(@Body() dto: SendNotificationDto){
     await this.notificationService.notifyOperators(dto.playerIds, dto.title, dto.message);
@@ -24,7 +22,6 @@ export class NotificationController {
   getTotalUnread(@Request() req) {
     return this.notificationService.countAllUnread(req.user.id);
   }
-
 
   @Get()
   @UseGuards(JwtAuthGuard)

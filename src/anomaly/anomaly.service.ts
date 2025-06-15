@@ -26,6 +26,8 @@ export class AnomalyService {
         private readonly userRepository : userRepository,
         private readonly assetStatusRepository : AssetStatusRepository
     ){}
+
+
  async getAllAnomalies(currentUser: User) {
   let anomalies;
 
@@ -86,6 +88,8 @@ export class AnomalyService {
     };
   });
 }  
+
+  // creation anomalie
   async createAnomaly(createAnomalyDto: CreateAnomalyDto, reportedBy: User) {
   const { description, fileIds, assetId } = createAnomalyDto;
 
@@ -177,7 +181,7 @@ async getAnomaliesByMonth() {
     throw new NotFoundException(`Anomaly with ID ${id} not found`);
   }
 
-  // S'assurer que statusHistory est trié par createdAt DESC
+  //  trié par createdAt DESC
   const sortedStatusHistory = Array.isArray(anomaly.statusHistory)
     ? [...anomaly.statusHistory].sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -341,6 +345,7 @@ async resolveAnomaly(anomalyId: string) {
   // Vérifier si l'anomalie existe
   const anomaly = await this.anomalyRepository.findOne({
     where: { id: anomalyId },
+    relations: ['asset'],
   });
 
   if (!anomaly) {
@@ -368,12 +373,14 @@ async resolveAnomaly(anomalyId: string) {
   }
 
   // Récupérer les statuts nécessaires
-  const [refusedStatus, inProgressStatus] = await Promise.all([
+  const [refusedStatus, inProgressStatus , damagedAssetStatus] = await Promise.all([
     this.statusRepository.findOne({ where: { name: 'refused', type: 'anomaly' } }),
     this.statusRepository.findOne({ where: { name: 'in_progress', type: 'anomaly' } }),
+    this.statusRepository.findOne({ where: { name: 'Damaged', type: 'asset' } }),
+
   ]);
 
-  if (!refusedStatus || !inProgressStatus) {
+  if (!refusedStatus || !inProgressStatus  || !damagedAssetStatus) {
     throw new NotFoundException("Required statuses 'refused' or 'in_progress' not found");
   }
 
@@ -393,11 +400,29 @@ async resolveAnomaly(anomalyId: string) {
   });
 
   await this.anomalyStatusRepository.save(refused);
+  
+  // Enregistrer le nouveau statut de l'asset dans AssetStatus
+  const assetStatus = this.assetStatusRepository.create({
+    asset: anomaly.asset,
+    status: damagedAssetStatus,
+  });
+  await this.assetStatusRepository.save(assetStatus);
+
+  //  Mettre à jour le statut actuel du bien
+  await this.assetRepository.update(anomaly.asset['id'] || anomaly.asset, {
+    status: damagedAssetStatus,
+  });
+
+
+  const updatedAsset = await this.assetRepository.findOne({
+  where: { id: typeof anomaly.asset === 'string' ? anomaly.asset : anomaly.asset.id },
+  relations: ['status'],
+});
 
   return {
     message: 'Anomaly status updated to refused',
     anomaly,
-    status: refusedStatus,
+    status: updatedAsset?.status,
   };
 }
 
@@ -405,7 +430,7 @@ async resolveAnomaly(anomalyId: string) {
     return this.anomalyRepository.findBySiteId(siteId);
   }
 
-
+ // assigner anomalie au technicien
   async assignTechnicianToAnomaly(anomalyId: string, technicianId: string) {
   const anomaly = await this.anomalyRepository.findOne({
     where: { id: anomalyId },
@@ -510,15 +535,6 @@ async getAllAnomaliesForTechnician(currentUser: User) {
     };
   });
 }
-
-
-// async findAnomaliesReportedByUser(userId: string){
-//   return this.anomalyRepository.find({
-//     where: { reportedBy: { id: userId } },
-//     relations: ['asset', 'statusHistory', 'files', 'assignedTo'],
-//     order: { createdAt: 'DESC' },
-//   });
-// }
 
   
 }
