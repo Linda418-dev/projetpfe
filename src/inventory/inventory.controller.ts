@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateInventoryDto } from './types/dto/create-inventory.dto';
 import { UpdateInventoryDto } from './types/dto/update-inventory.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
-import { BypassInventoryLock } from './guards/bypass-inventory-lock.decorator';
 
 @ApiBearerAuth()
 @ApiTags('inventory Resource')
