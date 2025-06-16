@@ -2,7 +2,6 @@ import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Req, Request,
 import { AnomalyService } from './anomaly.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateAnomalyDto } from './types/dto/create-anomaly.dto';
-import { BypassInventoryLock } from 'src/inventory/guards/bypass-inventory-lock.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AssignTechnicianDto } from './types/dto/assign-technician.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';

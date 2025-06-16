@@ -123,9 +123,9 @@ export class InventoryService {
     if (!plannedStatus) {
       throw new BadRequestException(`Default inventory status "Planned" not found`);
     }
-     // ✅ Vérifie et associe les locations AVANT la sauvegarde de l’inventaire
-   const locations = await this.locationRepository.findBy({
-  id: In(createinventorydto.locationIds),
+     // Vérifie et associe les locations AVANT la sauvegarde de l’inventaire
+    const locations = await this.locationRepository.findBy({
+    id: In(createinventorydto.locationIds),
 });
 
 if (locations.length !== createinventorydto.locationIds.length) {
@@ -440,7 +440,6 @@ async updateInventory(id: string, dto: UpdateInventoryDto) {
 );
 
  if (overlappingInventory) {
-    // Conversion explicite des dates en string ISO (yyyy-mm-dd)
     const overlapStartDate = new Date(overlappingInventory.startDate).toISOString().slice(0, 10);
     const overlapEndDate = new Date(overlappingInventory.endDate).toISOString().slice(0, 10);
 
@@ -508,7 +507,7 @@ const savedInventory = await this.inventoryRepository.save(inventory);
 
   // Assignation opérateur
 if (dto.operatorId) {
-  // Interdire  si le statut est "Completed" ou "Expired"
+  // n'accepte pes  si le statut est "Completed" ou "Expired"
   if (
     lastStatusName === InventoryStatusEnum.COMPLETED ||
     lastStatusName === InventoryStatusEnum.EXPIRED
@@ -716,7 +715,7 @@ async handlePlannedInventoriesToLaunch() {
       continue;
     }
 
-    // Vérification atomique simple via count
+    // Vérification  via count
     const inProgressCount = await this.inventoryStatusRepository.count({
       where: {
         inventory: { id: inventory.id },
@@ -725,7 +724,7 @@ async handlePlannedInventoriesToLaunch() {
     });
 
     if (inProgressCount > 0) {
-      continue; // Statut In Progress déjà présent
+      continue; 
     }
 
     const newStatus = this.inventoryStatusRepository.create({

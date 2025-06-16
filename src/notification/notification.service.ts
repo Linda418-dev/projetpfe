@@ -4,8 +4,6 @@ import axios from 'axios';
 import { NotificationRepository } from './repositories/notification.repository';
 import { In } from 'typeorm';
 import { userRepository } from 'src/user/repositories/user.repository';
-import { translate } from '@vitalets/google-translate-api';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class NotificationService {
@@ -21,24 +19,13 @@ export class NotificationService {
         this.ONE_SIGNAL_API_KEY = this.configService.get<string>('ONESIGNAL_API_KEY')!;
       }
 
-    // Fonction  de traduction vers le français
-    private async translateToFrench(text: string) {
-    try {
-      const result = await translate(text, { to: 'fr' });
-      return result.text;
-    } catch (error) {
-      console.error('Translation failed:', error.message);
-      return text; 
-    }
-  }
-
-    // methode pour notifier les operateurs  
-    async notifyOperators(playerIds: string[], title: string, message: string) {
+      // methode pour notifier les operateurs  
+      async notifyOperators(playerIds: string[], title: string, message: string) {
       try {
 
-      // Traduire le message et le titre en français
-      const translatedTitle = await this.translateToFrench(title);
-      const translatedMessage = await this.translateToFrench(message);
+       const translatedTitle = title;
+       const translatedMessage = message;
+
         await axios.post(
           'https://onesignal.com/api/v1/notifications',
           {
@@ -54,6 +41,7 @@ export class NotificationService {
             },
           },
         );
+
     // récupérer les utilisateurs correspondant aux playerIds
       const users = await this.userRepository.find({ where: { playerId: In(playerIds) } });
       // créer  la notification avec les destinataires
@@ -83,6 +71,7 @@ export class NotificationService {
   
     return notification;
   }
+
   //marker comme vu
   async markAsRead(id: string) {
   const notif = await this.notificationRepo.findOne({ where: { id } });
@@ -96,9 +85,8 @@ export class NotificationService {
   return this.notificationRepo.countAllUnread(userId);
   }
   
-  
 
-async getAllNotifications(user: any) {
+  async getAllNotifications(user: any) {
   const allNotifications = await this.notificationRepo.find({
     relations: ['recipients'],
     order: { createdAt: 'DESC' },

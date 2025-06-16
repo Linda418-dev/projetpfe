@@ -27,6 +27,7 @@ export class SiteService {
           const site = await this.siteRepository.save(
             this.siteRepository.create({ name: createSiteDto.name })
           );
+          
           const departments: CreateDepartmentDto[] = createSiteDto.department?.length
           ? createSiteDto.department
           : [{
@@ -36,6 +37,7 @@ export class SiteService {
               locations: [{ name: `Location_${site.name}` }]
             }]
           }];
+          
           for (const deptDto of departments) {
             const department = await this.departmentRepository.save(
               this.departmentRepository.create({
@@ -43,12 +45,14 @@ export class SiteService {
                 site: site,
               })
             );
+
             const services: CreateServiceDto[] = deptDto.services?.length
             ? deptDto.services
             : [{
               name: `Service_${site.name}`,
               locations: [{ name: `Location_${site.name}` }]
             }];
+
             for (const servDto of services) {
               const service = await this.serviceRepository.save(
                 this.serviceRepository.create({

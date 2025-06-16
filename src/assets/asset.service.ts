@@ -336,7 +336,7 @@ async generateNextRef(){
   const lastRefNumber = lastAsset ? parseInt(lastAsset.referenceNumber, 10) : 0;
   const nextRefNumber = lastRefNumber + 1;
 
-  // Format : 3 chiffres avec padding à gauche
+  // chiffres avec padding à gauche
   return nextRefNumber.toString().padStart(3, '0');
 }
 

@@ -29,6 +29,7 @@ export class InventoryDetailsService {
     private readonly userRepository : userRepository
 
   ) {}
+
   // get All Inventory  Details
   async getAllInventoryDetails() {
     const details = await this.inventoryDetailsRepository.find({
@@ -37,18 +38,16 @@ export class InventoryDetailsService {
     });
   
      return details.map((detail) => {
-    const asset = detail.assetStatus as IAsset;
+     const asset = detail.assetStatus as IAsset;
 
     return {
       ...detail,
-      assetId: asset.id,
+      assetId: asset.id ?? null,
     };
   });
   }
 
-
-
-  // creat Inventory Details
+  // create Inventory Details
   async createInventorydetails(dto: CreateInventoryDetailsDto) {
   // Vérifier l'affectation existe
   const affectation = await this.affectationRepository.findOne({
@@ -76,7 +75,7 @@ export class InventoryDetailsService {
     }
     await this.fileRepository.save(files);
   
-    // eécupérer le dernier AssetStatus 
+    // récupérer le dernier AssetStatus 
     const assetStatus = await this.assetStatusRepository.findOne({
       where: { asset: { id: dto.assetId } },
       order: { createdAt: 'DESC' },

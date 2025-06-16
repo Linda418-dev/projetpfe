@@ -22,11 +22,12 @@ export class InventoryController {
     }
 
     @Get('site/:siteId')
-  async getInventoriesBySite(@Param('siteId') siteId: string) {
+    async getInventoriesBySite(@Param('siteId') siteId: string) {
     return this.inventoryService.getInventoriesBySite(siteId);
-  }
-    @BypassInventoryLock()
-     @Post()
+    }
+
+
+    @Post()
      async create(@Body() dto: CreateInventoryDto) {
       return this.inventoryService.createInventory(dto);
     }

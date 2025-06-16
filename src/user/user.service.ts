@@ -47,12 +47,24 @@ export class UserService implements OnApplicationBootstrap {
   // méthode create user 
   async createUser(createUserDto: CreateUserDto) {
     const { email, username, password, roleId ,siteId } = createUserDto;
-    const userExists = await this.userRepository.findOne({
-      where: [{ email }, { username }],
-    });
-    if (userExists) {
-      throw new ConflictException('User with this email or username already exists');
-    }
+
+   // vérification du username dans le même site
+  const existingUser = await this.userRepository.findOne({
+    where: { username, site: { id: siteId } },
+    relations: ['site'],
+  });
+  if (existingUser) {
+    throw new ConflictException('Username already exists in this site');
+  }
+
+
+  // vérification dans tous les sites 
+  const userWithEmail = await this.userRepository.findOne({ where: { email } });
+  if (userWithEmail) {
+    throw new ConflictException('Email already exists');
+  }
+
+   //vérifier le role 
     const userRole = await this.userRoleRepository.findOne({
       where: { id: roleId },
     });
@@ -64,7 +76,9 @@ export class UserService implements OnApplicationBootstrap {
      if (!site) {
     throw new ConflictException('Invalid site ID');
     }
+    //hasher le password
     const hashedPassword = await this.bcryptService.hashPassword(password);
+    //create iinstance du user
     const newUser = this.userRepository.create({
       email,
       username,
@@ -72,6 +86,7 @@ export class UserService implements OnApplicationBootstrap {
       role: userRole,
       site,
     });
+    //save 
     const savedUser = await this.userRepository.save(newUser);
     return {
       id: savedUser.id,
@@ -128,6 +143,26 @@ export class UserService implements OnApplicationBootstrap {
     }
 
     user.site = site;
+  }
+
+  // 🔐 Vérification de l’unicité du username dans le site
+  if (
+    (updateUserDto.username && updateUserDto.username !== user.username) ||
+    (updateUserDto.siteId && updateUserDto.siteId !== (user.site as any)?.id)
+  ) {
+    const siteIdToCheck = updateUserDto.siteId || (user.site as any)?.id;
+
+    const existingUserWithSameUsername = await this.userRepository.findOne({
+      where: {
+        username: updateUserDto.username || user.username,
+        site: { id: siteIdToCheck },
+      },
+      relations: ['site'],
+    });
+
+    if (existingUserWithSameUsername && existingUserWithSameUsername.id !== user.id) {
+      throw new ConflictException('Username already exists in this site');
+    }
   }
 
   // Supprimer roleId pour ne pas l'assigner par erreur via Object.assign

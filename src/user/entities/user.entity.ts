@@ -17,7 +17,7 @@ export class User implements IUser {
   @Column({nullable: true })
   playerId: string;
 
-  @Column({ unique: true, nullable: true }) 
+  @Column({  nullable: true }) 
   username?: string;
 
   @Column({ unique: true, nullable: true }) 
